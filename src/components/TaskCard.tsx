@@ -76,7 +76,7 @@ const DEFAULT_ACTIONS: TaskAction[] = [
     label: "Send Back", 
     enabled: true,
     sendBack: {
-      step: "Previous Step"
+      step: ""
     }
   }
 ];
@@ -276,13 +276,13 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
     }
   };
 
-  const handleSendBackStepChange = (step: string) => {
+  const handleSendBackStepChange = (stepId: string) => {
     const newActions = [...actions];
     const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
     if (sendBackIndex >= 0) {
       newActions[sendBackIndex] = {
         ...newActions[sendBackIndex],
-        sendBack: { step }
+        sendBack: { step: stepId }
       };
       setActions(newActions);
       if (setNodeData) {
@@ -326,6 +326,46 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
 
   const canToggleAction = (action: string): boolean => {
     return ["cancel", "edit", "sendBack"].includes(action);
+  };
+
+  const renderActionSettings = (action: TaskAction, index: number) => {
+    if (action.action === "sendBack" && action.enabled && previousSteps.length > 0) {
+      return (
+        <div className="col-span-3 space-y-3 mt-2 p-4 bg-gray-50 rounded-lg">
+          <div className="space-y-3">
+            <label className="text-sm text-gray-600 mb-1.5 block">
+              Send Transaction Back To
+            </label>
+            <Select
+              value={action.sendBack?.step || ""}
+              onValueChange={handleSendBackStepChange}
+              disabled={previousSteps.length === 0}
+            >
+              <SelectTrigger className="bg-white">
+                <SelectValue placeholder={previousSteps.length === 0 ? "No previous steps available" : "Select step"} />
+              </SelectTrigger>
+              <SelectContent>
+                {previousSteps.length === 0 ? (
+                  <SelectItem value="none" disabled>No previous steps available</SelectItem>
+                ) : (
+                  previousSteps.map((step) => (
+                    <SelectItem key={step.id} value={step.id}>
+                      Step {step.sequenceNumber}: {step.label}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              {previousSteps.length === 0 
+                ? "This is the first step in the workflow."
+                : "Choose a previous workflow step to send the item back to."}
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -690,40 +730,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                                   <Switch checked={action.enabled} disabled />
                                 )}
                               </div>
-                              {action.action === "sendBack" && action.enabled && (
-                                <div className="col-span-3 space-y-3 mt-2 p-4 bg-gray-50 rounded-lg">
-                                  <div className="space-y-3">
-                                    <label className="text-sm text-gray-600 mb-1.5 block">
-                                      Send Transaction Back To
-                                    </label>
-                                    <Select
-                                      value={action.sendBack?.step}
-                                      onValueChange={handleSendBackStepChange}
-                                      disabled={data.sequenceNumber === 1}
-                                    >
-                                      <SelectTrigger className="bg-white">
-                                        <SelectValue placeholder={data.sequenceNumber === 1 ? "No previous steps available" : "Select step"} />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {data.sequenceNumber === 1 ? (
-                                          <SelectItem value="none" disabled>No previous steps available</SelectItem>
-                                        ) : (
-                                          previousSteps?.map((step) => (
-                                            <SelectItem key={step.id} value={step.id}>
-                                              Step {step.sequenceNumber}: {step.label}
-                                            </SelectItem>
-                                          ))
-                                        )}
-                                      </SelectContent>
-                                    </Select>
-                                    <p className="text-sm text-gray-500 leading-relaxed">
-                                      {data.sequenceNumber === 1 
-                                        ? "This is the first step in the workflow."
-                                        : "Choose a previous workflow step to send the item back to."}
-                                    </p>
-                                  </div>
-                                </div>
-                              )}
+                              {renderActionSettings(action, index)}
                             </div>
                           ))}
                         </div>
