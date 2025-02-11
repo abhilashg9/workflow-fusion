@@ -272,9 +272,6 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                   </span>
                 )}
               </div>
-              <div className="text-sm text-gray-500">
-                {assignment.type}
-              </div>
             </div>
           </div>
 
