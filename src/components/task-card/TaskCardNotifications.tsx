@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PlusCircle, ChevronDown, Eye, Pencil, Trash2 } from "lucide-react";
+import { PlusCircle, ChevronDown, Eye, Pencil, Trash2, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
@@ -60,44 +60,48 @@ export const TaskCardNotifications = ({
     <div className="space-y-4">
       {enabledActions.map(action => (
         <Collapsible key={action.action} className="w-full">
-          <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-gray-50/50 rounded-lg hover:bg-gray-100/50">
             <div className="flex items-center gap-2">
-              <ChevronDown className="w-4 h-4" />
-              <span>Notification on: {action.label}</span>
+              <Bell className="w-4 h-4 text-gray-500" />
+              <span className="text-sm">Notification on: <span className="font-medium">{action.label}</span></span>
             </div>
+            <ChevronDown className="w-4 h-4 text-gray-400" />
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-4">
-            <div className="space-y-4">
+            <div className="space-y-3">
               {notifications
                 .filter(n => n.actionType === action.action)
                 .map(notification => (
                   <div
                     key={notification.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+                    className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-lg hover:border-gray-200 transition-colors"
                   >
-                    <div className="space-y-1">
-                      <h4 className="font-medium">{notification.title}</h4>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <span>To:</span>
-                        {notification.recipients.map((recipient, index) => (
-                          <span key={recipient}>
-                            {recipient}
-                            {index < notification.recipients.length - 1 ? "," : ""}
-                          </span>
-                        ))}
+                    <div className="flex items-center gap-4">
+                      <div className="space-y-1">
+                        <h4 className="font-medium text-gray-900">{notification.title}</h4>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <User className="w-3.5 h-3.5" />
+                          {notification.recipients.map((recipient, index) => (
+                            <span key={recipient} className="text-gray-600">
+                              {recipient}
+                              {index < notification.recipients.length - 1 ? ", " : ""}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon">
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-900">
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-900">
                         <Pencil className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => onNotificationDelete(notification.id)}
+                        className="text-gray-500 hover:text-red-600"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -106,11 +110,12 @@ export const TaskCardNotifications = ({
                 ))}
               
               {isAdding ? (
-                <div className="space-y-4 p-4 border rounded-lg">
+                <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-white">
                   <Input
                     placeholder="Notification title"
                     value={newNotification.title || ""}
                     onChange={e => setNewNotification({ ...newNotification, title: e.target.value })}
+                    className="border-gray-200"
                   />
                   <Select
                     value={newNotification.actionType}
@@ -118,7 +123,7 @@ export const TaskCardNotifications = ({
                       setNewNotification({ ...newNotification, actionType: value })
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-200">
                       <SelectValue placeholder="Select recipient" />
                     </SelectTrigger>
                     <SelectContent>
@@ -130,16 +135,25 @@ export const TaskCardNotifications = ({
                     </SelectContent>
                   </Select>
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setIsAdding(false)}>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setIsAdding(false)}
+                      className="text-sm"
+                    >
                       Cancel
                     </Button>
-                    <Button onClick={handleAddNotification}>Add</Button>
+                    <Button 
+                      onClick={handleAddNotification}
+                      className="text-sm"
+                    >
+                      Add
+                    </Button>
                   </div>
                 </div>
               ) : (
                 <Button
-                  variant="outline"
-                  className="w-full"
+                  variant="ghost"
+                  className="w-full border border-dashed border-gray-200 text-primary hover:text-primary/90 hover:bg-primary/5"
                   onClick={() => setIsAdding(true)}
                 >
                   <PlusCircle className="w-4 h-4 mr-2" />
