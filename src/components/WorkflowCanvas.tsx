@@ -212,18 +212,34 @@ export const WorkflowCanvas = () => {
     const VERTICAL_SPACING = 250;
     const START_Y = 150;
     const CENTER_X = 250;
-    const updatedNodes = sortedNodes.map((node, index) => ({
-      ...node,
-      position: {
-        x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
-        y: START_Y + (index * VERTICAL_SPACING),
-      },
-    }));
+    
+    const updatedNodes = sortedNodes.map((node, index) => {
+      const previousNodes = sortedNodes
+        .slice(0, index)
+        .filter(prev => prev.type === "taskCard")
+        .map(prev => ({
+          id: prev.id,
+          label: prev.data.label || "Unknown Step"
+        }));
+
+      return {
+        ...node,
+        position: {
+          x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
+          y: START_Y + (index * VERTICAL_SPACING),
+        },
+        data: node.type === "taskCard" ? {
+          ...node.data,
+          previousSteps: previousNodes
+        } : node.data,
+      };
+    });
+
     setNodes(updatedNodes);
     adjustViewport();
   };
 
-  const onConnect = (params: Connection) => {
+  const onConnect = useCallback((params: Connection) => {
     setEdges((prevEdges) =>
       addEdge(
         {
@@ -253,7 +269,7 @@ export const WorkflowCanvas = () => {
         prevEdges
       )
     );
-  };
+  }, []);
 
   const onEdgeClick = (event: React.MouseEvent, edge: Edge) => {
     setSelectedEdge(edge);
@@ -301,12 +317,12 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    const previousNodes = nodes
-      .filter(node => 
-        node.type === "taskCard" && 
-        node.position.y < sourceNode.position.y
-      )
-      .sort((a, b) => a.position.y - b.position.y)
+    const sortedNodes = nodes.sort((a, b) => a.position.y - b.position.y);
+    const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
+    
+    const previousNodes = sortedNodes
+      .slice(0, sourceNodeIndex + 1)
+      .filter(node => node.type === "taskCard")
       .map(node => ({
         id: node.id,
         label: node.data.label || "Unknown Step"
@@ -334,23 +350,24 @@ export const WorkflowCanvas = () => {
 
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
+        const nodePreviousSteps = [...previousNodes, {
+          id: newNode.id,
+          label: newNode.data.label
+        }];
+
         return {
           ...node,
           position: {
             x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
             y: node.id === targetNode.id ? newY + VERTICAL_SPACING : node.position.y + VERTICAL_SPACING,
           },
-          draggable: true,
+          data: node.type === "taskCard" ? {
+            ...node.data,
+            previousSteps: nodePreviousSteps
+          } : node.data,
         };
       }
-      return {
-        ...node,
-        position: {
-          x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
-          y: node.position.y,
-        },
-        draggable: true,
-      };
+      return node;
     });
 
     setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
