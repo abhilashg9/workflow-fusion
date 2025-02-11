@@ -683,55 +683,25 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                               </div>
                               {action.action === "sendBack" && action.enabled && (
                                 <div className="col-span-3 space-y-3 mt-2 p-4 bg-gray-50 rounded-lg">
-                                  <div className="flex items-center justify-between gap-4">
-                                    <div className="flex-1">
-                                      <label className="text-sm text-gray-600 mb-1.5 block flex items-center gap-1">
-                                        Send Transaction Back To
-                                        <TooltipProvider>
-                                          <Tooltip>
-                                            <TooltipTrigger>
-                                              <HelpCircle className="w-4 h-4 text-gray-400" />
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              <p>Select the step to send back to</p>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        </TooltipProvider>
-                                      </label>
-                                      <Select
-                                        value={action.sendBack?.step}
-                                        onValueChange={handleSendBackStepChange}
-                                      >
-                                        <SelectTrigger className="bg-white">
-                                          <SelectValue placeholder="Select step" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="Previous Step">Previous Step</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                    <div>
-                                      <label className="text-sm text-gray-600 mb-1.5 block flex items-center gap-1">
-                                        Preview
-                                        <TooltipProvider>
-                                          <Tooltip>
-                                            <TooltipTrigger>
-                                              <HelpCircle className="w-4 h-4 text-gray-400" />
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              <p>Preview the send back action</p>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        </TooltipProvider>
-                                      </label>
-                                      <Button variant="outline" size="sm" className="bg-white">
-                                        Button
-                                      </Button>
-                                    </div>
+                                  <div className="space-y-3">
+                                    <label className="text-sm text-gray-600 mb-1.5 block">
+                                      Send Transaction Back To
+                                    </label>
+                                    <Select
+                                      value={action.sendBack?.step}
+                                      onValueChange={handleSendBackStepChange}
+                                    >
+                                      <SelectTrigger className="bg-white">
+                                        <SelectValue placeholder="Select step" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="Previous Step">Previous Step</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <p className="text-sm text-gray-500 leading-relaxed">
+                                      Choose a previous workflow step to send the item back to. The default is the immediately preceding step.
+                                    </p>
                                   </div>
-                                  <p className="text-sm text-gray-500 leading-relaxed">
-                                    Choose a previous workflow step to send the item back to. The default is the immediately preceding step.
-                                  </p>
                                 </div>
                               )}
                             </div>
