@@ -368,6 +368,67 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
     return null;
   };
 
+  const renderActionsList = () => {
+    return actions.map((action, index) => (
+      <div key={action.action}>
+        <div className="grid grid-cols-3 gap-4 items-center px-4 py-3 hover:bg-gray-50 transition-colors rounded-lg border border-gray-100 bg-white">
+          <div className="text-sm font-medium text-gray-700">{formatActionName(action.action)}</div>
+          <div>
+            <Input
+              value={action.label}
+              onChange={(e) => handleActionLabelChange(index, e.target.value)}
+              className="h-8 text-sm bg-white focus:ring-1 focus:ring-primary/20"
+            />
+          </div>
+          <div className="flex justify-end pr-2">
+            {canToggleAction(action.action) ? (
+              <Switch
+                checked={action.enabled}
+                onCheckedChange={(checked) => handleActionToggle(index, checked)}
+              />
+            ) : (
+              <Switch checked={action.enabled} disabled />
+            )}
+          </div>
+        </div>
+        {action.action === "sendBack" && action.enabled && (
+          <div className="mt-2 p-4 bg-gray-50 rounded-lg mx-4">
+            <div className="space-y-3">
+              <label className="text-sm text-gray-600 mb-1.5 block">
+                Send Transaction Back To
+              </label>
+              <Select
+                value={action.sendBack?.step || ""}
+                onValueChange={handleSendBackStepChange}
+                disabled={previousSteps.length === 0}
+              >
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder={previousSteps.length === 0 ? "No previous steps available" : "Select step"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {previousSteps.length === 0 ? (
+                    <SelectItem value="none" disabled>No previous steps available</SelectItem>
+                  ) : (
+                    previousSteps.map((step) => (
+                      <SelectItem key={step.id} value={step.id}>
+                        Step {step.sequenceNumber}: {step.label}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                {previousSteps.length === 0 
+                  ? "This is the first step in the workflow."
+                  : "Choose a previous workflow step to send the item back to."}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    ));
+  };
+
   return (
     <>
       <div 
@@ -707,32 +768,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                           <div className="text-right pr-2">Enable</div>
                         </div>
                         <div className="space-y-2 relative z-30">
-                          {actions.map((action, index) => (
-                            <div 
-                              key={action.action}
-                              className="grid grid-cols-3 gap-4 items-center px-4 py-3 hover:bg-gray-50 transition-colors rounded-lg border border-gray-100 bg-white"
-                            >
-                              <div className="text-sm font-medium text-gray-700">{formatActionName(action.action)}</div>
-                              <div>
-                                <Input
-                                  value={action.label}
-                                  onChange={(e) => handleActionLabelChange(index, e.target.value)}
-                                  className="h-8 text-sm bg-white focus:ring-1 focus:ring-primary/20"
-                                />
-                              </div>
-                              <div className="flex justify-end pr-2">
-                                {canToggleAction(action.action) ? (
-                                  <Switch
-                                    checked={action.enabled}
-                                    onCheckedChange={(checked) => handleActionToggle(index, checked)}
-                                  />
-                                ) : (
-                                  <Switch checked={action.enabled} disabled />
-                                )}
-                              </div>
-                              {renderActionSettings(action, index)}
-                            </div>
-                          ))}
+                          {renderActionsList()}
                         </div>
                       </div>
                     </TabsContent>
