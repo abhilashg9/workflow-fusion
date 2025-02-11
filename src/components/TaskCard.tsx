@@ -172,9 +172,9 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
       </div>
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent className="fixed right-0 bottom-0 top-[120px] w-[60vw] rounded-none border-l shadow-lg animate-slide-in-right">
-          <DrawerHeader>
-            <DrawerTitle>{data.label}</DrawerTitle>
+        <DrawerContent className="fixed right-0 top-0 h-screen w-[60vw] rounded-none border-l border-gray-200 bg-white shadow-lg transform transition-transform duration-300 ease-in-out data-[state=closed]:translate-x-full data-[state=open]:translate-x-0">
+          <DrawerHeader className="border-b border-gray-100">
+            <DrawerTitle className="text-lg font-semibold">{data.label}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
