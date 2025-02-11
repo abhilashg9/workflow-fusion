@@ -21,6 +21,15 @@ interface PreviousStep {
   sequenceNumber: number;
 }
 
+interface TaskNodeData {
+  type: "create" | "approval" | "integration";
+  label: string;
+  tags?: string[];
+  previousSteps?: PreviousStep[];
+  sequenceNumber?: number;
+  onDelete?: (id: string) => void;
+}
+
 type TaskType = "create" | "approval" | "integration";
 
 const TaskOption = ({ icon: Icon, title, subtitle, onClick }: { 
@@ -182,7 +191,7 @@ export const WorkflowCanvas = () => {
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
         id: node.id,
-        label: node.data.label,
+        label: (node.data as TaskNodeData).label,
         sequenceNumber: idx + 1
       }))
       .reverse();
