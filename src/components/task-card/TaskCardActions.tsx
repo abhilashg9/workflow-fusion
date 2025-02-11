@@ -99,7 +99,7 @@ export const TaskCardActions = ({
                   <p className="text-sm text-gray-500 leading-relaxed">
                     {previousSteps.length === 0 
                       ? "This is the first step in the workflow."
-                      : "Choose a previous workflow step to send the item back to."}
+                      : "Select a previous step in the workflow to configure the \"send back\" action. By default, the item will be sent back to the previous step."}
                   </p>
                 </div>
               </div>
