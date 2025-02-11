@@ -21,7 +21,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { TaskCardActions } from "./task-card/TaskCardActions";
 import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
-import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
+import { TaskCardNotifications } from "./task-card/TaskCardNotifications";
+import { TaskCardProps, AssignmentConfig, TaskAction, Notification } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 
 const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: TaskCardProps) => {
@@ -34,6 +35,9 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
   const [isHovered, setIsHovered] = useState(false);
   const [actions, setActions] = useState<TaskAction[]>(
     data.actions || DEFAULT_ACTIONS
+  );
+  const [notifications, setNotifications] = useState<Notification[]>(
+    data.notifications || []
   );
 
   useEffect(() => {
@@ -236,6 +240,41 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
     }
   };
 
+  const handleNotificationAdd = (notification: Notification) => {
+    const newNotifications = [...notifications, notification];
+    setNotifications(newNotifications);
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        notifications: newNotifications,
+      });
+    }
+  };
+
+  const handleNotificationDelete = (notificationId: string) => {
+    const newNotifications = notifications.filter((n) => n.id !== notificationId);
+    setNotifications(newNotifications);
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        notifications: newNotifications,
+      });
+    }
+  };
+
+  const handleNotificationEdit = (updatedNotification: Notification) => {
+    const newNotifications = notifications.map((n) =>
+      n.id === updatedNotification.id ? updatedNotification : n
+    );
+    setNotifications(newNotifications);
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        notifications: newNotifications,
+      });
+    }
+  };
+
   return (
     <>
       <div 
@@ -429,15 +468,22 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                   </TabsContent>
                 )}
 
+                <TabsContent value="notifications">
+                  <TaskCardNotifications
+                    actions={actions}
+                    assignment={assignment}
+                    notifications={notifications}
+                    onNotificationAdd={handleNotificationAdd}
+                    onNotificationDelete={handleNotificationDelete}
+                    onNotificationEdit={handleNotificationEdit}
+                  />
+                </TabsContent>
+
                 {isIntegrationTask && (
                   <TabsContent value="api-config">
                     API Config content
                   </TabsContent>
                 )}
-
-                <TabsContent value="notifications">
-                  Notifications content
-                </TabsContent>
 
                 {!isIntegrationTask && (
                   <>
