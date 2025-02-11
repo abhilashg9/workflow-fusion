@@ -1,5 +1,5 @@
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow } from "lucide-react";
 import { User, Bell, ArrowRight, Eye, Server } from "lucide-react";
@@ -10,6 +10,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TaskCardProps {
   data: {
@@ -20,6 +27,9 @@ interface TaskCardProps {
 }
 
 const TaskCard = memo(({ data }: TaskCardProps) => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("assignment");
+
   const getIcon = () => {
     switch (data.type) {
       case "create":
@@ -33,115 +43,184 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
 
   const isIntegrationTask = data.type === "integration";
 
+  const handleActionClick = (tab: string) => {
+    setActiveTab(tab);
+    setIsDrawerOpen(true);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 min-w-[250px]">
-      <Handle type="target" position={Position.Top} />
-      <div className="space-y-4">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
-          <input
-            type="text"
-            defaultValue={data.label}
-            className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
-            maxLength={50}
-          />
-        </div>
-
-        {data.tags && data.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {data.tags.map((tag, index) => (
-              <span
-                key={index}
-                className="px-2 py-1 bg-gray-50 text-gray-600 text-sm rounded"
-              >
-                {tag}
-              </span>
-            ))}
+    <>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 min-w-[250px]">
+        <Handle type="target" position={Position.Top} />
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
+            <input
+              type="text"
+              defaultValue={data.label}
+              className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
+              maxLength={50}
+            />
           </div>
-        )}
 
-        <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
-          <TooltipProvider>
-            {!isIntegrationTask && (
+          {data.tags && data.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {data.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-1 bg-gray-50 text-gray-600 text-sm rounded"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
+            <TooltipProvider>
+              {!isIntegrationTask && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                      onClick={() => handleActionClick("assignment")}
+                    >
+                      <User className="w-4 h-4 text-gray-600 mb-1" />
+                      <span className="text-xs text-gray-600">Assignment</span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Assignment</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              {isIntegrationTask && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                      onClick={() => handleActionClick("api-config")}
+                    >
+                      <Server className="w-4 h-4 text-gray-600 mb-1" />
+                      <span className="text-xs text-gray-600">API Config</span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>API Config</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                    <User className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">Assignment</span>
+                  <button 
+                    className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                    onClick={() => handleActionClick("notifications")}
+                  >
+                    <Bell className="w-4 h-4 text-gray-600 mb-1" />
+                    <span className="text-xs text-gray-600">Notifications</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Assignment</p>
+                  <p>Notifications</p>
                 </TooltipContent>
               </Tooltip>
-            )}
 
-            {isIntegrationTask && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                    <Server className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">API Config</span>
+                  <button 
+                    className={cn(
+                      "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
+                      isIntegrationTask && "opacity-50 cursor-not-allowed"
+                    )}
+                    disabled={isIntegrationTask}
+                    onClick={() => !isIntegrationTask && handleActionClick("actions")}
+                  >
+                    <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
+                    <span className="text-xs text-gray-600">Actions</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>API Config</p>
+                  <p>Actions</p>
                 </TooltipContent>
               </Tooltip>
-            )}
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Bell className="w-4 h-4 text-gray-600 mb-1" />
-                  <span className="text-xs text-gray-600">Notifications</span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Notifications</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button 
-                  className={cn(
-                    "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
-                    isIntegrationTask && "opacity-50 cursor-not-allowed"
-                  )}
-                  disabled={isIntegrationTask}
-                >
-                  <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
-                  <span className="text-xs text-gray-600">Actions</span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Actions</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button 
-                  className={cn(
-                    "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
-                    isIntegrationTask && "opacity-50 cursor-not-allowed"
-                  )}
-                  disabled={isIntegrationTask}
-                >
-                  <Eye className="w-4 h-4 text-gray-600 mb-1" />
-                  <span className="text-xs text-gray-600">Visibility</span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Visibility</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    className={cn(
+                      "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
+                      isIntegrationTask && "opacity-50 cursor-not-allowed"
+                    )}
+                    disabled={isIntegrationTask}
+                    onClick={() => !isIntegrationTask && handleActionClick("visibility")}
+                  >
+                    <Eye className="w-4 h-4 text-gray-600 mb-1" />
+                    <span className="text-xs text-gray-600">Visibility</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Visibility</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
+        <Handle type="source" position={Position.Bottom} />
       </div>
-      <Handle type="source" position={Position.Bottom} />
-    </div>
+
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200 bg-white shadow-lg">
+          <DrawerHeader className="border-b border-gray-100">
+            <DrawerTitle className="text-lg font-semibold">{data.label}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="w-full flex flex-wrap gap-2 justify-start items-center">
+                {!isIntegrationTask && (
+                  <TabsTrigger value="assignment">Assignment</TabsTrigger>
+                )}
+                {isIntegrationTask && (
+                  <TabsTrigger value="api-config">API Config</TabsTrigger>
+                )}
+                <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                {!isIntegrationTask && (
+                  <>
+                    <TabsTrigger value="actions">Actions</TabsTrigger>
+                    <TabsTrigger value="visibility">Visibility</TabsTrigger>
+                  </>
+                )}
+              </TabsList>
+
+              {!isIntegrationTask && (
+                <TabsContent value="assignment" className="mt-4">
+                  Assignment content here
+                </TabsContent>
+              )}
+              {isIntegrationTask && (
+                <TabsContent value="api-config" className="mt-4">
+                  API Configuration content here
+                </TabsContent>
+              )}
+              <TabsContent value="notifications" className="mt-4">
+                Notifications content here
+              </TabsContent>
+              {!isIntegrationTask && (
+                <>
+                  <TabsContent value="actions" className="mt-4">
+                    Actions content here
+                  </TabsContent>
+                  <TabsContent value="visibility" className="mt-4">
+                    Visibility content here
+                  </TabsContent>
+                </>
+              )}
+            </Tabs>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 });
 
