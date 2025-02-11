@@ -198,8 +198,6 @@ export const WorkflowCanvas = () => {
       }))
       .reverse();
 
-    console.log('Creating new node with previousSteps:', previousNodes); // Debug log
-
     const VERTICAL_SPACING = 250;
     const CENTER_X = 250;
     const newY = sourceNode.position.y + VERTICAL_SPACING;
@@ -242,7 +240,7 @@ export const WorkflowCanvas = () => {
           data: node.type === "taskCard" ? {
             ...node.data,
             previousSteps: nodePreviousSteps,
-            sequenceNumber: nodePreviousSteps.length + 1
+            sequenceNumber: nodePreviousSteps.length + 2
           } : node.data,
         };
       }
