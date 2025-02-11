@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   ReactFlow,
@@ -9,6 +10,7 @@ import {
   addEdge,
   MiniMap,
   MarkerType,
+  Panel,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -91,7 +93,7 @@ const initialNodes: Node[] = [
   {
     id: "end",
     type: "output",
-    position: { x: 250, y: 200 },
+    position: { x: 250, y: 400 },
     data: { label: "End" },
     style: {
       background: "#0EA5E9",
@@ -186,7 +188,7 @@ export const WorkflowCanvas = () => {
     const draggedNodeIndex = sortedNodes.findIndex(n => n.id === node.id);
     
     // Calculate new positions maintaining vertical spacing
-    const VERTICAL_SPACING = 200;
+    const VERTICAL_SPACING = 250; // Increased spacing between nodes
     const CENTER_X = 250;
     
     const updatedNodes = sortedNodes.map((n, index) => ({
@@ -209,7 +211,7 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    const VERTICAL_SPACING = 200;
+    const VERTICAL_SPACING = 250; // Increased spacing
     const CENTER_X = 250;
     const newY = sourceNode.position.y + VERTICAL_SPACING;
 
@@ -357,12 +359,16 @@ export const WorkflowCanvas = () => {
           />
           <Controls />
           <MiniMap
+            nodeStrokeWidth={3}
+            nodeStrokeColor="#fff"
             nodeColor={(node) => {
-              switch (node.id) {
-                case 'start':
+              switch (node.type) {
+                case 'input':
                   return '#8B5CF6';
-                case 'end':
+                case 'output':
                   return '#0EA5E9';
+                case 'taskCard':
+                  return '#fff';
                 default:
                   return '#fff';
               }
