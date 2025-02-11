@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   ReactFlow,
@@ -78,7 +77,7 @@ const initialNodes: Node[] = [
   {
     id: "start",
     type: "input",
-    position: { x: 250, y: 50 },
+    position: { x: 250, y: 150 },
     data: { label: "Start" },
     style: {
       background: "#8B5CF6",
@@ -181,25 +180,19 @@ export const WorkflowCanvas = () => {
   };
 
   const onNodeDragStop = (_: React.MouseEvent, node: Node) => {
-    // Sort nodes by vertical position
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    
-    // Find the index of the dragged node in sorted order
     const draggedNodeIndex = sortedNodes.findIndex(n => n.id === node.id);
-    
-    // Calculate new positions maintaining vertical spacing
-    const VERTICAL_SPACING = 250; // Increased spacing between nodes
+    const VERTICAL_SPACING = 250;
+    const START_Y = 150;
     const CENTER_X = 250;
-    
     const updatedNodes = sortedNodes.map((n, index) => ({
       ...n,
       position: {
         x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
-        y: 50 + (index * VERTICAL_SPACING),
+        y: START_Y + (index * VERTICAL_SPACING),
       },
       draggable: true,
     }));
-
     setNodes(updatedNodes);
   };
 
@@ -211,7 +204,7 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    const VERTICAL_SPACING = 250; // Increased spacing
+    const VERTICAL_SPACING = 250;
     const CENTER_X = 250;
     const newY = sourceNode.position.y + VERTICAL_SPACING;
 
