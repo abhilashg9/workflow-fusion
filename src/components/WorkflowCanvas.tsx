@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -121,17 +120,17 @@ const initialEdges: Edge[] = [
     },
     label: "+",
     labelStyle: { 
-      fill: "white",
+      fill: "#ffffff",
       fontWeight: "bold",
       fontSize: "16px",
       opacity: 0,
     },
     labelBgStyle: { 
       fill: "#2563EB",
-      borderRadius: "12px",
-      width: 24,
-      height: 24,
       opacity: 0,
+      borderRadius: "12px",
+      width: "24px",
+      height: "24px",
     },
     className: "workflow-edge",
   },
@@ -172,17 +171,17 @@ export const WorkflowCanvas = () => {
           },
           label: "+",
           labelStyle: { 
-            fill: "white",
+            fill: "#ffffff",
             fontWeight: "bold",
             fontSize: "16px",
             opacity: 0,
           },
           labelBgStyle: { 
             fill: "#2563EB",
-            borderRadius: "12px",
-            width: 24,
-            height: 24,
             opacity: 0,
+            borderRadius: "12px",
+            width: "24px",
+            height: "24px",
           },
           className: "workflow-edge",
         },
@@ -341,6 +340,17 @@ export const WorkflowCanvas = () => {
             .workflow-edge .react-flow__edge-label,
             .workflow-edge .react-flow__edge-label-background {
               transition: opacity 0.3s ease;
+            }
+            .react-flow__edge-label {
+              background: transparent !important;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .react-flow__edge-label-background {
+              border-radius: 50% !important;
+              width: 24px !important;
+              height: 24px !important;
             }
           `}
         </style>
