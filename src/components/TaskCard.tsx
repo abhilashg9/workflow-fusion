@@ -708,7 +708,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                                         {previousSteps.length > 0 ? (
                                           previousSteps.map((step) => (
                                             <SelectItem key={step.id} value={step.id}>
-                                              {step.label}
+                                              Step {step.sequenceNumber}: {step.label}
                                             </SelectItem>
                                           ))
                                         ) : (
