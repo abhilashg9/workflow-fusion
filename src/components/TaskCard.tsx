@@ -653,9 +653,9 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                     <TabsContent value="actions" className="space-y-4">
                       <div className="space-y-2">
                         <div className="grid grid-cols-3 gap-4 px-4 py-3 bg-gray-50 rounded-t-lg text-sm font-medium text-gray-600">
-                          <div>Action</div>
-                          <div>Label</div>
-                          <div className="text-right pr-2">Enable Action</div>
+                          <div className="text-center">Action</div>
+                          <div className="text-center">Label</div>
+                          <div className="text-center">Enable</div>
                         </div>
                         <div className="space-y-2">
                           {actions.map((action, index) => (
