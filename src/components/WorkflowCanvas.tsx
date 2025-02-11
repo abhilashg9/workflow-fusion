@@ -32,6 +32,8 @@ interface TaskNodeData {
 
 type TaskType = "create" | "approval" | "integration";
 
+type CustomNode = Node<TaskNodeData> | Node;
+
 const TaskOption = ({ icon: Icon, title, subtitle, onClick }: { 
   icon: any, 
   title: string, 
@@ -153,7 +155,7 @@ const initialEdges: Edge[] = [
 ];
 
 export const WorkflowCanvas = () => {
-  const [nodes, setNodes] = useState(initialNodes);
+  const [nodes, setNodes] = useState<CustomNode[]>(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
@@ -189,11 +191,14 @@ export const WorkflowCanvas = () => {
     const previousNodes: PreviousStep[] = sortedNodes
       .slice(0, sourceNodeIndex + 1)
       .filter(node => node.type === "taskCard")
-      .map((node, idx) => ({
-        id: node.id,
-        label: (node.data as TaskNodeData).label,
-        sequenceNumber: idx + 1
-      }))
+      .map((node, idx) => {
+        const nodeData = node.data as { label: string };
+        return {
+          id: node.id,
+          label: nodeData.label || "",
+          sequenceNumber: idx + 1
+        };
+      })
       .reverse();
 
     const VERTICAL_SPACING = 250;
