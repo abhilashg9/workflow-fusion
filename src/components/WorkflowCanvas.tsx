@@ -15,8 +15,32 @@ const initialNodes: Node[] = [
   {
     id: "start",
     type: "input",
-    position: { x: 100, y: 100 },
+    position: { x: 250, y: 50 },
     data: { label: "Start" },
+    style: {
+      background: "#fff",
+      border: "1px solid #ddd",
+      borderRadius: "4px",
+      padding: "10px 20px",
+    },
+  },
+  {
+    id: "parallel1",
+    type: "default",
+    position: { x: 100, y: 200 },
+    data: { label: "Step 1A" },
+    style: {
+      background: "#fff",
+      border: "1px solid #ddd",
+      borderRadius: "4px",
+      padding: "10px 20px",
+    },
+  },
+  {
+    id: "parallel2",
+    type: "default",
+    position: { x: 400, y: 200 },
+    data: { label: "Step 1B" },
     style: {
       background: "#fff",
       border: "1px solid #ddd",
@@ -27,7 +51,7 @@ const initialNodes: Node[] = [
   {
     id: "end",
     type: "output",
-    position: { x: 500, y: 100 },
+    position: { x: 250, y: 350 },
     data: { label: "End" },
     style: {
       background: "#fff",
@@ -40,10 +64,34 @@ const initialNodes: Node[] = [
 
 const initialEdges: Edge[] = [
   {
-    id: "start-end",
+    id: "start-parallel1",
     source: "start",
+    target: "parallel1",
+    type: "smoothstep",
+    animated: true,
+    style: { stroke: "#2563EB" },
+  },
+  {
+    id: "start-parallel2",
+    source: "start",
+    target: "parallel2",
+    type: "smoothstep",
+    animated: true,
+    style: { stroke: "#2563EB" },
+  },
+  {
+    id: "parallel1-end",
+    source: "parallel1",
     target: "end",
-    type: "smoothstep", // This creates an elbow connector
+    type: "smoothstep",
+    animated: true,
+    style: { stroke: "#2563EB" },
+  },
+  {
+    id: "parallel2-end",
+    source: "parallel2",
+    target: "end",
+    type: "smoothstep",
     animated: true,
     style: { stroke: "#2563EB" },
   },
