@@ -191,15 +191,14 @@ export const WorkflowCanvas = () => {
     const previousNodes: PreviousStep[] = sortedNodes
       .slice(0, sourceNodeIndex + 1)
       .filter(node => node.type === "taskCard")
-      .map((node, idx) => {
-        const taskNode = node as Node<TaskNodeData>;
-        return {
-          id: node.id,
-          label: taskNode.data.label || "",
-          sequenceNumber: idx + 1
-        };
-      })
+      .map((node, idx) => ({
+        id: node.id,
+        label: (node as Node<TaskNodeData>).data.label || "",
+        sequenceNumber: idx + 1
+      }))
       .reverse();
+
+    console.log('Creating new node with previousSteps:', previousNodes); // Debug log
 
     const VERTICAL_SPACING = 250;
     const CENTER_X = 250;
@@ -225,11 +224,14 @@ export const WorkflowCanvas = () => {
 
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
-        const nodePreviousSteps: PreviousStep[] = [...previousNodes, {
-          id: newNode.id,
-          label: `${newSequenceNumber}. ${newNode.data.label}`,
-          sequenceNumber: newSequenceNumber
-        }].reverse();
+        const nodePreviousSteps: PreviousStep[] = sortedNodes
+          .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
+          .map((n, idx) => ({
+            id: n.id,
+            label: `${idx + 1}. ${(n as Node<TaskNodeData>).data.label}`,
+            sequenceNumber: idx + 1
+          }))
+          .reverse();
 
         return {
           ...node,
@@ -240,7 +242,7 @@ export const WorkflowCanvas = () => {
           data: node.type === "taskCard" ? {
             ...node.data,
             previousSteps: nodePreviousSteps,
-            sequenceNumber: newSequenceNumber + 1
+            sequenceNumber: nodePreviousSteps.length + 1
           } : node.data,
         };
       }
