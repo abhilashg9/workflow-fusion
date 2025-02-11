@@ -15,6 +15,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
 import TaskCard from "./TaskCard";
 
+interface PreviousStep {
+  id: string;
+  label: string;
+  sequenceNumber: number;
+}
+
+type TaskType = "create" | "approval" | "integration";
+
 const TaskOption = ({ icon: Icon, title, subtitle, onClick }: { 
   icon: any, 
   title: string, 
@@ -158,7 +166,7 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   }, [nodes.length, adjustViewport]);
 
-  const handleTaskSelection = (type: "create" | "approval" | "integration") => {
+  const handleTaskSelection = (type: TaskType) => {
     if (!selectedEdge) return;
 
     const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
@@ -169,7 +177,7 @@ export const WorkflowCanvas = () => {
     const sortedNodes = nodes.sort((a, b) => a.position.y - b.position.y);
     const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
     
-    const previousNodes = sortedNodes
+    const previousNodes: PreviousStep[] = sortedNodes
       .slice(0, sourceNodeIndex + 1)
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
@@ -182,6 +190,7 @@ export const WorkflowCanvas = () => {
     const VERTICAL_SPACING = 250;
     const CENTER_X = 250;
     const newY = sourceNode.position.y + VERTICAL_SPACING;
+    const newSequenceNumber = previousNodes.length + 1;
 
     const newNode: Node = {
       id: `task-${Date.now()}`,
@@ -194,7 +203,7 @@ export const WorkflowCanvas = () => {
           ? ["API Name"]
           : ["Role 1", "Role 2"],
         previousSteps: previousNodes,
-        sequenceNumber: previousNodes.length + 1,
+        sequenceNumber: newSequenceNumber,
         onDelete: handleDeleteNode,
       },
       draggable: true,
@@ -202,10 +211,10 @@ export const WorkflowCanvas = () => {
 
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
-        const nodePreviousSteps = [...previousNodes, {
+        const nodePreviousSteps: PreviousStep[] = [...previousNodes, {
           id: newNode.id,
-          label: `${newNode.data.sequenceNumber}. ${newNode.data.label}`,
-          sequenceNumber: newNode.data.sequenceNumber
+          label: `${newSequenceNumber}. ${newNode.data.label}`,
+          sequenceNumber: newSequenceNumber
         }].reverse();
 
         return {
@@ -217,7 +226,7 @@ export const WorkflowCanvas = () => {
           data: node.type === "taskCard" ? {
             ...node.data,
             previousSteps: nodePreviousSteps,
-            sequenceNumber: newNode.data.sequenceNumber + 1
+            sequenceNumber: newSequenceNumber + 1
           } : node.data,
         };
       }
@@ -333,7 +342,7 @@ export const WorkflowCanvas = () => {
     
     const updatedNodes = sortedNodes.map((n, index) => {
       const currentSequence = n.type === "taskCard" ? index + 1 : 0;
-      const previousNodes = sortedNodes
+      const previousNodes: PreviousStep[] = sortedNodes
         .slice(0, index)
         .filter(prev => prev.type === "taskCard")
         .map((prev, idx) => ({
@@ -418,7 +427,7 @@ export const WorkflowCanvas = () => {
     const CENTER_X = 250;
     
     const updatedNodes = sortedNodes.map((node, index) => {
-      const previousNodes = sortedNodes
+      const previousNodes: PreviousStep[] = sortedNodes
         .slice(0, index)
         .filter(prev => prev.type === "taskCard")
         .map(prev => ({
