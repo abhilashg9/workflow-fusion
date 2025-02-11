@@ -1,5 +1,5 @@
 
-import { memo, useState } from "react";
+import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow } from "lucide-react";
 import { User, Bell, ArrowRight, Eye, Server } from "lucide-react";
@@ -15,7 +15,6 @@ import {
   Drawer,
   DrawerContent,
   DrawerHeader,
-  DrawerTitle,
 } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -25,12 +24,17 @@ interface TaskCardProps {
     label: string;
     tags?: string[];
   };
+  setNodeData?: (data: any) => void;
 }
 
-const TaskCard = memo(({ data }: TaskCardProps) => {
+const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("assignment");
   const [taskLabel, setTaskLabel] = useState(data.label);
+
+  useEffect(() => {
+    setTaskLabel(data.label);
+  }, [data.label]);
 
   const getIcon = () => {
     switch (data.type) {
@@ -52,6 +56,12 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
 
   const handleLabelChange = (newLabel: string) => {
     setTaskLabel(newLabel);
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        label: newLabel,
+      });
+    }
   };
 
   return (
