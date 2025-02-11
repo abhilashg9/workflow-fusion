@@ -21,7 +21,7 @@ interface PreviousStep {
   sequenceNumber: number;
 }
 
-interface TaskNodeData {
+interface TaskNodeData extends Record<string, unknown> {
   type: "create" | "approval" | "integration";
   label: string;
   tags?: string[];
@@ -32,7 +32,7 @@ interface TaskNodeData {
 
 type TaskType = "create" | "approval" | "integration";
 
-type CustomNode = Node<TaskNodeData> | Node;
+type CustomNode = Node<TaskNodeData> | Node<{ label: string }>;
 
 const TaskOption = ({ icon: Icon, title, subtitle, onClick }: { 
   icon: any, 
@@ -58,40 +58,7 @@ const nodeTypes = {
   taskCard: TaskCard,
 };
 
-const taskTypes = [
-  {
-    icon: FilePlus2,
-    title: "Create Task",
-    subtitle: "Add a create task and assign creators",
-    type: "create" as const,
-  },
-  {
-    icon: UserCheck,
-    title: "Approval Task",
-    subtitle: "Add an approval task and configure",
-    type: "approval" as const,
-  },
-  {
-    icon: Workflow,
-    title: "Integration Task",
-    subtitle: "Add an integration task and configure the APIs",
-    type: "integration" as const,
-  },
-  {
-    icon: GitBranch,
-    title: "Split Branch",
-    subtitle: "Split the workflow into branches with conditions",
-    type: "split" as const,
-  },
-  {
-    icon: ArrowRightLeft,
-    title: "Parallel Branch",
-    subtitle: "Add tasks in parallel that will occur simultaneously",
-    type: "parallel" as const,
-  },
-];
-
-const initialNodes: Node[] = [
+const initialNodes: CustomNode[] = [
   {
     id: "start",
     type: "input",
@@ -185,17 +152,17 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    const sortedNodes = nodes.sort((a, b) => a.position.y - b.position.y);
+    const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
     const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
     
     const previousNodes: PreviousStep[] = sortedNodes
       .slice(0, sourceNodeIndex + 1)
       .filter(node => node.type === "taskCard")
       .map((node, idx) => {
-        const nodeData = node.data as { label: string };
+        const taskNode = node as Node<TaskNodeData>;
         return {
           id: node.id,
-          label: nodeData.label || "",
+          label: taskNode.data.label || "",
           sequenceNumber: idx + 1
         };
       })
@@ -206,7 +173,7 @@ export const WorkflowCanvas = () => {
     const newY = sourceNode.position.y + VERTICAL_SPACING;
     const newSequenceNumber = previousNodes.length + 1;
 
-    const newNode: Node = {
+    const newNode: Node<TaskNodeData> = {
       id: `task-${Date.now()}`,
       type: "taskCard",
       position: { x: CENTER_X - 125, y: newY },
