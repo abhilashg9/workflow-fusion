@@ -178,7 +178,7 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
           </DrawerHeader>
           <div className="px-4">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full justify-start">
+              <TabsList className="w-full flex flex-wrap gap-2 justify-start items-center">
                 {!isIntegrationTask && (
                   <TabsTrigger value="assignment">Assignment</TabsTrigger>
                 )}
