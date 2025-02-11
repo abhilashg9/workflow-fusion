@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -331,15 +332,15 @@ export const WorkflowCanvas = () => {
           {`
             .workflow-edge:hover .react-flow__edge-label {
               opacity: 1 !important;
-              transition: opacity 0.2s;
+              transition: opacity 0.3s ease;
             }
             .workflow-edge:hover .react-flow__edge-label-background {
               opacity: 1 !important;
-              transition: opacity 0.2s;
+              transition: opacity 0.3s ease;
             }
             .workflow-edge .react-flow__edge-label,
             .workflow-edge .react-flow__edge-label-background {
-              transition: opacity 0.2s;
+              transition: opacity 0.3s ease;
             }
           `}
         </style>
