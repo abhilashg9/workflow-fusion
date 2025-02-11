@@ -730,10 +730,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                                     </div>
                                   </div>
                                   <p className="text-sm text-gray-500 leading-relaxed">
-                                    Transfer this task or transaction to another team member or role. 
-                                    Delegating ensures that the appropriate person can take action 
-                                    while maintaining visibility and accountability. Once delegated, 
-                                    you may still track the progress, depending on your permissions.
+                                    Choose a previous workflow step to send the item back to. The default is the immediately preceding step.
                                   </p>
                                 </div>
                               )}
