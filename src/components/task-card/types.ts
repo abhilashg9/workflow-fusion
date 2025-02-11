@@ -16,6 +16,14 @@ export interface TaskAction {
   };
 }
 
+export interface Notification {
+  id: string;
+  title: string;
+  recipients: string[];
+  actionType: string;
+  status: "success" | "failure";
+}
+
 export interface TaskCardProps {
   data: {
     type: "create" | "approval" | "integration";
@@ -23,6 +31,7 @@ export interface TaskCardProps {
     tags?: string[];
     assignment?: AssignmentConfig;
     actions?: TaskAction[];
+    notifications?: Notification[];
     sequenceNumber?: number;
   };
   id: string;
