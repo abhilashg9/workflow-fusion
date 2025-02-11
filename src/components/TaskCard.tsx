@@ -23,8 +23,6 @@ import { TaskCardActions } from "./task-card/TaskCardActions";
 import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
 import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
-import { TaskCardNotifications } from "./task-card/TaskCardNotifications";
-import { Notification } from "./task-card/types";
 
 const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: TaskCardProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -33,13 +31,10 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
   const [assignment, setAssignment] = useState<AssignmentConfig>(
     data.assignment || { type: "roles", roles: [], filters: [] }
   );
+  const [isHovered, setIsHovered] = useState(false);
   const [actions, setActions] = useState<TaskAction[]>(
     data.actions || DEFAULT_ACTIONS
   );
-  const [notifications, setNotifications] = useState<Notification[]>(
-    data.notifications || []
-  );
-  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     setTaskLabel(data.label);
@@ -238,41 +233,6 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
         return <Badge variant="secondary" className="text-xs">Manager Hierarchy</Badge>;
       default:
         return null;
-    }
-  };
-
-  const handleNotificationAdd = (notification: Notification) => {
-    const newNotifications = [...notifications, notification];
-    setNotifications(newNotifications);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        notifications: newNotifications,
-      });
-    }
-  };
-
-  const handleNotificationDelete = (notificationId: string) => {
-    const newNotifications = notifications.filter(n => n.id !== notificationId);
-    setNotifications(newNotifications);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        notifications: newNotifications,
-      });
-    }
-  };
-
-  const handleNotificationEdit = (notification: Notification) => {
-    const newNotifications = notifications.map(n =>
-      n.id === notification.id ? notification : n
-    );
-    setNotifications(newNotifications);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        notifications: newNotifications,
-      });
     }
   };
 
@@ -476,14 +436,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                 )}
 
                 <TabsContent value="notifications">
-                  <TaskCardNotifications
-                    actions={actions}
-                    assignment={assignment}
-                    notifications={notifications}
-                    onNotificationAdd={handleNotificationAdd}
-                    onNotificationDelete={handleNotificationDelete}
-                    onNotificationEdit={handleNotificationEdit}
-                  />
+                  Notifications content
                 </TabsContent>
 
                 {!isIntegrationTask && (
