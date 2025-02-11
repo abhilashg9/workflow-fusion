@@ -66,8 +66,7 @@ const initialEdges: Edge[] = [
     },
     labelBgStyle: { 
       fill: "#2563EB",
-      rx: 12,
-      ry: 12,
+      borderRadius: "12px",
       width: 24,
       height: 24,
     },
