@@ -357,8 +357,8 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
       </div>
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200">
-          <DrawerHeader className="border-b border-gray-100">
+        <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200 flex flex-col">
+          <DrawerHeader className="border-b border-gray-100 shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
@@ -379,186 +379,188 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
               </Button>
             </div>
           </DrawerHeader>
-          <div className="p-4">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full justify-start">
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-4">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="w-full justify-start">
+                  {!isIntegrationTask && (
+                    <TabsTrigger value="assignment">Assignment</TabsTrigger>
+                  )}
+                  {isIntegrationTask && (
+                    <TabsTrigger value="api-config">API Config</TabsTrigger>
+                  )}
+                  <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                  {!isIntegrationTask && (
+                    <>
+                      <TabsTrigger value="actions">Actions</TabsTrigger>
+                      <TabsTrigger value="visibility">Visibility</TabsTrigger>
+                    </>
+                  )}
+                </TabsList>
                 {!isIntegrationTask && (
-                  <TabsTrigger value="assignment">Assignment</TabsTrigger>
+                  <TabsContent value="assignment" className="space-y-4">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Assignment Type</label>
+                        <Select 
+                          value={assignment.type}
+                          onValueChange={(value: AssignmentConfig["type"]) => handleAssignmentTypeChange(value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select assignment type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="roles">Roles</SelectItem>
+                            <SelectItem value="users">Users</SelectItem>
+                            <SelectItem value="dynamic_users">Dynamic Users</SelectItem>
+                            <SelectItem value="supplier">Supplier</SelectItem>
+                            <SelectItem value="manager">Manager</SelectItem>
+                            <SelectItem value="manager_hierarchy">Manager Hierarchy</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {assignment.type === "roles" && (
+                        <>
+                          <div>
+                            <label className="text-sm font-medium mb-2 block">Roles</label>
+                            <Select onValueChange={handleRoleSelect}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select roles" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {ROLES_OPTIONS.map((role) => (
+                                  <SelectItem key={role} value={role}>{role}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {assignment.roles?.map((role) => (
+                                <Badge key={role} variant="secondary" className="gap-1">
+                                  {role}
+                                  <X 
+                                    className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                    onClick={() => removeItem("role", role)}
+                                  />
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium mb-2 block">Filters (Optional)</label>
+                            <Select onValueChange={handleFilterSelect}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select filters" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {FILTERS_OPTIONS.map((filter) => (
+                                  <SelectItem key={filter} value={filter}>{filter}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {assignment.filters?.map((filter) => (
+                                <Badge key={filter} variant="secondary" className="gap-1">
+                                  {filter}
+                                  <X 
+                                    className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                    onClick={() => removeItem("filter", filter)}
+                                  />
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {assignment.type === "users" && (
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Users</label>
+                          <Select onValueChange={handleUserSelect}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select users" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {USERS_OPTIONS.map((user) => (
+                                <SelectItem key={user} value={user}>{user}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {assignment.users?.map((user) => (
+                              <Badge key={user} variant="secondary" className="gap-1">
+                                {user}
+                                <X 
+                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                  onClick={() => removeItem("user", user)}
+                                />
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {assignment.type === "dynamic_users" && (
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Dynamic Users</label>
+                          <Select onValueChange={handleDynamicUserSelect}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select dynamic users" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {DYNAMIC_USERS_OPTIONS.map((user) => (
+                                <SelectItem key={user} value={user}>{user}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {assignment.dynamicUsers?.map((user) => (
+                              <Badge key={user} variant="secondary" className="gap-1">
+                                {user}
+                                <X 
+                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                  onClick={() => removeItem("dynamicUser", user)}
+                                />
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {(assignment.type === "supplier" || 
+                        assignment.type === "manager" || 
+                        assignment.type === "manager_hierarchy") && (
+                        <div className="text-sm text-gray-500">
+                          {assignment.type === "supplier" && "Task will be assigned to supplier"}
+                          {assignment.type === "manager" && "Task will be assigned to manager"}
+                          {assignment.type === "manager_hierarchy" && "Task will be assigned based on manager hierarchy"}
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
                 )}
                 {isIntegrationTask && (
-                  <TabsTrigger value="api-config">API Config</TabsTrigger>
+                  <TabsContent value="api-config">
+                    API Config content
+                  </TabsContent>
                 )}
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                <TabsContent value="notifications">
+                  Notifications content
+                </TabsContent>
                 {!isIntegrationTask && (
                   <>
-                    <TabsTrigger value="actions">Actions</TabsTrigger>
-                    <TabsTrigger value="visibility">Visibility</TabsTrigger>
+                    <TabsContent value="actions">
+                      Actions content
+                    </TabsContent>
+                    <TabsContent value="visibility">
+                      Visibility content
+                    </TabsContent>
                   </>
                 )}
-              </TabsList>
-              {!isIntegrationTask && (
-                <TabsContent value="assignment" className="space-y-4">
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Assignment Type</label>
-                      <Select 
-                        value={assignment.type}
-                        onValueChange={(value: AssignmentConfig["type"]) => handleAssignmentTypeChange(value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select assignment type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="roles">Roles</SelectItem>
-                          <SelectItem value="users">Users</SelectItem>
-                          <SelectItem value="dynamic_users">Dynamic Users</SelectItem>
-                          <SelectItem value="supplier">Supplier</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="manager_hierarchy">Manager Hierarchy</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {assignment.type === "roles" && (
-                      <>
-                        <div>
-                          <label className="text-sm font-medium mb-2 block">Roles</label>
-                          <Select onValueChange={handleRoleSelect}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select roles" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {ROLES_OPTIONS.map((role) => (
-                                <SelectItem key={role} value={role}>{role}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {assignment.roles?.map((role) => (
-                              <Badge key={role} variant="secondary" className="gap-1">
-                                {role}
-                                <X 
-                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                  onClick={() => removeItem("role", role)}
-                                />
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium mb-2 block">Filters (Optional)</label>
-                          <Select onValueChange={handleFilterSelect}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select filters" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {FILTERS_OPTIONS.map((filter) => (
-                                <SelectItem key={filter} value={filter}>{filter}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {assignment.filters?.map((filter) => (
-                              <Badge key={filter} variant="secondary" className="gap-1">
-                                {filter}
-                                <X 
-                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                  onClick={() => removeItem("filter", filter)}
-                                />
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    {assignment.type === "users" && (
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">Users</label>
-                        <Select onValueChange={handleUserSelect}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select users" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {USERS_OPTIONS.map((user) => (
-                              <SelectItem key={user} value={user}>{user}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {assignment.users?.map((user) => (
-                            <Badge key={user} variant="secondary" className="gap-1">
-                              {user}
-                              <X 
-                                className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                onClick={() => removeItem("user", user)}
-                              />
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {assignment.type === "dynamic_users" && (
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">Dynamic Users</label>
-                        <Select onValueChange={handleDynamicUserSelect}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select dynamic users" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {DYNAMIC_USERS_OPTIONS.map((user) => (
-                              <SelectItem key={user} value={user}>{user}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {assignment.dynamicUsers?.map((user) => (
-                            <Badge key={user} variant="secondary" className="gap-1">
-                              {user}
-                              <X 
-                                className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                onClick={() => removeItem("dynamicUser", user)}
-                              />
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {(assignment.type === "supplier" || 
-                      assignment.type === "manager" || 
-                      assignment.type === "manager_hierarchy") && (
-                      <div className="text-sm text-gray-500">
-                        {assignment.type === "supplier" && "Task will be assigned to supplier"}
-                        {assignment.type === "manager" && "Task will be assigned to manager"}
-                        {assignment.type === "manager_hierarchy" && "Task will be assigned based on manager hierarchy"}
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-              )}
-              {isIntegrationTask && (
-                <TabsContent value="api-config">
-                  API Config content
-                </TabsContent>
-              )}
-              <TabsContent value="notifications">
-                Notifications content
-              </TabsContent>
-              {!isIntegrationTask && (
-                <>
-                  <TabsContent value="actions">
-                    Actions content
-                  </TabsContent>
-                  <TabsContent value="visibility">
-                    Visibility content
-                  </TabsContent>
-                </>
-              )}
-            </Tabs>
+              </Tabs>
+            </div>
           </div>
-          <DrawerFooter className="border-t border-gray-100">
+          <DrawerFooter className="border-t border-gray-100 mt-auto shrink-0">
             <Button 
               variant="destructive" 
               onClick={handleDeleteTask}
