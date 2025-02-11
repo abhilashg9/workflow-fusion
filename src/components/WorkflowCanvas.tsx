@@ -187,15 +187,16 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    // Calculate position between source and target nodes
+    // Calculate vertical midpoint between nodes
     const newX = (sourceNode.position.x + targetNode.position.x) / 2;
-    const newY = (sourceNode.position.y + targetNode.position.y) / 2;
+    const newY = sourceNode.position.y + 
+      (targetNode.position.y - sourceNode.position.y) / 2;
 
     // Create new task node
     const newNode: Node = {
       id: `task-${Date.now()}`,
       type: "taskCard",
-      position: { x: newX, y: newY },
+      position: { x: newX - 125, y: newY }, // Center the 250px wide card
       data: {
         type,
         label: `New ${type} task`,
@@ -208,7 +209,7 @@ export const WorkflowCanvas = () => {
     // Remove the original edge
     setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
 
-    // Add two new edges
+    // Add two new edges with consistent styling
     const newEdges: Edge[] = [
       {
         id: `e-${selectedEdge.source}-${newNode.id}`,
@@ -216,6 +217,7 @@ export const WorkflowCanvas = () => {
         target: newNode.id,
         type: "smoothstep",
         animated: true,
+        style: { stroke: "#2563EB" },
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: "#2563EB",
@@ -242,6 +244,7 @@ export const WorkflowCanvas = () => {
         target: selectedEdge.target,
         type: "smoothstep",
         animated: true,
+        style: { stroke: "#2563EB" },
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: "#2563EB",
