@@ -65,9 +65,9 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
             {!isIntegrationTask && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                    <User className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm text-gray-600">Assignment</span>
+                  <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <User className="w-4 h-4 text-gray-600 mb-1" />
+                    <span className="text-xs text-gray-600">Assignment</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -79,9 +79,9 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
             {isIntegrationTask && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                    <Server className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm text-gray-600">API Config</span>
+                  <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <Server className="w-4 h-4 text-gray-600 mb-1" />
+                    <span className="text-xs text-gray-600">API Config</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -92,9 +92,9 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Bell className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Notifications</span>
+                <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <Bell className="w-4 h-4 text-gray-600 mb-1" />
+                  <span className="text-xs text-gray-600">Notifications</span>
                 </button>
               </TooltipTrigger>
               <TooltipContent>
@@ -106,13 +106,13 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
               <TooltipTrigger asChild>
                 <button 
                   className={cn(
-                    "flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors",
+                    "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
                     isIntegrationTask && "opacity-50 cursor-not-allowed"
                   )}
                   disabled={isIntegrationTask}
                 >
-                  <ArrowRight className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Actions</span>
+                  <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
+                  <span className="text-xs text-gray-600">Actions</span>
                 </button>
               </TooltipTrigger>
               <TooltipContent>
@@ -124,13 +124,13 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
               <TooltipTrigger asChild>
                 <button 
                   className={cn(
-                    "flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors",
+                    "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
                     isIntegrationTask && "opacity-50 cursor-not-allowed"
                   )}
                   disabled={isIntegrationTask}
                 >
-                  <Eye className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Visibility</span>
+                  <Eye className="w-4 h-4 text-gray-600 mb-1" />
+                  <span className="text-xs text-gray-600">Visibility</span>
                 </button>
               </TooltipTrigger>
               <TooltipContent>
@@ -148,4 +148,3 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
 TaskCard.displayName = "TaskCard";
 
 export default TaskCard;
-
