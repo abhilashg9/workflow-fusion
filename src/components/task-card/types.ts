@@ -24,6 +24,23 @@ export interface TaskCardProps {
     assignment?: AssignmentConfig;
     actions?: TaskAction[];
     sequenceNumber?: number;
+    apiConfig?: {
+      selectedApi?: {
+        id: string;
+        name: string;
+        type: "inbound" | "outbound";
+        endpoint: string;
+        viewUrl?: string;
+      };
+      failureRecourse?: {
+        type: "sendBack" | "assign";
+        stepId?: string;
+        assignee?: {
+          type: "user" | "role";
+          value: string;
+        };
+      };
+    };
   };
   id: string;
   setNodeData?: (data: any) => void;
