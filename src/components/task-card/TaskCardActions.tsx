@@ -36,6 +36,8 @@ export const TaskCardActions = ({
     return ["cancel", "edit", "sendBack"].includes(action);
   };
 
+  console.log('TaskCardActions previousSteps:', previousSteps); // Debug log
+
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-3 gap-4 px-4 py-3 bg-gray-50 rounded-t-lg text-sm font-medium text-gray-600 sticky top-[45px] z-40">
@@ -86,13 +88,11 @@ export const TaskCardActions = ({
                       {previousSteps.length === 0 ? (
                         <SelectItem value="none" disabled>No previous steps available</SelectItem>
                       ) : (
-                        previousSteps
-                          .sort((a, b) => a.sequenceNumber - b.sequenceNumber)
-                          .map((step) => (
-                            <SelectItem key={step.id} value={step.id}>
-                              Step {step.sequenceNumber}: {step.label}
-                            </SelectItem>
-                          ))
+                        previousSteps.map((step) => (
+                          <SelectItem key={step.id} value={step.id}>
+                            Step {step.sequenceNumber}: {step.label}
+                          </SelectItem>
+                        ))
                       )}
                     </SelectContent>
                   </Select>
