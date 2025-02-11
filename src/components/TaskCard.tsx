@@ -23,6 +23,8 @@ import { TaskCardActions } from "./task-card/TaskCardActions";
 import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
 import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
+import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
+import { ApiConfig, FailureRecourse } from "./workflow/types";
 
 const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: TaskCardProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -236,6 +238,30 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
     }
   };
 
+  const handleApiSelect = (selectedApi: ApiConfig) => {
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        apiConfig: {
+          ...data.apiConfig,
+          selectedApi,
+        },
+      });
+    }
+  };
+
+  const handleFailureRecourseChange = (failureRecourse: FailureRecourse) => {
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        apiConfig: {
+          ...data.apiConfig,
+          failureRecourse,
+        },
+      });
+    }
+  };
+
   return (
     <>
       <div 
@@ -431,7 +457,13 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
 
                 {isIntegrationTask && (
                   <TabsContent value="api-config">
-                    API Config content
+                    <TaskCardApiConfig
+                      selectedApi={data.apiConfig?.selectedApi}
+                      failureRecourse={data.apiConfig?.failureRecourse}
+                      previousSteps={previousSteps}
+                      onApiSelect={handleApiSelect}
+                      onFailureRecourseChange={handleFailureRecourseChange}
+                    />
                   </TabsContent>
                 )}
 
