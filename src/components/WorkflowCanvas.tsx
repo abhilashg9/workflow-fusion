@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -183,7 +182,7 @@ export const WorkflowCanvas = () => {
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
         id: node.id,
-        label: `${idx + 1}. ${node.data.label}`,
+        label: node.data.label,
         sequenceNumber: idx + 1
       }))
       .reverse();
