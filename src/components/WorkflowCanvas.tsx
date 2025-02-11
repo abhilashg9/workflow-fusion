@@ -7,7 +7,6 @@ import {
   Edge,
   Connection,
   addEdge,
-  MiniMap,
   MarkerType,
   useReactFlow,
 } from "@xyflow/react";
@@ -379,28 +378,6 @@ export const WorkflowCanvas = () => {
             style={{ backgroundColor: "#fafafa" }}
           />
           <Controls />
-          <MiniMap
-            nodeStrokeWidth={3}
-            nodeStrokeColor="#fff"
-            nodeColor={(node) => {
-              switch (node.type) {
-                case 'input':
-                  return '#8B5CF6';
-                case 'output':
-                  return '#0EA5E9';
-                case 'taskCard':
-                  return '#fff';
-                default:
-                  return '#fff';
-              }
-            }}
-            position="bottom-right"
-            style={{
-              backgroundColor: "#fafafa",
-              border: "1px solid #ddd",
-              borderRadius: "4px",
-            }}
-          />
         </ReactFlow>
       </div>
 
