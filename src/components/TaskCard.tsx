@@ -303,6 +303,13 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
     setIsDrawerOpen(false);
   };
 
+  const formatActionName = (action: string): string => {
+    return action
+      .split(/(?=[A-Z])|_/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   return (
     <>
       <div 
@@ -640,7 +647,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                               key={action.action}
                               className="grid grid-cols-3 gap-4 items-center px-2 py-3 rounded-lg border border-gray-100"
                             >
-                              <div className="text-sm font-medium">{action.action}</div>
+                              <div className="text-sm font-medium">{formatActionName(action.action)}</div>
                               <div className="text-sm text-gray-600">{action.label}</div>
                               <div>
                                 <Switch
@@ -653,7 +660,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                                   <div className="flex items-center justify-between gap-4">
                                     <div className="flex-1">
                                       <label className="text-sm text-gray-600 mb-1 block">
-                                        Send transaction back to
+                                        Send Transaction Back To
                                         <TooltipProvider>
                                           <Tooltip>
                                             <TooltipTrigger>
