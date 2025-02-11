@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -522,9 +521,9 @@ export const WorkflowCanvas = () => {
           }}
         >
           <Background
-            color="#94a3b8"
+            color="#ccc"
             gap={20}
-            size={1.5}
+            size={1}
             style={{ backgroundColor: "#fafafa" }}
           />
           <Controls />
