@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   ReactFlow,
@@ -10,7 +9,6 @@ import {
   addEdge,
   MiniMap,
   MarkerType,
-  NodeDragEvent,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -180,7 +178,7 @@ export const WorkflowCanvas = () => {
     setIsModalOpen(true);
   };
 
-  const onNodeDragStop = (_: NodeDragEvent, node: Node) => {
+  const onNodeDragStop = (_: React.MouseEvent, node: Node) => {
     // Sort nodes by vertical position
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
     
