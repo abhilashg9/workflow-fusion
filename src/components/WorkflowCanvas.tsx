@@ -189,35 +189,16 @@ export const WorkflowCanvas = () => {
     const VERTICAL_SPACING = 200;
     const CENTER_X = 250;
     
-    const updatedNodes = sortedNodes.map((n, index) => {
-      const newY = 50 + (index * VERTICAL_SPACING);
-      return {
-        ...n,
-        position: {
-          x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
-          y: newY,
-        },
-      };
-    });
-
-    // Update edges to maintain connections
-    const newEdges = edges.map(edge => {
-      const sourceNode = updatedNodes.find(n => n.id === edge.source);
-      const targetNode = updatedNodes.find(n => n.id === edge.target);
-      if (sourceNode && targetNode) {
-        return {
-          ...edge,
-          sourceX: sourceNode.position.x,
-          sourceY: sourceNode.position.y,
-          targetX: targetNode.position.x,
-          targetY: targetNode.position.y,
-        };
-      }
-      return edge;
-    });
+    const updatedNodes = sortedNodes.map((n, index) => ({
+      ...n,
+      position: {
+        x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
+        y: 50 + (index * VERTICAL_SPACING),
+      },
+      draggable: true,
+    }));
 
     setNodes(updatedNodes);
-    setEdges(newEdges);
   };
 
   const handleTaskSelection = (type: "create" | "approval" | "integration") => {
@@ -243,7 +224,7 @@ export const WorkflowCanvas = () => {
           ? ["API Name"]
           : ["Role 1", "Role 2"],
       },
-      dragHandle: '.drag-handle',
+      draggable: true,
     };
 
     const updatedNodes = nodes.map((node) => {
@@ -254,6 +235,7 @@ export const WorkflowCanvas = () => {
             x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
             y: node.id === targetNode.id ? newY + VERTICAL_SPACING : node.position.y + VERTICAL_SPACING,
           },
+          draggable: true,
         };
       }
       return {
@@ -262,6 +244,7 @@ export const WorkflowCanvas = () => {
           x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
           y: node.position.y,
         },
+        draggable: true,
       };
     });
 
