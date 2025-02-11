@@ -691,9 +691,10 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                                     <Select
                                       value={action.sendBack?.step}
                                       onValueChange={handleSendBackStepChange}
+                                      disabled={!previousSteps || previousSteps.length === 0}
                                     >
                                       <SelectTrigger className="bg-white">
-                                        <SelectValue placeholder="Select step" />
+                                        <SelectValue placeholder={previousSteps.length === 0 ? "No previous steps available" : "Select step"} />
                                       </SelectTrigger>
                                       <SelectContent>
                                         {previousSteps.length > 0 ? (
@@ -703,12 +704,14 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                                             </SelectItem>
                                           ))
                                         ) : (
-                                          <SelectItem value="Previous Step">Previous Step</SelectItem>
+                                          <SelectItem value="none" disabled>No previous steps available</SelectItem>
                                         )}
                                       </SelectContent>
                                     </Select>
                                     <p className="text-sm text-gray-500 leading-relaxed">
-                                      Choose a previous workflow step to send the item back to. The default is the immediately preceding step.
+                                      {previousSteps.length === 0 
+                                        ? "This is the first step in the workflow."
+                                        : "Choose a previous workflow step to send the item back to."}
                                     </p>
                                   </div>
                                 </div>

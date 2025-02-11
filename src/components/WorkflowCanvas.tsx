@@ -265,14 +265,30 @@ export const WorkflowCanvas = () => {
     const VERTICAL_SPACING = 250;
     const START_Y = 150;
     const CENTER_X = 250;
-    const updatedNodes = sortedNodes.map((n, index) => ({
-      ...n,
-      position: {
-        x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
-        y: START_Y + (index * VERTICAL_SPACING),
-      },
-      draggable: true,
-    }));
+    
+    const updatedNodes = sortedNodes.map((n, index) => {
+      const previousNodes = sortedNodes
+        .slice(0, index)
+        .filter(prev => prev.type === "taskCard")
+        .map(prev => ({
+          id: prev.id,
+          label: prev.data.label || "Unknown Step"
+        }));
+
+      return {
+        ...n,
+        position: {
+          x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
+          y: START_Y + (index * VERTICAL_SPACING),
+        },
+        data: n.type === "taskCard" ? {
+          ...n.data,
+          previousSteps: previousNodes
+        } : n.data,
+        draggable: true,
+      };
+    });
+
     setNodes(updatedNodes);
     adjustViewport();
   };
@@ -288,11 +304,12 @@ export const WorkflowCanvas = () => {
     const previousNodes = nodes
       .filter(node => 
         node.type === "taskCard" && 
-        node.position.y < targetNode.position.y
+        node.position.y < sourceNode.position.y
       )
+      .sort((a, b) => a.position.y - b.position.y)
       .map(node => ({
         id: node.id,
-        label: (node.data as any).label || "Unknown Step"
+        label: node.data.label || "Unknown Step"
       }));
 
     const VERTICAL_SPACING = 250;
