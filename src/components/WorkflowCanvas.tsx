@@ -187,10 +187,10 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    // Calculate vertical midpoint between nodes
+    // Calculate vertical midpoint and spacing
+    const VERTICAL_SPACING = 150; // Spacing between nodes
     const newX = (sourceNode.position.x + targetNode.position.x) / 2;
-    const newY = sourceNode.position.y + 
-      (targetNode.position.y - sourceNode.position.y) / 2;
+    const newY = sourceNode.position.y + VERTICAL_SPACING;
 
     // Create new task node
     const newNode: Node = {
@@ -205,6 +205,20 @@ export const WorkflowCanvas = () => {
           : ["Role 1", "Role 2"],
       },
     };
+
+    // Update target node position
+    const updatedNodes = nodes.map((node) => {
+      if (node.id === targetNode.id) {
+        return {
+          ...node,
+          position: {
+            ...node.position,
+            y: newY + VERTICAL_SPACING,
+          },
+        };
+      }
+      return node;
+    });
 
     // Remove the original edge
     setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
@@ -267,7 +281,7 @@ export const WorkflowCanvas = () => {
       },
     ];
 
-    setNodes((nds) => [...nds, newNode]);
+    setNodes([...updatedNodes, newNode]);
     setEdges((eds) => [...eds, ...newEdges]);
     setIsModalOpen(false);
   };
