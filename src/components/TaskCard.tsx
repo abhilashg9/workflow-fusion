@@ -1,4 +1,3 @@
-
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow } from "lucide-react";
@@ -60,6 +59,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
   const [assignment, setAssignment] = useState<AssignmentConfig>(
     data.assignment || { type: "roles", roles: [], filters: [] }
   );
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     setTaskLabel(data.label);
@@ -244,8 +244,22 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 min-w-[250px]">
+      <div 
+        className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 min-w-[250px] relative group"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <Handle type="target" position={Position.Top} />
+        {isHovered && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={handleDeleteTask}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
         <div className="space-y-4">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
