@@ -400,18 +400,18 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
           <div className="flex-1 overflow-y-auto">
             <div className="p-4">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="w-full justify-start sticky top-0 z-50 bg-white">
-                  {!isIntegrationTask && (
-                    <TabsTrigger value="assignment">Assignment</TabsTrigger>
-                  )}
-                  {isIntegrationTask && (
-                    <TabsTrigger value="api-config">API Config</TabsTrigger>
-                  )}
-                  <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                  {!isIntegrationTask && (
+                <TabsList className="w-full grid grid-cols-3 !p-0 bg-white sticky top-0 z-50">
+                  {!isIntegrationTask ? (
                     <>
-                      <TabsTrigger value="actions">Actions</TabsTrigger>
-                      <TabsTrigger value="visibility">Visibility</TabsTrigger>
+                      <TabsTrigger value="assignment" className="flex-1">Assignment</TabsTrigger>
+                      <TabsTrigger value="notifications" className="flex-1">Notifications</TabsTrigger>
+                      <TabsTrigger value="actions" className="flex-1">Actions</TabsTrigger>
+                      <TabsTrigger value="visibility" className="flex-1">Visibility</TabsTrigger>
+                    </>
+                  ) : (
+                    <>
+                      <TabsTrigger value="api-config" className="flex-1">API Config</TabsTrigger>
+                      <TabsTrigger value="notifications" className="flex-1">Notifications</TabsTrigger>
                     </>
                   )}
                 </TabsList>
