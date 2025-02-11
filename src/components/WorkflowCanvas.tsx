@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -159,13 +158,14 @@ export const WorkflowCanvas = () => {
   }, [nodes.length, adjustViewport]);
 
   const handleDeleteNode = (nodeId: string) => {
-    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
     const connectedEdges = edges.filter(
       (edge) => edge.source === nodeId || edge.target === nodeId
     );
+
     if (connectedEdges.length === 2) {
       const sourceEdge = connectedEdges.find((edge) => edge.target === nodeId);
       const targetEdge = connectedEdges.find((edge) => edge.source === nodeId);
+
       if (sourceEdge && targetEdge) {
         const newEdge: Edge = {
           id: `e-${sourceEdge.source}-${targetEdge.target}`,
@@ -205,6 +205,7 @@ export const WorkflowCanvas = () => {
         eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
       );
     }
+
     const remainingNodes = nodes.filter((node) => node.id !== nodeId);
     const sortedNodes = remainingNodes.sort((a, b) => a.position.y - b.position.y);
     const VERTICAL_SPACING = 250;
@@ -470,4 +471,3 @@ export const WorkflowCanvas = () => {
     </>
   );
 };
-
