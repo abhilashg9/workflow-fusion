@@ -18,4 +18,4 @@ export const DEFAULT_ACTIONS = [
       step: ""
     }
   }
-] as const;
+];
