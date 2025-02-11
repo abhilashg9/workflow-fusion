@@ -310,6 +310,22 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
       .join(" ");
   };
 
+  const handleActionLabelChange = (actionIndex: number, newLabel: string) => {
+    const newActions = [...actions];
+    newActions[actionIndex] = { ...newActions[actionIndex], label: newLabel };
+    setActions(newActions);
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        actions: newActions,
+      });
+    }
+  };
+
+  const canToggleAction = (action: string): boolean => {
+    return ["cancel", "edit", "sendBack"].includes(action);
+  };
+
   return (
     <>
       <div 
@@ -639,7 +655,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                         <div className="grid grid-cols-3 gap-4 px-2 py-3 bg-gray-50 text-sm font-medium text-gray-600">
                           <div>Action</div>
                           <div>Label</div>
-                          <div>Config</div>
+                          <div>Enable Action</div>
                         </div>
                         <div className="space-y-2">
                           {actions.map((action, index) => (
@@ -648,12 +664,22 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                               className="grid grid-cols-3 gap-4 items-center px-2 py-3 rounded-lg border border-gray-100"
                             >
                               <div className="text-sm font-medium">{formatActionName(action.action)}</div>
-                              <div className="text-sm text-gray-600">{action.label}</div>
                               <div>
-                                <Switch
-                                  checked={action.enabled}
-                                  onCheckedChange={(checked) => handleActionToggle(index, checked)}
+                                <Input
+                                  value={action.label}
+                                  onChange={(e) => handleActionLabelChange(index, e.target.value)}
+                                  className="h-8 text-sm"
                                 />
+                              </div>
+                              <div>
+                                {canToggleAction(action.action) ? (
+                                  <Switch
+                                    checked={action.enabled}
+                                    onCheckedChange={(checked) => handleActionToggle(index, checked)}
+                                  />
+                                ) : (
+                                  <Switch checked={action.enabled} disabled />
+                                )}
                               </div>
                               {action.action === "sendBack" && action.enabled && (
                                 <div className="col-span-3 space-y-2 mt-2">
