@@ -105,14 +105,14 @@ const initialEdges: Edge[] = [
       fill: "white",
       fontWeight: "bold",
       fontSize: "16px",
-      opacity: "0",
+      opacity: 0,
     },
     labelBgStyle: { 
       fill: "#2563EB",
       borderRadius: "12px",
       width: 24,
       height: 24,
-      opacity: "0",
+      opacity: 0,
     },
     className: "workflow-edge",
   },
@@ -140,14 +140,14 @@ export const WorkflowCanvas = () => {
             fill: "white",
             fontWeight: "bold",
             fontSize: "16px",
-            opacity: "0",
+            opacity: 0,
           },
           labelBgStyle: { 
             fill: "#2563EB",
             borderRadius: "12px",
             width: 24,
             height: 24,
-            opacity: "0",
+            opacity: 0,
           },
           className: "workflow-edge",
         },
@@ -168,9 +168,15 @@ export const WorkflowCanvas = () => {
           {`
             .workflow-edge:hover .react-flow__edge-label {
               opacity: 1 !important;
+              transition: opacity 0.2s;
             }
             .workflow-edge:hover .react-flow__edge-label-background {
               opacity: 1 !important;
+              transition: opacity 0.2s;
+            }
+            .workflow-edge .react-flow__edge-label,
+            .workflow-edge .react-flow__edge-label-background {
+              transition: opacity 0.2s;
             }
           `}
         </style>
