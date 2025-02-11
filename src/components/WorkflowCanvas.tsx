@@ -8,6 +8,8 @@ import {
   Edge,
   Connection,
   addEdge,
+  MiniMap,
+  MarkerType,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -18,82 +20,57 @@ const initialNodes: Node[] = [
     position: { x: 250, y: 50 },
     data: { label: "Start" },
     style: {
-      background: "#fff",
-      border: "1px solid #ddd",
+      background: "#8B5CF6",
+      color: "white",
+      border: "none",
       borderRadius: "4px",
       padding: "10px 20px",
-    },
-  },
-  {
-    id: "parallel1",
-    type: "default",
-    position: { x: 100, y: 200 },
-    data: { label: "Step 1A" },
-    style: {
-      background: "#fff",
-      border: "1px solid #ddd",
-      borderRadius: "4px",
-      padding: "10px 20px",
-    },
-  },
-  {
-    id: "parallel2",
-    type: "default",
-    position: { x: 400, y: 200 },
-    data: { label: "Step 1B" },
-    style: {
-      background: "#fff",
-      border: "1px solid #ddd",
-      borderRadius: "4px",
-      padding: "10px 20px",
+      minWidth: "100px",
+      textAlign: "center",
     },
   },
   {
     id: "end",
     type: "output",
-    position: { x: 250, y: 350 },
+    position: { x: 250, y: 200 },
     data: { label: "End" },
     style: {
-      background: "#fff",
-      border: "1px solid #ddd",
+      background: "#0EA5E9",
+      color: "white",
+      border: "none",
       borderRadius: "4px",
       padding: "10px 20px",
+      minWidth: "100px",
+      textAlign: "center",
     },
   },
 ];
 
 const initialEdges: Edge[] = [
   {
-    id: "start-parallel1",
+    id: "start-end",
     source: "start",
-    target: "parallel1",
-    type: "smoothstep",
-    animated: true,
-    style: { stroke: "#2563EB" },
-  },
-  {
-    id: "start-parallel2",
-    source: "start",
-    target: "parallel2",
-    type: "smoothstep",
-    animated: true,
-    style: { stroke: "#2563EB" },
-  },
-  {
-    id: "parallel1-end",
-    source: "parallel1",
     target: "end",
     type: "smoothstep",
     animated: true,
     style: { stroke: "#2563EB" },
-  },
-  {
-    id: "parallel2-end",
-    source: "parallel2",
-    target: "end",
-    type: "smoothstep",
-    animated: true,
-    style: { stroke: "#2563EB" },
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      color: "#2563EB",
+    },
+    label: "+",
+    labelStyle: { 
+      fill: "white",
+      fontWeight: "bold",
+      fontSize: "16px",
+    },
+    labelBgStyle: { 
+      fill: "#2563EB",
+      rx: 12,
+      ry: 12,
+      width: 24,
+      height: 24,
+    },
   },
 ];
 
@@ -102,7 +79,20 @@ export const WorkflowCanvas = () => {
   const [edges, setEdges] = useState(initialEdges);
 
   const onConnect = (params: Connection) => {
-    setEdges((prevEdges) => addEdge(params, prevEdges));
+    setEdges((prevEdges) =>
+      addEdge(
+        {
+          ...params,
+          type: "smoothstep",
+          animated: true,
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+        },
+        prevEdges
+      )
+    );
   };
 
   return (
@@ -116,6 +106,10 @@ export const WorkflowCanvas = () => {
         defaultEdgeOptions={{
           type: "smoothstep",
           style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
         }}
       >
         <Background
@@ -125,6 +119,24 @@ export const WorkflowCanvas = () => {
           style={{ backgroundColor: "#fafafa" }}
         />
         <Controls />
+        <MiniMap
+          nodeColor={(node) => {
+            switch (node.id) {
+              case 'start':
+                return '#8B5CF6';
+              case 'end':
+                return '#0EA5E9';
+              default:
+                return '#fff';
+            }
+          }}
+          position="bottom-right"
+          style={{
+            backgroundColor: "#fafafa",
+            border: "1px solid #ddd",
+            borderRadius: "4px",
+          }}
+        />
       </ReactFlow>
     </div>
   );
