@@ -7,7 +7,7 @@ export const GlobalHeader = () => {
     <header className="border-b h-16 bg-white">
       <div className="h-full flex items-center justify-between px-6">
         <div className="flex items-center space-x-8">
-          <img src="/lovable-uploads/2a5997f1-596a-4398-abc2-11e71bd3ac33.png" alt="Aerchain" className="h-8" />
+          <span className="text-xl font-semibold">Aerchain</span>
           <nav className="flex items-center space-x-6">
             <Button variant="ghost" className="text-gray-600">
               <Grid className="h-4 w-4 mr-2" />
