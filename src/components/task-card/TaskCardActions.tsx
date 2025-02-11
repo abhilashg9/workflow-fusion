@@ -80,24 +80,32 @@ export const TaskCardActions = ({
                     disabled={previousSteps.length === 0}
                   >
                     <SelectTrigger className="bg-white">
-                      <SelectValue placeholder={previousSteps.length === 0 ? "No previous steps available" : "Select step"} />
+                      <SelectValue 
+                        placeholder={
+                          previousSteps.length === 0 
+                            ? "No previous steps available" 
+                            : `${previousSteps.length} previous steps available`
+                        } 
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {previousSteps.length === 0 ? (
                         <SelectItem value="none" disabled>No previous steps available</SelectItem>
                       ) : (
-                        previousSteps.map((step) => (
-                          <SelectItem key={step.id} value={step.id}>
-                            Step {step.sequenceNumber}: {step.label}
-                          </SelectItem>
-                        ))
+                        previousSteps
+                          .sort((a, b) => b.sequenceNumber - a.sequenceNumber)
+                          .map((step) => (
+                            <SelectItem key={step.id} value={step.id}>
+                              Step {step.sequenceNumber}: {step.label}
+                            </SelectItem>
+                          ))
                       )}
                     </SelectContent>
                   </Select>
                   <p className="text-sm text-gray-500 leading-relaxed">
                     {previousSteps.length === 0 
                       ? "This is the first step in the workflow."
-                      : "Choose a previous workflow step to send the item back to."}
+                      : `You can send this item back to any of the previous ${previousSteps.length} steps.`}
                   </p>
                 </div>
               </div>
