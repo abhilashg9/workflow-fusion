@@ -699,25 +699,25 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                                     <Select
                                       value={action.sendBack?.step}
                                       onValueChange={handleSendBackStepChange}
-                                      disabled={!previousSteps || previousSteps.length === 0}
+                                      disabled={data.sequenceNumber === 1}
                                     >
                                       <SelectTrigger className="bg-white">
-                                        <SelectValue placeholder={previousSteps.length === 0 ? "No previous steps available" : "Select step"} />
+                                        <SelectValue placeholder={data.sequenceNumber === 1 ? "No previous steps available" : "Select step"} />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        {previousSteps.length > 0 ? (
-                                          previousSteps.map((step) => (
+                                        {data.sequenceNumber === 1 ? (
+                                          <SelectItem value="none" disabled>No previous steps available</SelectItem>
+                                        ) : (
+                                          previousSteps?.map((step) => (
                                             <SelectItem key={step.id} value={step.id}>
-                                              Step {step.sequenceNumber}: {step.label}
+                                              {step.label}
                                             </SelectItem>
                                           ))
-                                        ) : (
-                                          <SelectItem value="none" disabled>No previous steps available</SelectItem>
                                         )}
                                       </SelectContent>
                                     </Select>
                                     <p className="text-sm text-gray-500 leading-relaxed">
-                                      {previousSteps.length === 0 
+                                      {data.sequenceNumber === 1 
                                         ? "This is the first step in the workflow."
                                         : "Choose a previous workflow step to send the item back to."}
                                     </p>
