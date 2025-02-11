@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -157,7 +158,7 @@ export const WorkflowCanvas = () => {
         minZoom: 0.75,
         maxZoom: 2.25,
         duration: 200,
-        nodes: nodes.slice(0, 3) // Only consider first 3 nodes for viewport fitting
+        nodes: nodes.slice(0, 3)
       });
     }, 50);
   }, [fitView, nodes]);
@@ -427,13 +428,16 @@ export const WorkflowCanvas = () => {
     const CENTER_X = 250;
     
     const updatedNodes = sortedNodes.map((node, index) => {
+      const currentSequence = node.type === "taskCard" ? index + 1 : 0;
       const previousNodes: PreviousStep[] = sortedNodes
         .slice(0, index)
         .filter(prev => prev.type === "taskCard")
-        .map(prev => ({
+        .map((prev, idx) => ({
           id: prev.id,
-          label: prev.data.label || "Unknown Step"
-        }));
+          label: `${idx + 1}. ${prev.data.label}`,
+          sequenceNumber: idx + 1
+        }))
+        .reverse();
 
       return {
         ...node,
@@ -443,7 +447,8 @@ export const WorkflowCanvas = () => {
         },
         data: node.type === "taskCard" ? {
           ...node.data,
-          previousSteps: previousNodes
+          previousSteps: previousNodes,
+          sequenceNumber: currentSequence
         } : node.data,
       };
     });
