@@ -1,4 +1,3 @@
-
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, HelpCircle } from "lucide-react";
@@ -57,6 +56,7 @@ interface TaskCardProps {
   id: string;
   setNodeData?: (data: any) => void;
   onDelete?: (id: string) => void;
+  previousSteps?: { id: string; label: string }[];
 }
 
 const ROLES_OPTIONS = ["Finance Manager", "Procurement Manager", "IT Manager", "HR Manager"];
@@ -80,7 +80,7 @@ const DEFAULT_ACTIONS: TaskAction[] = [
   }
 ];
 
-const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
+const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: TaskCardProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("assignment");
   const [taskLabel, setTaskLabel] = useState(data.label);
@@ -696,7 +696,15 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                                         <SelectValue placeholder="Select step" />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        <SelectItem value="Previous Step">Previous Step</SelectItem>
+                                        {previousSteps.length > 0 ? (
+                                          previousSteps.map((step) => (
+                                            <SelectItem key={step.id} value={step.id}>
+                                              {step.label}
+                                            </SelectItem>
+                                          ))
+                                        ) : (
+                                          <SelectItem value="Previous Step">Previous Step</SelectItem>
+                                        )}
                                       </SelectContent>
                                     </Select>
                                     <p className="text-sm text-gray-500 leading-relaxed">
@@ -737,4 +745,3 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
 TaskCard.displayName = "TaskCard";
 
 export default TaskCard;
-

@@ -285,6 +285,16 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
+    const previousNodes = nodes
+      .filter(node => 
+        node.type === "taskCard" && 
+        node.position.y < targetNode.position.y
+      )
+      .map(node => ({
+        id: node.id,
+        label: (node.data as any).label || "Unknown Step"
+      }));
+
     const VERTICAL_SPACING = 250;
     const CENTER_X = 250;
     const newY = sourceNode.position.y + VERTICAL_SPACING;
@@ -299,6 +309,7 @@ export const WorkflowCanvas = () => {
         tags: type === "integration" 
           ? ["API Name"]
           : ["Role 1", "Role 2"],
+        previousSteps: previousNodes,
         onDelete: handleDeleteNode,
       },
       draggable: true,
