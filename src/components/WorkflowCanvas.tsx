@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
   Background,
@@ -9,7 +9,7 @@ import {
   addEdge,
   MiniMap,
   MarkerType,
-  Panel,
+  useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -141,6 +141,22 @@ export const WorkflowCanvas = () => {
   const [edges, setEdges] = useState(initialEdges);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
+  const { fitView } = useReactFlow();
+
+  const adjustViewport = useCallback(() => {
+    setTimeout(() => {
+      fitView({
+        padding: 0.5,
+        minZoom: 0.5,
+        maxZoom: 1.5,
+        duration: 200
+      });
+    }, 50);
+  }, [fitView]);
+
+  useEffect(() => {
+    adjustViewport();
+  }, [nodes.length, adjustViewport]);
 
   const onConnect = (params: Connection) => {
     setEdges((prevEdges) =>
@@ -194,6 +210,7 @@ export const WorkflowCanvas = () => {
       draggable: true,
     }));
     setNodes(updatedNodes);
+    adjustViewport();
   };
 
   const handleTaskSelection = (type: "create" | "approval" | "integration") => {
