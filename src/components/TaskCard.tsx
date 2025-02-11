@@ -42,7 +42,9 @@ interface TaskCardProps {
     tags?: string[];
     assignment?: AssignmentConfig;
   };
+  id: string;
   setNodeData?: (data: any) => void;
+  onDelete?: (id: string) => void;
 }
 
 const ROLES_OPTIONS = ["Finance Manager", "Procurement Manager", "IT Manager", "HR Manager"];
@@ -50,7 +52,7 @@ const FILTERS_OPTIONS = ["Dimension 1", "Dimension 2", "Dimension 3", "Dimension
 const USERS_OPTIONS = ["John Doe", "Jane Smith", "Alex Johnson", "Sarah Wilson"];
 const DYNAMIC_USERS_OPTIONS = ["PR Owner", "PO Owner", "GRN Owner", "Invoice Owner"];
 
-const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
+const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("assignment");
   const [taskLabel, setTaskLabel] = useState(data.label);
@@ -233,8 +235,8 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
   };
 
   const handleDeleteTask = () => {
-    if (setNodeData) {
-      setNodeData({ deleted: true });
+    if (onDelete) {
+      onDelete(id);
     }
     setIsDrawerOpen(false);
   };
