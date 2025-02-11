@@ -9,13 +9,13 @@ import {
   addEdge,
   MarkerType,
   useReactFlow,
+  Node,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
 import TaskCard from "../TaskCard";
 import { TaskSelectionModal } from "./TaskSelectionModal";
 import { WorkflowEdge } from "./WorkflowEdge";
-import { VERTICAL_SPACING, CENTER_X, initialNodes, defaultEdgeOptions } from "./constants";
 import { CustomNode, TaskNodeData, TaskType, PreviousStep } from "./types";
 
 const nodeTypes = {
@@ -25,6 +25,48 @@ const nodeTypes = {
 const edgeTypes = {
   workflow: WorkflowEdge,
 };
+
+const VERTICAL_SPACING = 250;
+const CENTER_X = 250;
+
+const initialNodes: CustomNode[] = [
+  {
+    id: "start",
+    type: "input",
+    position: { x: CENTER_X - 50, y: 150 },
+    data: {
+      type: "create" as TaskType,
+      label: "Start",
+    },
+    style: {
+      background: "#8B5CF6",
+      color: "white",
+      border: "none",
+      borderRadius: "4px",
+      padding: "10px 20px",
+      minWidth: "100px",
+      textAlign: "center",
+    },
+  },
+  {
+    id: "end",
+    type: "output",
+    position: { x: CENTER_X - 50, y: 400 },
+    data: {
+      type: "create" as TaskType,
+      label: "End",
+    },
+    style: {
+      background: "#0EA5E9",
+      color: "white",
+      border: "none",
+      borderRadius: "4px",
+      padding: "10px 20px",
+      minWidth: "100px",
+      textAlign: "center",
+    },
+  },
+];
 
 const initialEdges: Edge[] = [
   {
@@ -95,7 +137,7 @@ export const WorkflowCanvas = () => {
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
         id: node.id,
-        label: (node as Node<TaskNodeData>).data.label || "",
+        label: (node.data as TaskNodeData).label || "",
         sequenceNumber: idx + 1
       }))
       .reverse();
@@ -124,7 +166,7 @@ export const WorkflowCanvas = () => {
           .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
           .map((n, idx) => ({
             id: n.id,
-            label: (n as Node<TaskNodeData>).data.label || "",
+            label: (n.data as TaskNodeData).label || "",
             sequenceNumber: idx + 1
           }))
           .reverse();
@@ -282,7 +324,7 @@ export const WorkflowCanvas = () => {
         .filter(prev => prev.type === "taskCard")
         .map((prev, idx) => ({
           id: prev.id,
-          label: `${idx + 1}. ${prev.data.label}`,
+          label: (prev.data as TaskNodeData).label || "",
           sequenceNumber: idx + 1
         }))
         .reverse();
@@ -342,7 +384,14 @@ export const WorkflowCanvas = () => {
           onEdgeClick={onEdgeClick}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          defaultEdgeOptions={defaultEdgeOptions}
+          defaultEdgeOptions={{
+            type: "smoothstep",
+            style: { stroke: "#2563EB" },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              color: "#2563EB",
+            },
+          }}
           fitView
           className="bg-canvas"
         >
