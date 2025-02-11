@@ -4,6 +4,7 @@ import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow } from "lucide-react";
 import { User, Bell, ArrowRight, Eye, Server } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -29,6 +30,7 @@ interface TaskCardProps {
 const TaskCard = memo(({ data }: TaskCardProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("assignment");
+  const [taskLabel, setTaskLabel] = useState(data.label);
 
   const getIcon = () => {
     switch (data.type) {
@@ -48,6 +50,10 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
     setIsDrawerOpen(true);
   };
 
+  const handleLabelChange = (newLabel: string) => {
+    setTaskLabel(newLabel);
+  };
+
   return (
     <>
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 min-w-[250px]">
@@ -57,7 +63,8 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
             <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
             <input
               type="text"
-              defaultValue={data.label}
+              value={taskLabel}
+              onChange={(e) => handleLabelChange(e.target.value)}
               className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
               maxLength={50}
             />
@@ -172,8 +179,16 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200">
-          <DrawerHeader>
-            <DrawerTitle>Task Configuration</DrawerTitle>
+          <DrawerHeader className="border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
+              <Input
+                value={taskLabel}
+                onChange={(e) => handleLabelChange(e.target.value)}
+                className="flex-1 text-lg font-medium h-auto py-1"
+                maxLength={50}
+              />
+            </div>
           </DrawerHeader>
           <div className="p-4">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
