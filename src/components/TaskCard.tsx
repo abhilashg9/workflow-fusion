@@ -258,20 +258,22 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
             <div className="flex-1 space-y-1">
-              <input
-                type="text"
-                value={taskLabel}
-                onChange={(e) => handleLabelChange(e.target.value)}
-                className="w-full text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
-                maxLength={50}
-              />
-              <div className="text-sm text-gray-500 flex items-center gap-2">
-                {assignment.type}
+              <div className="flex items-center justify-between gap-2">
+                <input
+                  type="text"
+                  value={taskLabel}
+                  onChange={(e) => handleLabelChange(e.target.value)}
+                  className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
+                  maxLength={50}
+                />
                 {data.sequenceNumber > 0 && (
-                  <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
+                  <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full shrink-0">
                     Step {data.sequenceNumber}
                   </span>
                 )}
+              </div>
+              <div className="text-sm text-gray-500">
+                {assignment.type}
               </div>
             </div>
           </div>
