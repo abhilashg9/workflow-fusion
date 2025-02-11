@@ -1,6 +1,6 @@
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { FilePlus2, UserCheck, Workflow, HelpCircle } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow } from "lucide-react";
 import { User, Bell, ArrowRight, Eye, Server, X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -18,68 +18,11 @@ import {
   DrawerFooter,
 } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-
-interface AssignmentConfig {
-  type: "roles" | "users" | "dynamic_users" | "supplier" | "manager" | "manager_hierarchy";
-  roles?: string[];
-  filters?: string[];
-  users?: string[];
-  dynamicUsers?: string[];
-}
-
-interface TaskAction {
-  action: string;
-  label: string;
-  enabled: boolean;
-  sendBack?: {
-    step: string;
-  };
-}
-
-interface TaskCardProps {
-  data: {
-    type: "create" | "approval" | "integration";
-    label: string;
-    tags?: string[];
-    assignment?: AssignmentConfig;
-    actions?: TaskAction[];
-    sequenceNumber?: number;
-  };
-  id: string;
-  setNodeData?: (data: any) => void;
-  onDelete?: (id: string) => void;
-  previousSteps?: { id: string; label: string; sequenceNumber: number }[];
-}
-
-const ROLES_OPTIONS = ["Finance Manager", "Procurement Manager", "IT Manager", "HR Manager"];
-const FILTERS_OPTIONS = ["Dimension 1", "Dimension 2", "Dimension 3", "Dimension 4"];
-const USERS_OPTIONS = ["John Doe", "Jane Smith", "Alex Johnson", "Sarah Wilson"];
-const DYNAMIC_USERS_OPTIONS = ["PR Owner", "PO Owner", "GRN Owner", "Invoice Owner"];
-
-const DEFAULT_ACTIONS: TaskAction[] = [
-  { action: "approve", label: "Accept", enabled: true },
-  { action: "reject", label: "Reject", enabled: true },
-  { action: "cancel", label: "Close", enabled: true },
-  { action: "edit", label: "Modify", enabled: false },
-  { action: "delegate", label: "Assign to", enabled: false },
-  { 
-    action: "sendBack", 
-    label: "Send Back", 
-    enabled: true,
-    sendBack: {
-      step: ""
-    }
-  }
-];
+import { TaskCardActions } from "./task-card/TaskCardActions";
+import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
+import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
+import { DEFAULT_ACTIONS } from "./task-card/constants";
 
 const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: TaskCardProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -89,7 +32,6 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
     data.assignment || { type: "roles", roles: [], filters: [] }
   );
   const [isHovered, setIsHovered] = useState(false);
-
   const [actions, setActions] = useState<TaskAction[]>(
     data.actions || DEFAULT_ACTIONS
   );
@@ -205,23 +147,53 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
     updateNodeData(newAssignment);
   };
 
-  const getAssignmentSubtitle = () => {
-    switch (assignment.type) {
-      case "roles":
-        return "Roles";
-      case "users":
-        return "Users";
-      case "dynamic_users":
-        return "Dynamic Users";
-      case "supplier":
-        return "Supplier";
-      case "manager":
-        return "Manager";
-      case "manager_hierarchy":
-        return "Manager Hierarchy";
-      default:
-        return "";
+  const handleActionToggle = (actionIndex: number, enabled: boolean) => {
+    const newActions = [...actions];
+    newActions[actionIndex] = { ...newActions[actionIndex], enabled };
+    setActions(newActions);
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        actions: newActions,
+      });
     }
+  };
+
+  const handleActionLabelChange = (actionIndex: number, newLabel: string) => {
+    const newActions = [...actions];
+    newActions[actionIndex] = { ...newActions[actionIndex], label: newLabel };
+    setActions(newActions);
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        actions: newActions,
+      });
+    }
+  };
+
+  const handleSendBackStepChange = (stepId: string) => {
+    const newActions = [...actions];
+    const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
+    if (sendBackIndex >= 0) {
+      newActions[sendBackIndex] = {
+        ...newActions[sendBackIndex],
+        sendBack: { step: stepId }
+      };
+      setActions(newActions);
+      if (setNodeData) {
+        setNodeData({
+          ...data,
+          actions: newActions,
+        });
+      }
+    }
+  };
+
+  const handleDeleteTask = () => {
+    if (onDelete) {
+      onDelete(id);
+    }
+    setIsDrawerOpen(false);
   };
 
   const renderAssignmentTags = () => {
@@ -264,171 +236,6 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
     }
   };
 
-  const handleActionToggle = (actionIndex: number, enabled: boolean) => {
-    const newActions = [...actions];
-    newActions[actionIndex] = { ...newActions[actionIndex], enabled };
-    setActions(newActions);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        actions: newActions,
-      });
-    }
-  };
-
-  const handleSendBackStepChange = (stepId: string) => {
-    const newActions = [...actions];
-    const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
-    if (sendBackIndex >= 0) {
-      newActions[sendBackIndex] = {
-        ...newActions[sendBackIndex],
-        sendBack: { step: stepId }
-      };
-      setActions(newActions);
-      if (setNodeData) {
-        setNodeData({
-          ...data,
-          actions: newActions,
-        });
-      }
-    }
-  };
-
-  const handleCloseDrawer = () => {
-    setIsDrawerOpen(false);
-  };
-
-  const handleDeleteTask = () => {
-    if (onDelete) {
-      onDelete(id);
-    }
-    setIsDrawerOpen(false);
-  };
-
-  const formatActionName = (action: string): string => {
-    return action
-      .split(/(?=[A-Z])|_/)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
-  };
-
-  const handleActionLabelChange = (actionIndex: number, newLabel: string) => {
-    const newActions = [...actions];
-    newActions[actionIndex] = { ...newActions[actionIndex], label: newLabel };
-    setActions(newActions);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        actions: newActions,
-      });
-    }
-  };
-
-  const canToggleAction = (action: string): boolean => {
-    return ["cancel", "edit", "sendBack"].includes(action);
-  };
-
-  const renderActionSettings = (action: TaskAction, index: number) => {
-    if (action.action === "sendBack" && action.enabled && previousSteps.length > 0) {
-      return (
-        <div className="col-span-3 space-y-3 mt-2 p-4 bg-gray-50 rounded-lg">
-          <div className="space-y-3">
-            <label className="text-sm text-gray-600 mb-1.5 block">
-              Send Transaction Back To
-            </label>
-            <Select
-              value={action.sendBack?.step || ""}
-              onValueChange={handleSendBackStepChange}
-              disabled={previousSteps.length === 0}
-            >
-              <SelectTrigger className="bg-white">
-                <SelectValue placeholder={previousSteps.length === 0 ? "No previous steps available" : "Select step"} />
-              </SelectTrigger>
-              <SelectContent>
-                {previousSteps.length === 0 ? (
-                  <SelectItem value="none" disabled>No previous steps available</SelectItem>
-                ) : (
-                  previousSteps.map((step) => (
-                    <SelectItem key={step.id} value={step.id}>
-                      Step {step.sequenceNumber}: {step.label}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              {previousSteps.length === 0 
-                ? "This is the first step in the workflow."
-                : "Choose a previous workflow step to send the item back to."}
-            </p>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const renderActionsList = () => {
-    return actions.map((action, index) => (
-      <div key={action.action}>
-        <div className="grid grid-cols-3 gap-4 items-center px-4 py-3 hover:bg-gray-50 transition-colors rounded-lg border border-gray-100 bg-white">
-          <div className="text-sm font-medium text-gray-700">{formatActionName(action.action)}</div>
-          <div>
-            <Input
-              value={action.label}
-              onChange={(e) => handleActionLabelChange(index, e.target.value)}
-              className="h-8 text-sm bg-white focus:ring-1 focus:ring-primary/20"
-            />
-          </div>
-          <div className="flex justify-end pr-2">
-            {canToggleAction(action.action) ? (
-              <Switch
-                checked={action.enabled}
-                onCheckedChange={(checked) => handleActionToggle(index, checked)}
-              />
-            ) : (
-              <Switch checked={action.enabled} disabled />
-            )}
-          </div>
-        </div>
-        {action.action === "sendBack" && action.enabled && (
-          <div className="mt-2 p-4 bg-gray-50 rounded-lg mx-4">
-            <div className="space-y-3">
-              <label className="text-sm text-gray-600 mb-1.5 block">
-                Send Transaction Back To
-              </label>
-              <Select
-                value={action.sendBack?.step || ""}
-                onValueChange={handleSendBackStepChange}
-                disabled={previousSteps.length === 0}
-              >
-                <SelectTrigger className="bg-white">
-                  <SelectValue placeholder={previousSteps.length === 0 ? "No previous steps available" : "Select step"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {previousSteps.length === 0 ? (
-                    <SelectItem value="none" disabled>No previous steps available</SelectItem>
-                  ) : (
-                    previousSteps.map((step) => (
-                      <SelectItem key={step.id} value={step.id}>
-                        Step {step.sequenceNumber}: {step.label}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                {previousSteps.length === 0 
-                  ? "This is the first step in the workflow."
-                  : "Choose a previous workflow step to send the item back to."}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    ));
-  };
-
   return (
     <>
       <div 
@@ -459,7 +266,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                 maxLength={50}
               />
               <div className="text-sm text-gray-500 flex items-center gap-2">
-                {getAssignmentSubtitle()}
+                {assignment.type}
                 {data.sequenceNumber > 0 && (
                   <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
                     Step {data.sequenceNumber}
@@ -608,169 +415,41 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                     </>
                   )}
                 </TabsList>
+
                 {!isIntegrationTask && (
-                  <TabsContent value="assignment" className="space-y-4">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">Assignment Type</label>
-                        <Select 
-                          value={assignment.type}
-                          onValueChange={(value: AssignmentConfig["type"]) => handleAssignmentTypeChange(value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select assignment type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="roles">Roles</SelectItem>
-                            <SelectItem value="users">Users</SelectItem>
-                            <SelectItem value="dynamic_users">Dynamic Users</SelectItem>
-                            <SelectItem value="supplier">Supplier</SelectItem>
-                            <SelectItem value="manager">Manager</SelectItem>
-                            <SelectItem value="manager_hierarchy">Manager Hierarchy</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {assignment.type === "roles" && (
-                        <>
-                          <div>
-                            <label className="text-sm font-medium mb-2 block">Roles</label>
-                            <Select onValueChange={handleRoleSelect}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select roles" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {ROLES_OPTIONS.map((role) => (
-                                  <SelectItem key={role} value={role}>{role}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {assignment.roles?.map((role) => (
-                                <Badge key={role} variant="secondary" className="gap-1">
-                                  {role}
-                                  <X 
-                                    className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                    onClick={() => removeItem("role", role)}
-                                  />
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium mb-2 block">Filters (Optional)</label>
-                            <Select onValueChange={handleFilterSelect}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select filters" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {FILTERS_OPTIONS.map((filter) => (
-                                  <SelectItem key={filter} value={filter}>{filter}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {assignment.filters?.map((filter) => (
-                                <Badge key={filter} variant="secondary" className="gap-1">
-                                  {filter}
-                                  <X 
-                                    className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                    onClick={() => removeItem("filter", filter)}
-                                  />
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        </>
-                      )}
-
-                      {assignment.type === "users" && (
-                        <div>
-                          <label className="text-sm font-medium mb-2 block">Users</label>
-                          <Select onValueChange={handleUserSelect}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select users" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {USERS_OPTIONS.map((user) => (
-                                <SelectItem key={user} value={user}>{user}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {assignment.users?.map((user) => (
-                              <Badge key={user} variant="secondary" className="gap-1">
-                                {user}
-                                <X 
-                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                  onClick={() => removeItem("user", user)}
-                                />
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {assignment.type === "dynamic_users" && (
-                        <div>
-                          <label className="text-sm font-medium mb-2 block">Dynamic Users</label>
-                          <Select onValueChange={handleDynamicUserSelect}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select dynamic users" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {DYNAMIC_USERS_OPTIONS.map((user) => (
-                                <SelectItem key={user} value={user}>{user}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {assignment.dynamicUsers?.map((user) => (
-                              <Badge key={user} variant="secondary" className="gap-1">
-                                {user}
-                                <X 
-                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                  onClick={() => removeItem("dynamicUser", user)}
-                                />
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {(assignment.type === "supplier" || 
-                        assignment.type === "manager" || 
-                        assignment.type === "manager_hierarchy") && (
-                        <div className="text-sm text-gray-500">
-                          {assignment.type === "supplier" && "Task will be assigned to supplier"}
-                          {assignment.type === "manager" && "Task will be assigned to manager"}
-                          {assignment.type === "manager_hierarchy" && "Task will be assigned based on manager hierarchy"}
-                        </div>
-                      )}
-                    </div>
+                  <TabsContent value="assignment">
+                    <TaskCardAssignment
+                      assignment={assignment}
+                      onAssignmentTypeChange={handleAssignmentTypeChange}
+                      onRoleSelect={handleRoleSelect}
+                      onFilterSelect={handleFilterSelect}
+                      onUserSelect={handleUserSelect}
+                      onDynamicUserSelect={handleDynamicUserSelect}
+                      onRemoveItem={removeItem}
+                    />
                   </TabsContent>
                 )}
+
                 {isIntegrationTask && (
                   <TabsContent value="api-config">
                     API Config content
                   </TabsContent>
                 )}
+
                 <TabsContent value="notifications">
                   Notifications content
                 </TabsContent>
+
                 {!isIntegrationTask && (
                   <>
-                    <TabsContent value="actions" className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-3 gap-4 px-4 py-3 bg-gray-50 rounded-t-lg text-sm font-medium text-gray-600 sticky top-[45px] z-40">
-                          <div>Action</div>
-                          <div className="text-center">Label</div>
-                          <div className="text-right pr-2">Enable</div>
-                        </div>
-                        <div className="space-y-2 relative z-30">
-                          {renderActionsList()}
-                        </div>
-                      </div>
+                    <TabsContent value="actions">
+                      <TaskCardActions
+                        actions={actions}
+                        previousSteps={previousSteps}
+                        onActionToggle={handleActionToggle}
+                        onActionLabelChange={handleActionLabelChange}
+                        onSendBackStepChange={handleSendBackStepChange}
+                      />
                     </TabsContent>
                     <TabsContent value="visibility">
                       Visibility content
