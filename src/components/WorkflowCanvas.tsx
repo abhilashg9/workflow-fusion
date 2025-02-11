@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   ReactFlow,
@@ -187,16 +186,16 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    // Calculate vertical midpoint and spacing
-    const VERTICAL_SPACING = 150; // Spacing between nodes
-    const newX = (sourceNode.position.x + targetNode.position.x) / 2;
+    // Calculate vertical spacing and center alignment
+    const VERTICAL_SPACING = 200; // Increased spacing between nodes
+    const CENTER_X = 250; // Fixed center X position for all nodes
     const newY = sourceNode.position.y + VERTICAL_SPACING;
 
     // Create new task node
     const newNode: Node = {
       id: `task-${Date.now()}`,
       type: "taskCard",
-      position: { x: newX - 125, y: newY }, // Center the 250px wide card
+      position: { x: CENTER_X - 125, y: newY }, // Center the 250px wide card
       data: {
         type,
         label: `New ${type} task`,
@@ -206,18 +205,26 @@ export const WorkflowCanvas = () => {
       },
     };
 
-    // Update target node position
+    // Update all nodes positions for proper alignment
     const updatedNodes = nodes.map((node) => {
-      if (node.id === targetNode.id) {
+      // Update target node and any nodes below it
+      if (node.position.y >= targetNode.position.y) {
         return {
           ...node,
           position: {
-            ...node.position,
-            y: newY + VERTICAL_SPACING,
+            x: CENTER_X - (node.type === "taskCard" ? 125 : 50), // Center based on node type
+            y: node.id === targetNode.id ? newY + VERTICAL_SPACING : node.position.y + VERTICAL_SPACING,
           },
         };
       }
-      return node;
+      // Center align any nodes above the target
+      return {
+        ...node,
+        position: {
+          x: CENTER_X - (node.type === "taskCard" ? 125 : 50), // Center based on node type
+          y: node.position.y,
+        },
+      };
     });
 
     // Remove the original edge
