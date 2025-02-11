@@ -157,6 +157,69 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   }, [nodes.length, adjustViewport]);
 
+  const handleDeleteNode = (nodeId: string) => {
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    const connectedEdges = edges.filter(
+      (edge) => edge.source === nodeId || edge.target === nodeId
+    );
+    if (connectedEdges.length === 2) {
+      const sourceEdge = connectedEdges.find((edge) => edge.target === nodeId);
+      const targetEdge = connectedEdges.find((edge) => edge.source === nodeId);
+      if (sourceEdge && targetEdge) {
+        const newEdge: Edge = {
+          id: `e-${sourceEdge.source}-${targetEdge.target}`,
+          source: sourceEdge.source,
+          target: targetEdge.target,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+          label: "+",
+          labelStyle: { 
+            fill: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "16px",
+            opacity: 0,
+          },
+          labelBgStyle: { 
+            fill: "#2563EB",
+            opacity: 0,
+            borderRadius: "12px",
+            width: "24px",
+            height: "24px",
+          },
+          className: "workflow-edge",
+        };
+        setEdges((eds) => 
+          eds
+            .filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
+            .concat(newEdge)
+        );
+      }
+    } else {
+      setEdges((eds) => 
+        eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
+      );
+    }
+    const remainingNodes = nodes.filter((node) => node.id !== nodeId);
+    const sortedNodes = remainingNodes.sort((a, b) => a.position.y - b.position.y);
+    const VERTICAL_SPACING = 250;
+    const START_Y = 150;
+    const CENTER_X = 250;
+    const updatedNodes = sortedNodes.map((node, index) => ({
+      ...node,
+      position: {
+        x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
+        y: START_Y + (index * VERTICAL_SPACING),
+      },
+    }));
+    setNodes(updatedNodes);
+    adjustViewport();
+  };
+
   const onConnect = (params: Connection) => {
     setEdges((prevEdges) =>
       addEdge(
@@ -234,6 +297,7 @@ export const WorkflowCanvas = () => {
         tags: type === "integration" 
           ? ["API Name"]
           : ["Role 1", "Role 2"],
+        onDelete: handleDeleteNode,
       },
       draggable: true,
     };
