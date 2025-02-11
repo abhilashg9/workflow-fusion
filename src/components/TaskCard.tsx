@@ -1,10 +1,10 @@
-
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow } from "lucide-react";
-import { User, Bell, ArrowRight, Eye, Server, X } from "lucide-react";
+import { User, Bell, ArrowRight, Eye, Server, X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -15,6 +15,7 @@ import {
   Drawer,
   DrawerContent,
   DrawerHeader,
+  DrawerFooter,
 } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -227,6 +228,17 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
     }
   };
 
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+  };
+
+  const handleDeleteTask = () => {
+    if (setNodeData) {
+      setNodeData({ deleted: true });
+    }
+    setIsDrawerOpen(false);
+  };
+
   return (
     <>
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 min-w-[250px]">
@@ -347,14 +359,24 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200">
           <DrawerHeader className="border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
-              <Input
-                value={taskLabel}
-                onChange={(e) => handleLabelChange(e.target.value)}
-                className="flex-1 text-lg font-medium h-auto py-1"
-                maxLength={50}
-              />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
+                <Input
+                  value={taskLabel}
+                  onChange={(e) => handleLabelChange(e.target.value)}
+                  className="flex-1 text-lg font-medium h-auto py-1"
+                  maxLength={50}
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCloseDrawer}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
           </DrawerHeader>
           <div className="p-4">
@@ -536,6 +558,16 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
               )}
             </Tabs>
           </div>
+          <DrawerFooter className="border-t border-gray-100">
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteTask}
+              className="w-full"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Task
+            </Button>
+          </DrawerFooter>
         </DrawerContent>
       </Drawer>
     </>
@@ -545,4 +577,3 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
 TaskCard.displayName = "TaskCard";
 
 export default TaskCard;
-
