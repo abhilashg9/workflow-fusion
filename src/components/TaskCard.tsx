@@ -1,8 +1,7 @@
-
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow } from "lucide-react";
-import { User, Bell, ArrowRight, Eye, Server } from "lucide-react";
+import { User, Bell, ArrowRight, Eye, Server, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,20 +16,45 @@ import {
   DrawerHeader,
 } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+
+interface AssignmentConfig {
+  type: "roles" | "users" | "dynamic_users" | "supplier" | "manager" | "manager_hierarchy";
+  roles?: string[];
+  filters?: string[];
+  users?: string[];
+  dynamicUsers?: string[];
+}
 
 interface TaskCardProps {
   data: {
     type: "create" | "approval" | "integration";
     label: string;
     tags?: string[];
+    assignment?: AssignmentConfig;
   };
   setNodeData?: (data: any) => void;
 }
+
+const ROLES_OPTIONS = ["Finance Manager", "Procurement Manager", "IT Manager", "HR Manager"];
+const FILTERS_OPTIONS = ["Dimension 1", "Dimension 2", "Dimension 3", "Dimension 4"];
+const USERS_OPTIONS = ["John Doe", "Jane Smith", "Alex Johnson", "Sarah Wilson"];
+const DYNAMIC_USERS_OPTIONS = ["PR Owner", "PO Owner", "GRN Owner", "Invoice Owner"];
 
 const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("assignment");
   const [taskLabel, setTaskLabel] = useState(data.label);
+  const [assignment, setAssignment] = useState<AssignmentConfig>(
+    data.assignment || { type: "roles", roles: [], filters: [] }
+  );
 
   useEffect(() => {
     setTaskLabel(data.label);
@@ -64,6 +88,104 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
     }
   };
 
+  const handleAssignmentTypeChange = (type: AssignmentConfig["type"]) => {
+    const newAssignment: AssignmentConfig = { type };
+    switch (type) {
+      case "roles":
+        newAssignment.roles = [];
+        newAssignment.filters = [];
+        break;
+      case "users":
+        newAssignment.users = [];
+        break;
+      case "dynamic_users":
+        newAssignment.dynamicUsers = [];
+        break;
+    }
+    setAssignment(newAssignment);
+    updateNodeData(newAssignment);
+  };
+
+  const updateNodeData = (newAssignment: AssignmentConfig) => {
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        assignment: newAssignment,
+      });
+    }
+  };
+
+  const handleRoleSelect = (role: string) => {
+    if (assignment.type === "roles" && !assignment.roles?.includes(role)) {
+      const newRoles = [...(assignment.roles || []), role];
+      setAssignment({ ...assignment, roles: newRoles });
+      updateNodeData({ ...assignment, roles: newRoles });
+    }
+  };
+
+  const handleFilterSelect = (filter: string) => {
+    if (assignment.type === "roles" && !assignment.filters?.includes(filter)) {
+      const newFilters = [...(assignment.filters || []), filter];
+      setAssignment({ ...assignment, filters: newFilters });
+      updateNodeData({ ...assignment, filters: newFilters });
+    }
+  };
+
+  const handleUserSelect = (user: string) => {
+    if (assignment.type === "users" && !assignment.users?.includes(user)) {
+      const newUsers = [...(assignment.users || []), user];
+      setAssignment({ ...assignment, users: newUsers });
+      updateNodeData({ ...assignment, users: newUsers });
+    }
+  };
+
+  const handleDynamicUserSelect = (user: string) => {
+    if (assignment.type === "dynamic_users" && !assignment.dynamicUsers?.includes(user)) {
+      const newUsers = [...(assignment.dynamicUsers || []), user];
+      setAssignment({ ...assignment, dynamicUsers: newUsers });
+      updateNodeData({ ...assignment, dynamicUsers: newUsers });
+    }
+  };
+
+  const removeItem = (type: string, item: string) => {
+    let newAssignment = { ...assignment };
+    switch (type) {
+      case "role":
+        newAssignment.roles = assignment.roles?.filter(r => r !== item);
+        break;
+      case "filter":
+        newAssignment.filters = assignment.filters?.filter(f => f !== item);
+        break;
+      case "user":
+        newAssignment.users = assignment.users?.filter(u => u !== item);
+        break;
+      case "dynamicUser":
+        newAssignment.dynamicUsers = assignment.dynamicUsers?.filter(u => u !== item);
+        break;
+    }
+    setAssignment(newAssignment);
+    updateNodeData(newAssignment);
+  };
+
+  const getAssignmentSubtitle = () => {
+    switch (assignment.type) {
+      case "roles":
+        return "Roles";
+      case "users":
+        return "Users";
+      case "dynamic_users":
+        return "Dynamic Users";
+      case "supplier":
+        return "Supplier";
+      case "manager":
+        return "Manager";
+      case "manager_hierarchy":
+        return "Manager Hierarchy";
+      default:
+        return "";
+    }
+  };
+
   return (
     <>
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 min-w-[250px]">
@@ -71,13 +193,16 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
         <div className="space-y-4">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
-            <input
-              type="text"
-              value={taskLabel}
-              onChange={(e) => handleLabelChange(e.target.value)}
-              className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
-              maxLength={50}
-            />
+            <div className="flex-1 space-y-1">
+              <input
+                type="text"
+                value={taskLabel}
+                onChange={(e) => handleLabelChange(e.target.value)}
+                className="w-full text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
+                maxLength={50}
+              />
+              <div className="text-sm text-gray-500">{getAssignmentSubtitle()}</div>
+            </div>
           </div>
 
           {data.tags && data.tags.length > 0 && (
@@ -218,8 +343,145 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
                 )}
               </TabsList>
               {!isIntegrationTask && (
-                <TabsContent value="assignment">
-                  Assignment content
+                <TabsContent value="assignment" className="space-y-4">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Assignment Type</label>
+                      <Select 
+                        value={assignment.type}
+                        onValueChange={(value: AssignmentConfig["type"]) => handleAssignmentTypeChange(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select assignment type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="roles">Roles</SelectItem>
+                          <SelectItem value="users">Users</SelectItem>
+                          <SelectItem value="dynamic_users">Dynamic Users</SelectItem>
+                          <SelectItem value="supplier">Supplier</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="manager_hierarchy">Manager Hierarchy</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {assignment.type === "roles" && (
+                      <>
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Roles</label>
+                          <Select onValueChange={handleRoleSelect}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select roles" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ROLES_OPTIONS.map((role) => (
+                                <SelectItem key={role} value={role}>{role}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {assignment.roles?.map((role) => (
+                              <Badge key={role} variant="secondary" className="gap-1">
+                                {role}
+                                <X 
+                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                  onClick={() => removeItem("role", role)}
+                                />
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Filters (Optional)</label>
+                          <Select onValueChange={handleFilterSelect}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select filters" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {FILTERS_OPTIONS.map((filter) => (
+                                <SelectItem key={filter} value={filter}>{filter}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {assignment.filters?.map((filter) => (
+                              <Badge key={filter} variant="secondary" className="gap-1">
+                                {filter}
+                                <X 
+                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                  onClick={() => removeItem("filter", filter)}
+                                />
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {assignment.type === "users" && (
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Users</label>
+                        <Select onValueChange={handleUserSelect}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select users" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {USERS_OPTIONS.map((user) => (
+                              <SelectItem key={user} value={user}>{user}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {assignment.users?.map((user) => (
+                            <Badge key={user} variant="secondary" className="gap-1">
+                              {user}
+                              <X 
+                                className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                onClick={() => removeItem("user", user)}
+                              />
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {assignment.type === "dynamic_users" && (
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Dynamic Users</label>
+                        <Select onValueChange={handleDynamicUserSelect}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select dynamic users" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {DYNAMIC_USERS_OPTIONS.map((user) => (
+                              <SelectItem key={user} value={user}>{user}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {assignment.dynamicUsers?.map((user) => (
+                            <Badge key={user} variant="secondary" className="gap-1">
+                              {user}
+                              <X 
+                                className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                onClick={() => removeItem("dynamicUser", user)}
+                              />
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {(assignment.type === "supplier" || 
+                      assignment.type === "manager" || 
+                      assignment.type === "manager_hierarchy") && (
+                      <div className="text-sm text-gray-500">
+                        {assignment.type === "supplier" && "Task will be assigned to supplier"}
+                        {assignment.type === "manager" && "Task will be assigned to manager"}
+                        {assignment.type === "manager_hierarchy" && "Task will be assigned based on manager hierarchy"}
+                      </div>
+                    )}
+                  </div>
                 </TabsContent>
               )}
               {isIntegrationTask && (
