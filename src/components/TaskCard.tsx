@@ -1,3 +1,4 @@
+
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow } from "lucide-react";
@@ -374,7 +375,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleCloseDrawer}
+                onClick={() => setIsDrawerOpen(false)}
                 className="h-8 w-8"
               >
                 <X className="h-4 w-4" />

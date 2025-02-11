@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -423,7 +424,7 @@ export const WorkflowCanvas = () => {
           onConnect={onConnect}
           onEdgeClick={onEdgeClick}
           onNodeDragStop={onNodeDragStop}
-          nodeTypes={nodeTypes}
+          nodeTypes={{ taskCard: TaskCard }}
           fitView
           className="bg-canvas"
           defaultEdgeOptions={{
