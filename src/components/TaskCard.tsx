@@ -171,7 +171,7 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
       </div>
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200">
+        <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200 animate-in slide-in-from-right">
           <DrawerHeader>
             <DrawerTitle>Task Configuration</DrawerTitle>
           </DrawerHeader>
