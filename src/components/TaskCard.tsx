@@ -652,26 +652,26 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                   <>
                     <TabsContent value="actions" className="space-y-4">
                       <div className="space-y-2">
-                        <div className="grid grid-cols-3 gap-4 px-2 py-3 bg-gray-50 text-sm font-medium text-gray-600">
+                        <div className="grid grid-cols-3 gap-4 px-4 py-3 bg-gray-50 rounded-t-lg text-sm font-medium text-gray-600">
                           <div>Action</div>
                           <div>Label</div>
-                          <div>Enable Action</div>
+                          <div className="text-right pr-2">Enable Action</div>
                         </div>
                         <div className="space-y-2">
                           {actions.map((action, index) => (
                             <div 
                               key={action.action}
-                              className="grid grid-cols-3 gap-4 items-center px-2 py-3 rounded-lg border border-gray-100"
+                              className="grid grid-cols-3 gap-4 items-center px-4 py-3 hover:bg-gray-50 transition-colors rounded-lg border border-gray-100"
                             >
-                              <div className="text-sm font-medium">{formatActionName(action.action)}</div>
+                              <div className="text-sm font-medium text-gray-700">{formatActionName(action.action)}</div>
                               <div>
                                 <Input
                                   value={action.label}
                                   onChange={(e) => handleActionLabelChange(index, e.target.value)}
-                                  className="h-8 text-sm"
+                                  className="h-8 text-sm bg-white focus:ring-1 focus:ring-primary/20"
                                 />
                               </div>
-                              <div>
+                              <div className="flex justify-end pr-2">
                                 {canToggleAction(action.action) ? (
                                   <Switch
                                     checked={action.enabled}
@@ -682,15 +682,15 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                                 )}
                               </div>
                               {action.action === "sendBack" && action.enabled && (
-                                <div className="col-span-3 space-y-2 mt-2">
+                                <div className="col-span-3 space-y-3 mt-2 p-4 bg-gray-50 rounded-lg">
                                   <div className="flex items-center justify-between gap-4">
                                     <div className="flex-1">
-                                      <label className="text-sm text-gray-600 mb-1 block">
+                                      <label className="text-sm text-gray-600 mb-1.5 block flex items-center gap-1">
                                         Send Transaction Back To
                                         <TooltipProvider>
                                           <Tooltip>
                                             <TooltipTrigger>
-                                              <HelpCircle className="w-4 h-4 ml-1 inline-block text-gray-400" />
+                                              <HelpCircle className="w-4 h-4 text-gray-400" />
                                             </TooltipTrigger>
                                             <TooltipContent>
                                               <p>Select the step to send back to</p>
@@ -702,7 +702,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                                         value={action.sendBack?.step}
                                         onValueChange={handleSendBackStepChange}
                                       >
-                                        <SelectTrigger>
+                                        <SelectTrigger className="bg-white">
                                           <SelectValue placeholder="Select step" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -711,12 +711,12 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                                       </Select>
                                     </div>
                                     <div>
-                                      <label className="text-sm text-gray-600 mb-1 block">
+                                      <label className="text-sm text-gray-600 mb-1.5 block flex items-center gap-1">
                                         Preview
                                         <TooltipProvider>
                                           <Tooltip>
                                             <TooltipTrigger>
-                                              <HelpCircle className="w-4 h-4 ml-1 inline-block text-gray-400" />
+                                              <HelpCircle className="w-4 h-4 text-gray-400" />
                                             </TooltipTrigger>
                                             <TooltipContent>
                                               <p>Preview the send back action</p>
@@ -724,16 +724,16 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                                           </Tooltip>
                                         </TooltipProvider>
                                       </label>
-                                      <Button variant="outline" size="sm">
+                                      <Button variant="outline" size="sm" className="bg-white">
                                         Button
                                       </Button>
                                     </div>
                                   </div>
-                                  <p className="text-sm text-gray-500">
+                                  <p className="text-sm text-gray-500 leading-relaxed">
                                     Transfer this task or transaction to another team member or role. 
                                     Delegating ensures that the appropriate person can take action 
                                     while maintaining visibility and accountability. Once delegated, 
-                                    you may still track the progress, depending on your permissions
+                                    you may still track the progress, depending on your permissions.
                                   </p>
                                 </div>
                               )}
