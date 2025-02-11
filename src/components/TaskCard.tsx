@@ -57,7 +57,7 @@ interface TaskCardProps {
   id: string;
   setNodeData?: (data: any) => void;
   onDelete?: (id: string) => void;
-  previousSteps?: { id: string; label: string }[];
+  previousSteps?: { id: string; label: string; sequenceNumber: number }[];
 }
 
 const ROLES_OPTIONS = ["Finance Manager", "Procurement Manager", "IT Manager", "HR Manager"];
