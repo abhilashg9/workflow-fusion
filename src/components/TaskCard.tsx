@@ -1,6 +1,6 @@
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { FilePlus2, UserCheck, Workflow } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow, HelpCircle } from "lucide-react";
 import { User, Bell, ArrowRight, Eye, Server, X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 
 interface AssignmentConfig {
   type: "roles" | "users" | "dynamic_users" | "supplier" | "manager" | "manager_hierarchy";
@@ -35,12 +36,22 @@ interface AssignmentConfig {
   dynamicUsers?: string[];
 }
 
+interface TaskAction {
+  action: string;
+  label: string;
+  enabled: boolean;
+  sendBack?: {
+    step: string;
+  };
+}
+
 interface TaskCardProps {
   data: {
     type: "create" | "approval" | "integration";
     label: string;
     tags?: string[];
     assignment?: AssignmentConfig;
+    actions?: TaskAction[];
   };
   id: string;
   setNodeData?: (data: any) => void;
@@ -52,6 +63,22 @@ const FILTERS_OPTIONS = ["Dimension 1", "Dimension 2", "Dimension 3", "Dimension
 const USERS_OPTIONS = ["John Doe", "Jane Smith", "Alex Johnson", "Sarah Wilson"];
 const DYNAMIC_USERS_OPTIONS = ["PR Owner", "PO Owner", "GRN Owner", "Invoice Owner"];
 
+const DEFAULT_ACTIONS: TaskAction[] = [
+  { action: "approve", label: "Accept", enabled: true },
+  { action: "reject", label: "Reject", enabled: true },
+  { action: "cancel", label: "Close", enabled: true },
+  { action: "edit", label: "Modify", enabled: false },
+  { action: "delegate", label: "Assign to", enabled: false },
+  { 
+    action: "sendBack", 
+    label: "Send Back", 
+    enabled: true,
+    sendBack: {
+      step: "Previous Step"
+    }
+  }
+];
+
 const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("assignment");
@@ -60,6 +87,10 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
     data.assignment || { type: "roles", roles: [], filters: [] }
   );
   const [isHovered, setIsHovered] = useState(false);
+
+  const [actions, setActions] = useState<TaskAction[]>(
+    data.actions || DEFAULT_ACTIONS
+  );
 
   useEffect(() => {
     setTaskLabel(data.label);
@@ -228,6 +259,36 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
         return <Badge variant="secondary" className="text-xs">Manager Hierarchy</Badge>;
       default:
         return null;
+    }
+  };
+
+  const handleActionToggle = (actionIndex: number, enabled: boolean) => {
+    const newActions = [...actions];
+    newActions[actionIndex] = { ...newActions[actionIndex], enabled };
+    setActions(newActions);
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        actions: newActions,
+      });
+    }
+  };
+
+  const handleSendBackStepChange = (step: string) => {
+    const newActions = [...actions];
+    const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
+    if (sendBackIndex >= 0) {
+      newActions[sendBackIndex] = {
+        ...newActions[sendBackIndex],
+        sendBack: { step }
+      };
+      setActions(newActions);
+      if (setNodeData) {
+        setNodeData({
+          ...data,
+          actions: newActions,
+        });
+      }
     }
   };
 
@@ -566,8 +627,87 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                 </TabsContent>
                 {!isIntegrationTask && (
                   <>
-                    <TabsContent value="actions">
-                      Actions content
+                    <TabsContent value="actions" className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-3 gap-4 px-2 py-3 bg-gray-50 text-sm font-medium text-gray-600">
+                          <div>Action</div>
+                          <div>Label</div>
+                          <div>Config</div>
+                        </div>
+                        <div className="space-y-2">
+                          {actions.map((action, index) => (
+                            <div 
+                              key={action.action}
+                              className="grid grid-cols-3 gap-4 items-center px-2 py-3 rounded-lg border border-gray-100"
+                            >
+                              <div className="text-sm font-medium">{action.action}</div>
+                              <div className="text-sm text-gray-600">{action.label}</div>
+                              <div>
+                                <Switch
+                                  checked={action.enabled}
+                                  onCheckedChange={(checked) => handleActionToggle(index, checked)}
+                                />
+                              </div>
+                              {action.action === "sendBack" && action.enabled && (
+                                <div className="col-span-3 space-y-2 mt-2">
+                                  <div className="flex items-center justify-between gap-4">
+                                    <div className="flex-1">
+                                      <label className="text-sm text-gray-600 mb-1 block">
+                                        Send transaction back to
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger>
+                                              <HelpCircle className="w-4 h-4 ml-1 inline-block text-gray-400" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p>Select the step to send back to</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
+                                      </label>
+                                      <Select
+                                        value={action.sendBack?.step}
+                                        onValueChange={handleSendBackStepChange}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select step" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="Previous Step">Previous Step</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm text-gray-600 mb-1 block">
+                                        Preview
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger>
+                                              <HelpCircle className="w-4 h-4 ml-1 inline-block text-gray-400" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p>Preview the send back action</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
+                                      </label>
+                                      <Button variant="outline" size="sm">
+                                        Button
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <p className="text-sm text-gray-500">
+                                    Transfer this task or transaction to another team member or role. 
+                                    Delegating ensures that the appropriate person can take action 
+                                    while maintaining visibility and accountability. Once delegated, 
+                                    you may still track the progress, depending on your permissions
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </TabsContent>
                     <TabsContent value="visibility">
                       Visibility content
