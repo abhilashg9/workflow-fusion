@@ -158,6 +158,210 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   }, [nodes.length, adjustViewport]);
 
+  const handleTaskSelection = (type: "create" | "approval" | "integration") => {
+    if (!selectedEdge) return;
+
+    const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
+    const targetNode = nodes.find((n) => n.id === selectedEdge.target);
+    
+    if (!sourceNode || !targetNode) return;
+
+    const sortedNodes = nodes.sort((a, b) => a.position.y - b.position.y);
+    const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
+    
+    const previousNodes = sortedNodes
+      .slice(0, sourceNodeIndex + 1)
+      .filter(node => node.type === "taskCard")
+      .map((node, idx) => ({
+        id: node.id,
+        label: `${idx + 1}. ${node.data.label}`,
+        sequenceNumber: idx + 1
+      }))
+      .reverse();
+
+    const VERTICAL_SPACING = 250;
+    const CENTER_X = 250;
+    const newY = sourceNode.position.y + VERTICAL_SPACING;
+
+    const newNode: Node = {
+      id: `task-${Date.now()}`,
+      type: "taskCard",
+      position: { x: CENTER_X - 125, y: newY },
+      data: {
+        type,
+        label: `New ${type} task`,
+        tags: type === "integration" 
+          ? ["API Name"]
+          : ["Role 1", "Role 2"],
+        previousSteps: previousNodes,
+        sequenceNumber: previousNodes.length + 1,
+        onDelete: handleDeleteNode,
+      },
+      draggable: true,
+    };
+
+    const updatedNodes = nodes.map((node) => {
+      if (node.position.y >= targetNode.position.y) {
+        const nodePreviousSteps = [...previousNodes, {
+          id: newNode.id,
+          label: `${newNode.data.sequenceNumber}. ${newNode.data.label}`,
+          sequenceNumber: newNode.data.sequenceNumber
+        }].reverse();
+
+        return {
+          ...node,
+          position: {
+            x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
+            y: node.id === targetNode.id ? newY + VERTICAL_SPACING : node.position.y + VERTICAL_SPACING,
+          },
+          data: node.type === "taskCard" ? {
+            ...node.data,
+            previousSteps: nodePreviousSteps,
+            sequenceNumber: newNode.data.sequenceNumber + 1
+          } : node.data,
+        };
+      }
+      return node;
+    });
+
+    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
+
+    const newEdges: Edge[] = [
+      {
+        id: `e-${selectedEdge.source}-${newNode.id}`,
+        source: selectedEdge.source,
+        target: newNode.id,
+        type: "smoothstep",
+        animated: true,
+        style: { stroke: "#2563EB" },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: "#2563EB",
+        },
+        label: "+",
+        labelStyle: { 
+          fill: "white",
+          fontWeight: "bold",
+          fontSize: "16px",
+          opacity: 0,
+        },
+        labelBgStyle: { 
+          fill: "#2563EB",
+          borderRadius: "12px",
+          width: 24,
+          height: 24,
+          opacity: 0,
+        },
+        className: "workflow-edge",
+      },
+      {
+        id: `e-${newNode.id}-${selectedEdge.target}`,
+        source: newNode.id,
+        target: selectedEdge.target,
+        type: "smoothstep",
+        animated: true,
+        style: { stroke: "#2563EB" },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: "#2563EB",
+        },
+        label: "+",
+        labelStyle: { 
+          fill: "white",
+          fontWeight: "bold",
+          fontSize: "16px",
+          opacity: 0,
+        },
+        labelBgStyle: { 
+          fill: "#2563EB",
+          borderRadius: "12px",
+          width: 24,
+          height: 24,
+          opacity: 0,
+        },
+        className: "workflow-edge",
+      },
+    ];
+
+    setNodes([...updatedNodes, newNode]);
+    setEdges((eds) => [...eds, ...newEdges]);
+    setIsModalOpen(false);
+  };
+
+  const onConnect = useCallback((params: Connection) => {
+    setEdges((prevEdges) =>
+      addEdge(
+        {
+          ...params,
+          type: "smoothstep",
+          animated: true,
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+          label: "+",
+          labelStyle: { 
+            fill: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "16px",
+            opacity: 0,
+          },
+          labelBgStyle: { 
+            fill: "#2563EB",
+            opacity: 0,
+            borderRadius: "12px",
+            width: "24px",
+            height: "24px",
+          },
+          className: "workflow-edge",
+        },
+        prevEdges
+      )
+    );
+  }, []);
+
+  const onEdgeClick = (event: React.MouseEvent, edge: Edge) => {
+    setSelectedEdge(edge);
+    setIsModalOpen(true);
+  };
+
+  const onNodeDragStop = (_: React.MouseEvent, node: Node) => {
+    const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
+    const VERTICAL_SPACING = 250;
+    const START_Y = 150;
+    const CENTER_X = 250;
+    
+    const updatedNodes = sortedNodes.map((n, index) => {
+      const currentSequence = n.type === "taskCard" ? index + 1 : 0;
+      const previousNodes = sortedNodes
+        .slice(0, index)
+        .filter(prev => prev.type === "taskCard")
+        .map((prev, idx) => ({
+          id: prev.id,
+          label: `${idx + 1}. ${prev.data.label}`,
+          sequenceNumber: idx + 1
+        }))
+        .reverse();
+
+      return {
+        ...n,
+        position: {
+          x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
+          y: START_Y + (index * VERTICAL_SPACING),
+        },
+        data: n.type === "taskCard" ? {
+          ...n.data,
+          previousSteps: previousNodes,
+          sequenceNumber: currentSequence
+        } : n.data,
+        draggable: true,
+      };
+    });
+
+    setNodes(updatedNodes);
+    adjustViewport();
+  };
+
   const handleDeleteNode = (nodeId: string) => {
     const connectedEdges = edges.filter(
       (edge) => edge.source === nodeId || edge.target === nodeId
@@ -237,201 +441,6 @@ export const WorkflowCanvas = () => {
 
     setNodes(updatedNodes);
     adjustViewport();
-  };
-
-  const onConnect = useCallback((params: Connection) => {
-    setEdges((prevEdges) =>
-      addEdge(
-        {
-          ...params,
-          type: "smoothstep",
-          animated: true,
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: "#2563EB",
-          },
-          label: "+",
-          labelStyle: { 
-            fill: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "16px",
-            opacity: 0,
-          },
-          labelBgStyle: { 
-            fill: "#2563EB",
-            opacity: 0,
-            borderRadius: "12px",
-            width: "24px",
-            height: "24px",
-          },
-          className: "workflow-edge",
-        },
-        prevEdges
-      )
-    );
-  }, []);
-
-  const onEdgeClick = (event: React.MouseEvent, edge: Edge) => {
-    setSelectedEdge(edge);
-    setIsModalOpen(true);
-  };
-
-  const onNodeDragStop = (_: React.MouseEvent, node: Node) => {
-    const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const VERTICAL_SPACING = 250;
-    const START_Y = 150;
-    const CENTER_X = 250;
-    
-    const updatedNodes = sortedNodes.map((n, index) => {
-      const previousNodes = sortedNodes
-        .slice(0, index)
-        .filter(prev => prev.type === "taskCard")
-        .map(prev => ({
-          id: prev.id,
-          label: prev.data.label || "Unknown Step"
-        }));
-
-      return {
-        ...n,
-        position: {
-          x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
-          y: START_Y + (index * VERTICAL_SPACING),
-        },
-        data: n.type === "taskCard" ? {
-          ...n.data,
-          previousSteps: previousNodes
-        } : n.data,
-        draggable: true,
-      };
-    });
-
-    setNodes(updatedNodes);
-    adjustViewport();
-  };
-
-  const handleTaskSelection = (type: "create" | "approval" | "integration") => {
-    if (!selectedEdge) return;
-
-    const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
-    const targetNode = nodes.find((n) => n.id === selectedEdge.target);
-    
-    if (!sourceNode || !targetNode) return;
-
-    const sortedNodes = nodes.sort((a, b) => a.position.y - b.position.y);
-    const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
-    
-    const previousNodes = sortedNodes
-      .slice(0, sourceNodeIndex + 1)
-      .filter(node => node.type === "taskCard")
-      .map(node => ({
-        id: node.id,
-        label: node.data.label || "Unknown Step"
-      }));
-
-    const VERTICAL_SPACING = 250;
-    const CENTER_X = 250;
-    const newY = sourceNode.position.y + VERTICAL_SPACING;
-
-    const newNode: Node = {
-      id: `task-${Date.now()}`,
-      type: "taskCard",
-      position: { x: CENTER_X - 125, y: newY },
-      data: {
-        type,
-        label: `New ${type} task`,
-        tags: type === "integration" 
-          ? ["API Name"]
-          : ["Role 1", "Role 2"],
-        previousSteps: previousNodes,
-        onDelete: handleDeleteNode,
-      },
-      draggable: true,
-    };
-
-    const updatedNodes = nodes.map((node) => {
-      if (node.position.y >= targetNode.position.y) {
-        const nodePreviousSteps = [...previousNodes, {
-          id: newNode.id,
-          label: newNode.data.label
-        }];
-
-        return {
-          ...node,
-          position: {
-            x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
-            y: node.id === targetNode.id ? newY + VERTICAL_SPACING : node.position.y + VERTICAL_SPACING,
-          },
-          data: node.type === "taskCard" ? {
-            ...node.data,
-            previousSteps: nodePreviousSteps
-          } : node.data,
-        };
-      }
-      return node;
-    });
-
-    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
-
-    const newEdges: Edge[] = [
-      {
-        id: `e-${selectedEdge.source}-${newNode.id}`,
-        source: selectedEdge.source,
-        target: newNode.id,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#2563EB" },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: "#2563EB",
-        },
-        label: "+",
-        labelStyle: { 
-          fill: "white",
-          fontWeight: "bold",
-          fontSize: "16px",
-          opacity: 0,
-        },
-        labelBgStyle: { 
-          fill: "#2563EB",
-          borderRadius: "12px",
-          width: 24,
-          height: 24,
-          opacity: 0,
-        },
-        className: "workflow-edge",
-      },
-      {
-        id: `e-${newNode.id}-${selectedEdge.target}`,
-        source: newNode.id,
-        target: selectedEdge.target,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#2563EB" },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: "#2563EB",
-        },
-        label: "+",
-        labelStyle: { 
-          fill: "white",
-          fontWeight: "bold",
-          fontSize: "16px",
-          opacity: 0,
-        },
-        labelBgStyle: { 
-          fill: "#2563EB",
-          borderRadius: "12px",
-          width: 24,
-          height: 24,
-          opacity: 0,
-        },
-        className: "workflow-edge",
-      },
-    ];
-
-    setNodes([...updatedNodes, newNode]);
-    setEdges((eds) => [...eds, ...newEdges]);
-    setIsModalOpen(false);
   };
 
   return (

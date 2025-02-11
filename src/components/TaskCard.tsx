@@ -52,6 +52,7 @@ interface TaskCardProps {
     tags?: string[];
     assignment?: AssignmentConfig;
     actions?: TaskAction[];
+    sequenceNumber?: number;
   };
   id: string;
   setNodeData?: (data: any) => void;
@@ -356,7 +357,14 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                 className="w-full text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
                 maxLength={50}
               />
-              <div className="text-sm text-gray-500">{getAssignmentSubtitle()}</div>
+              <div className="text-sm text-gray-500 flex items-center gap-2">
+                {getAssignmentSubtitle()}
+                {data.sequenceNumber > 0 && (
+                  <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+                    Step {data.sequenceNumber}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
