@@ -145,13 +145,14 @@ export const WorkflowCanvas = () => {
   const adjustViewport = useCallback(() => {
     setTimeout(() => {
       fitView({
-        padding: 0.5,
-        minZoom: 0.5,
-        maxZoom: 1.5,
-        duration: 200
+        padding: 0.2,
+        minZoom: 0.75,
+        maxZoom: 2.25,
+        duration: 200,
+        nodes: nodes.slice(0, 3) // Only consider first 3 nodes for viewport fitting
       });
     }, 50);
-  }, [fitView]);
+  }, [fitView, nodes]);
 
   useEffect(() => {
     adjustViewport();
