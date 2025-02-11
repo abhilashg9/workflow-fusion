@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   ReactFlow,
@@ -9,6 +10,7 @@ import {
   addEdge,
   MiniMap,
   MarkerType,
+  NodeDragEvent,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -178,6 +180,48 @@ export const WorkflowCanvas = () => {
     setIsModalOpen(true);
   };
 
+  const onNodeDragStop = (_: NodeDragEvent, node: Node) => {
+    // Sort nodes by vertical position
+    const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
+    
+    // Find the index of the dragged node in sorted order
+    const draggedNodeIndex = sortedNodes.findIndex(n => n.id === node.id);
+    
+    // Calculate new positions maintaining vertical spacing
+    const VERTICAL_SPACING = 200;
+    const CENTER_X = 250;
+    
+    const updatedNodes = sortedNodes.map((n, index) => {
+      const newY = 50 + (index * VERTICAL_SPACING);
+      return {
+        ...n,
+        position: {
+          x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
+          y: newY,
+        },
+      };
+    });
+
+    // Update edges to maintain connections
+    const newEdges = edges.map(edge => {
+      const sourceNode = updatedNodes.find(n => n.id === edge.source);
+      const targetNode = updatedNodes.find(n => n.id === edge.target);
+      if (sourceNode && targetNode) {
+        return {
+          ...edge,
+          sourceX: sourceNode.position.x,
+          sourceY: sourceNode.position.y,
+          targetX: targetNode.position.x,
+          targetY: targetNode.position.y,
+        };
+      }
+      return edge;
+    });
+
+    setNodes(updatedNodes);
+    setEdges(newEdges);
+  };
+
   const handleTaskSelection = (type: "create" | "approval" | "integration") => {
     if (!selectedEdge) return;
 
@@ -186,16 +230,14 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    // Calculate vertical spacing and center alignment
-    const VERTICAL_SPACING = 200; // Increased spacing between nodes
-    const CENTER_X = 250; // Fixed center X position for all nodes
+    const VERTICAL_SPACING = 200;
+    const CENTER_X = 250;
     const newY = sourceNode.position.y + VERTICAL_SPACING;
 
-    // Create new task node
     const newNode: Node = {
       id: `task-${Date.now()}`,
       type: "taskCard",
-      position: { x: CENTER_X - 125, y: newY }, // Center the 250px wide card
+      position: { x: CENTER_X - 125, y: newY },
       data: {
         type,
         label: `New ${type} task`,
@@ -203,34 +245,30 @@ export const WorkflowCanvas = () => {
           ? ["API Name"]
           : ["Role 1", "Role 2"],
       },
+      dragHandle: '.drag-handle',
     };
 
-    // Update all nodes positions for proper alignment
     const updatedNodes = nodes.map((node) => {
-      // Update target node and any nodes below it
       if (node.position.y >= targetNode.position.y) {
         return {
           ...node,
           position: {
-            x: CENTER_X - (node.type === "taskCard" ? 125 : 50), // Center based on node type
+            x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
             y: node.id === targetNode.id ? newY + VERTICAL_SPACING : node.position.y + VERTICAL_SPACING,
           },
         };
       }
-      // Center align any nodes above the target
       return {
         ...node,
         position: {
-          x: CENTER_X - (node.type === "taskCard" ? 125 : 50), // Center based on node type
+          x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
           y: node.position.y,
         },
       };
     });
 
-    // Remove the original edge
     setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
 
-    // Add two new edges with consistent styling
     const newEdges: Edge[] = [
       {
         id: `e-${selectedEdge.source}-${newNode.id}`,
@@ -317,6 +355,7 @@ export const WorkflowCanvas = () => {
           edges={edges}
           onConnect={onConnect}
           onEdgeClick={onEdgeClick}
+          onNodeDragStop={onNodeDragStop}
           nodeTypes={nodeTypes}
           fitView
           className="bg-canvas"

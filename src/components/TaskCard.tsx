@@ -2,7 +2,7 @@
 import { memo } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow } from "lucide-react";
-import { User, Bell, ArrowRight, Eye } from "lucide-react";
+import { User, Bell, ArrowRight, Eye, GripVertical } from "lucide-react";
 
 interface TaskCardProps {
   data: {
@@ -36,6 +36,9 @@ const TaskCard = memo(({ data }: TaskCardProps) => {
             className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
             maxLength={50}
           />
+          <div className="drag-handle cursor-move p-2 hover:bg-gray-50 rounded-lg transition-colors">
+            <GripVertical className="w-4 h-4 text-gray-400" />
+          </div>
         </div>
 
         {data.tags && data.tags.length > 0 && (
