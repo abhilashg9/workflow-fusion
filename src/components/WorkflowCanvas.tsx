@@ -58,6 +58,39 @@ const nodeTypes = {
   taskCard: TaskCard,
 };
 
+const taskTypes = [
+  {
+    icon: FilePlus2,
+    title: "Create Task",
+    subtitle: "Add a create task and assign creators",
+    type: "create" as const,
+  },
+  {
+    icon: UserCheck,
+    title: "Approval Task",
+    subtitle: "Add an approval task and configure",
+    type: "approval" as const,
+  },
+  {
+    icon: Workflow,
+    title: "Integration Task",
+    subtitle: "Add an integration task and configure the APIs",
+    type: "integration" as const,
+  },
+  {
+    icon: GitBranch,
+    title: "Split Branch",
+    subtitle: "Split the workflow into branches with conditions",
+    type: "split" as const,
+  },
+  {
+    icon: ArrowRightLeft,
+    title: "Parallel Branch",
+    subtitle: "Add tasks in parallel that will occur simultaneously",
+    type: "parallel" as const,
+  },
+];
+
 const initialNodes: CustomNode[] = [
   {
     id: "start",
