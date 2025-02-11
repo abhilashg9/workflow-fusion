@@ -1,3 +1,4 @@
+
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, HelpCircle } from "lucide-react";
@@ -483,7 +484,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
           <div className="flex-1 overflow-y-auto">
             <div className="p-4">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="w-full justify-start">
+                <TabsList className="w-full justify-start sticky top-0 z-10 bg-white">
                   {!isIntegrationTask && (
                     <TabsTrigger value="assignment">Assignment</TabsTrigger>
                   )}
@@ -652,10 +653,10 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
                   <>
                     <TabsContent value="actions" className="space-y-4">
                       <div className="space-y-2">
-                        <div className="grid grid-cols-3 gap-4 px-4 py-3 bg-gray-50 rounded-t-lg text-sm font-medium text-gray-600">
-                          <div className="text-center">Action</div>
+                        <div className="grid grid-cols-3 gap-4 px-4 py-3 bg-gray-50 rounded-t-lg text-sm font-medium text-gray-600 sticky top-[45px] z-10">
+                          <div>Action</div>
                           <div className="text-center">Label</div>
-                          <div className="text-center">Enable</div>
+                          <div className="text-right pr-2">Enable</div>
                         </div>
                         <div className="space-y-2">
                           {actions.map((action, index) => (
@@ -736,3 +737,4 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete }: TaskCardProps) => {
 TaskCard.displayName = "TaskCard";
 
 export default TaskCard;
+
