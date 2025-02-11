@@ -254,11 +254,6 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
             <X className="h-4 w-4" />
           </Button>
         )}
-        {data.sequenceNumber > 0 && (
-          <div className="absolute -top-3 right-4 bg-primary text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm">
-            Step {data.sequenceNumber}
-          </div>
-        )}
         <div className="space-y-4">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
@@ -270,8 +265,13 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                 className="w-full text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
                 maxLength={50}
               />
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 flex items-center gap-2">
                 {assignment.type}
+                {data.sequenceNumber > 0 && (
+                  <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
+                    Step {data.sequenceNumber}
+                  </span>
+                )}
               </div>
             </div>
           </div>
