@@ -260,7 +260,6 @@ export const WorkflowCanvas = () => {
 
   const onNodeDragStop = (_: React.MouseEvent, node: Node) => {
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const draggedNodeIndex = sortedNodes.findIndex(n => n.id === node.id);
     const VERTICAL_SPACING = 250;
     const START_Y = 150;
     const CENTER_X = 250;
@@ -424,7 +423,7 @@ export const WorkflowCanvas = () => {
           onConnect={onConnect}
           onEdgeClick={onEdgeClick}
           onNodeDragStop={onNodeDragStop}
-          nodeTypes={{ taskCard: TaskCard }}
+          nodeTypes={nodeTypes}
           fitView
           className="bg-canvas"
           defaultEdgeOptions={{
@@ -471,3 +470,4 @@ export const WorkflowCanvas = () => {
     </>
   );
 };
+
