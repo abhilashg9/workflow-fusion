@@ -13,10 +13,19 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
+import TaskCard from "./TaskCard";
 
-const TaskOption = ({ icon: Icon, title, subtitle }: { icon: any, title: string, subtitle: string }) => (
-  <div className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+const TaskOption = ({ icon: Icon, title, subtitle, onClick }: { 
+  icon: any, 
+  title: string, 
+  subtitle: string,
+  onClick: () => void 
+}) => (
+  <div 
+    className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+    onClick={onClick}
+  >
     <div className="p-2 rounded-lg bg-primary/10">
       <Icon className="w-6 h-6 text-primary" />
     </div>
@@ -27,31 +36,40 @@ const TaskOption = ({ icon: Icon, title, subtitle }: { icon: any, title: string,
   </div>
 );
 
+const nodeTypes = {
+  taskCard: TaskCard,
+};
+
 const taskTypes = [
   {
     icon: FilePlus2,
     title: "Create Task",
     subtitle: "Add a create task and assign creators",
+    type: "create" as const,
   },
   {
     icon: UserCheck,
     title: "Approval Task",
     subtitle: "Add an approval task and configure",
+    type: "approval" as const,
   },
   {
     icon: Workflow,
     title: "Integration Task",
     subtitle: "Add an integration task and configure the APIs",
+    type: "integration" as const,
   },
   {
     icon: GitBranch,
     title: "Split Branch",
     subtitle: "Split the workflow into branches with conditions",
+    type: "split" as const,
   },
   {
     icon: ArrowRightLeft,
     title: "Parallel Branch",
     subtitle: "Add tasks in parallel that will occur simultaneously",
+    type: "parallel" as const,
   },
 ];
 
@@ -161,6 +179,96 @@ export const WorkflowCanvas = () => {
     setIsModalOpen(true);
   };
 
+  const handleTaskSelection = (type: "create" | "approval" | "integration") => {
+    if (!selectedEdge) return;
+
+    const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
+    const targetNode = nodes.find((n) => n.id === selectedEdge.target);
+    
+    if (!sourceNode || !targetNode) return;
+
+    // Calculate position between source and target nodes
+    const newX = (sourceNode.position.x + targetNode.position.x) / 2;
+    const newY = (sourceNode.position.y + targetNode.position.y) / 2;
+
+    // Create new task node
+    const newNode: Node = {
+      id: `task-${Date.now()}`,
+      type: "taskCard",
+      position: { x: newX, y: newY },
+      data: {
+        type,
+        label: `New ${type} task`,
+        tags: type === "integration" 
+          ? ["API Name"]
+          : ["Role 1", "Role 2"],
+      },
+    };
+
+    // Remove the original edge
+    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
+
+    // Add two new edges
+    const newEdges: Edge[] = [
+      {
+        id: `e-${selectedEdge.source}-${newNode.id}`,
+        source: selectedEdge.source,
+        target: newNode.id,
+        type: "smoothstep",
+        animated: true,
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: "#2563EB",
+        },
+        label: "+",
+        labelStyle: { 
+          fill: "white",
+          fontWeight: "bold",
+          fontSize: "16px",
+          opacity: 0,
+        },
+        labelBgStyle: { 
+          fill: "#2563EB",
+          borderRadius: "12px",
+          width: 24,
+          height: 24,
+          opacity: 0,
+        },
+        className: "workflow-edge",
+      },
+      {
+        id: `e-${newNode.id}-${selectedEdge.target}`,
+        source: newNode.id,
+        target: selectedEdge.target,
+        type: "smoothstep",
+        animated: true,
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: "#2563EB",
+        },
+        label: "+",
+        labelStyle: { 
+          fill: "white",
+          fontWeight: "bold",
+          fontSize: "16px",
+          opacity: 0,
+        },
+        labelBgStyle: { 
+          fill: "#2563EB",
+          borderRadius: "12px",
+          width: 24,
+          height: 24,
+          opacity: 0,
+        },
+        className: "workflow-edge",
+      },
+    ];
+
+    setNodes((nds) => [...nds, newNode]);
+    setEdges((eds) => [...eds, ...newEdges]);
+    setIsModalOpen(false);
+  };
+
   return (
     <>
       <div className="flex-1 bg-canvas">
@@ -185,6 +293,7 @@ export const WorkflowCanvas = () => {
           edges={edges}
           onConnect={onConnect}
           onEdgeClick={onEdgeClick}
+          nodeTypes={nodeTypes}
           fitView
           className="bg-canvas"
           defaultEdgeOptions={{
@@ -236,6 +345,11 @@ export const WorkflowCanvas = () => {
                 icon={task.icon}
                 title={task.title}
                 subtitle={task.subtitle}
+                onClick={() => {
+                  if (task.type === "create" || task.type === "approval" || task.type === "integration") {
+                    handleTaskSelection(task.type);
+                  }
+                }}
               />
             ))}
           </div>
