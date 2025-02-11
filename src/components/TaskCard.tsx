@@ -1,3 +1,4 @@
+
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow } from "lucide-react";
@@ -186,6 +187,46 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
     }
   };
 
+  const renderAssignmentTags = () => {
+    switch (assignment.type) {
+      case "roles":
+        return (
+          <>
+            {assignment.roles?.map((role) => (
+              <Badge key={role} variant="secondary" className="text-xs">
+                {role}
+              </Badge>
+            ))}
+            {assignment.filters?.map((filter) => (
+              <Badge key={filter} variant="outline" className="text-xs">
+                {filter}
+              </Badge>
+            ))}
+          </>
+        );
+      case "users":
+        return assignment.users?.map((user) => (
+          <Badge key={user} variant="secondary" className="text-xs">
+            {user}
+          </Badge>
+        ));
+      case "dynamic_users":
+        return assignment.dynamicUsers?.map((user) => (
+          <Badge key={user} variant="secondary" className="text-xs">
+            {user}
+          </Badge>
+        ));
+      case "supplier":
+        return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
+      case "manager":
+        return <Badge variant="secondary" className="text-xs">Manager</Badge>;
+      case "manager_hierarchy":
+        return <Badge variant="secondary" className="text-xs">Manager Hierarchy</Badge>;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 min-w-[250px]">
@@ -205,18 +246,9 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
             </div>
           </div>
 
-          {data.tags && data.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {data.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-2 py-1 bg-gray-50 text-gray-600 text-sm rounded"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {renderAssignmentTags()}
+          </div>
 
           <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
             <TooltipProvider>
@@ -513,3 +545,4 @@ const TaskCard = memo(({ data, setNodeData }: TaskCardProps) => {
 TaskCard.displayName = "TaskCard";
 
 export default TaskCard;
+
