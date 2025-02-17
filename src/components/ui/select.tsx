@@ -80,6 +80,10 @@ const SelectContent = React.forwardRef<
         className
       )}
       position={position}
+      onCloseAutoFocus={(event) => {
+        // Prevent the dropdown from closing after selection
+        event.preventDefault();
+      }}
       {...props}
     >
       <SelectScrollUpButton />
@@ -139,6 +143,14 @@ const SelectItem = React.forwardRef<
       "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
+    onSelect={(event) => {
+      // Prevent the default selection behavior
+      event.preventDefault();
+      // Allow the click to propagate for custom handling
+      if (props.onSelect) {
+        props.onSelect(event);
+      }
+    }}
     {...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
