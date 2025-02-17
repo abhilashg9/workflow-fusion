@@ -201,23 +201,19 @@ export const WorkflowCanvas = () => {
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
     const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
 
-    // Check if trying to add a task before an existing Create task
     const hasExistingCreateTask = sortedNodes.some(node => 
       node.type === "taskCard" && node.data.type === "create"
     );
 
     const isFirstTaskAfterStart = sourceNode.id === "start";
     
-    // Rule 1 & 2: Handle Create task positioning
     if (type === "create") {
-      // If there's already a create task, don't allow another one
       if (hasExistingCreateTask) {
         toast.error("Only one Create task is allowed in the workflow");
         setIsModalOpen(false);
         return;
       }
       
-      // If trying to add Create task not as the first task
       if (!isFirstTaskAfterStart) {
         toast.error("Create task can only be added as the first step");
         setIsModalOpen(false);
@@ -225,7 +221,6 @@ export const WorkflowCanvas = () => {
       }
     }
 
-    // Rule 3: Allow other tasks as first step if no Create task exists
     if (isFirstTaskAfterStart && hasExistingCreateTask && type !== "create") {
       toast.error("A Create task must be the first step");
       setIsModalOpen(false);
@@ -270,6 +265,7 @@ export const WorkflowCanvas = () => {
         validationErrors: validationErrors,
       },
       draggable: true,
+      className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
     };
 
     const updatedNodes = nodes.map((node): Node<TaskNodeData> => {
@@ -284,6 +280,8 @@ export const WorkflowCanvas = () => {
             }))
             .reverse();
 
+          const currentValidationErrors = validateNode(node.data);
+          
           return {
             ...node,
             position: {
@@ -294,7 +292,9 @@ export const WorkflowCanvas = () => {
               ...node.data,
               previousSteps: nodePreviousSteps,
               sequenceNumber: nodePreviousSteps.length + 2,
+              validationErrors: currentValidationErrors,
             },
+            className: currentValidationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
           };
         }
         return {
@@ -531,6 +531,60 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   };
 
+  const validateNode = (nodeData: TaskNodeData) => {
+    const errors: string[] = [];
+    
+    if (!nodeData.label || nodeData.label.trim() === '') {
+      errors.push('Task label is required');
+    }
+
+    if (nodeData.type === 'create') {
+      if (!nodeData.assignment?.type) {
+        errors.push('Role/User/Supplier selection is required');
+      }
+    }
+
+    if (nodeData.type === 'approval') {
+      if (!nodeData.assignment?.type) {
+        errors.push('Role/User/Supplier/Manager selection is required');
+      }
+      const hasEmptyActionLabel = nodeData.actions?.some(
+        action => !action.label || action.label.trim() === ''
+      );
+      if (hasEmptyActionLabel) {
+        errors.push('Accept/Reject labels cannot be empty');
+      }
+    }
+
+    if (nodeData.type === 'integration') {
+      if (!nodeData.apiConfig?.selectedApi) {
+        errors.push('API selection is required');
+      }
+    }
+
+    return errors;
+  };
+
+  const updateNodeValidation = (nodeId: string, newData: any) => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          const updatedData = { ...node.data, ...newData };
+          const validationErrors = validateNode(updatedData);
+          return {
+            ...node,
+            data: {
+              ...updatedData,
+              validationErrors,
+            },
+            className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
+          };
+        }
+        return node;
+      })
+    );
+  };
+
   return (
     <>
       <div className="flex-1 bg-canvas">
@@ -599,7 +653,6 @@ export const WorkflowCanvas = () => {
               const sourceNode = selectedEdge ? nodes.find(n => n.id === selectedEdge.source) : null;
               const isFirstTaskAfterStart = sourceNode?.id === "start";
               
-              // Disable Create task option if not the first task
               const isDisabled = (task.type === "create" && !isFirstTaskAfterStart) ||
                                (!isFirstTaskAfterStart && task.type === "create");
 

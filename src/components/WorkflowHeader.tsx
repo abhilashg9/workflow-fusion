@@ -1,4 +1,3 @@
-
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReactFlow, Node } from "@xyflow/react";
@@ -37,51 +36,15 @@ export const WorkflowHeader = () => {
     let allErrors: { nodeId: string; sequenceNumber?: number; errors: string[] }[] = [];
 
     nodes.forEach((node) => {
-      const nodeData = node.data;
-      const errors: string[] = [];
-      
-      // Common validations
-      if (!nodeData.label || nodeData.label.trim() === '') {
-        errors.push('Task label is required');
-      }
-
-      // Create task validations
-      if (nodeData.type === 'create') {
-        if (!nodeData.assignment?.type) {
-          errors.push('Role/User/Supplier selection is required');
-        }
-      }
-
-      // Approval task validations
-      if (nodeData.type === 'approval') {
-        if (!nodeData.assignment?.type) {
-          errors.push('Role/User/Supplier/Manager selection is required');
-        }
-        const hasEmptyActionLabel = nodeData.actions?.some(
-          action => !action.label || action.label.trim() === ''
-        );
-        if (hasEmptyActionLabel) {
-          errors.push('Accept/Reject labels cannot be empty');
-        }
-      }
-
-      // Integration task validations
-      if (nodeData.type === 'integration') {
-        if (!nodeData.apiConfig?.selectedApi) {
-          errors.push('API selection is required');
-        }
-      }
-
-      if (errors.length > 0) {
-        allErrors.push({ 
-          nodeId: node.id, 
-          sequenceNumber: nodeData.sequenceNumber,
-          errors 
+      if (node.type === "taskCard" && node.data.validationErrors && node.data.validationErrors.length > 0) {
+        allErrors.push({
+          nodeId: node.id,
+          sequenceNumber: node.data.sequenceNumber,
+          errors: node.data.validationErrors
         });
       }
     });
 
-    // Sort errors by sequence number
     return allErrors.sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0));
   };
 
