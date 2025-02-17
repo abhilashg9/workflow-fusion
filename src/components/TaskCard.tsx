@@ -15,7 +15,6 @@ import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
 import { ApiConfig, FailureRecourse } from "./workflow/types";
-
 const TaskCard = memo(({
   data,
   id,
@@ -33,11 +32,9 @@ const TaskCard = memo(({
   });
   const [isHovered, setIsHovered] = useState(false);
   const [actions, setActions] = useState<TaskAction[]>(data.actions || DEFAULT_ACTIONS);
-
   useEffect(() => {
     setTaskLabel(data.label);
   }, [data.label]);
-
   const getIcon = () => {
     switch (data.type) {
       case "create":
@@ -48,14 +45,11 @@ const TaskCard = memo(({
         return <Workflow className="w-5 h-5 text-[#F97316]" />;
     }
   };
-
   const isIntegrationTask = data.type === "integration";
-
   const handleActionClick = (tab: string) => {
     setActiveTab(tab);
     setIsDrawerOpen(true);
   };
-
   const handleLabelChange = (newLabel: string) => {
     setTaskLabel(newLabel);
     if (setNodeData) {
@@ -65,7 +59,6 @@ const TaskCard = memo(({
       });
     }
   };
-
   const handleAssignmentTypeChange = (type: AssignmentConfig["type"]) => {
     const newAssignment: AssignmentConfig = {
       type
@@ -85,7 +78,6 @@ const TaskCard = memo(({
     setAssignment(newAssignment);
     updateNodeData(newAssignment);
   };
-
   const updateNodeData = (newAssignment: AssignmentConfig) => {
     if (setNodeData) {
       setNodeData({
@@ -94,7 +86,6 @@ const TaskCard = memo(({
       });
     }
   };
-
   const handleRoleSelect = (role: string) => {
     if (assignment.type === "roles" && !assignment.roles?.includes(role)) {
       const newRoles = [...(assignment.roles || []), role];
@@ -108,7 +99,6 @@ const TaskCard = memo(({
       });
     }
   };
-
   const handleFilterSelect = (filter: string) => {
     if (assignment.type === "roles" && !assignment.filters?.includes(filter)) {
       const newFilters = [...(assignment.filters || []), filter];
@@ -122,7 +112,6 @@ const TaskCard = memo(({
       });
     }
   };
-
   const handleUserSelect = (user: string) => {
     if (assignment.type === "users" && !assignment.users?.includes(user)) {
       const newUsers = [...(assignment.users || []), user];
@@ -136,7 +125,6 @@ const TaskCard = memo(({
       });
     }
   };
-
   const handleDynamicUserSelect = (user: string) => {
     if (assignment.type === "dynamic_users" && !assignment.dynamicUsers?.includes(user)) {
       const newUsers = [...(assignment.dynamicUsers || []), user];
@@ -150,7 +138,6 @@ const TaskCard = memo(({
       });
     }
   };
-
   const removeItem = (type: string, item: string) => {
     let newAssignment = {
       ...assignment
@@ -172,7 +159,6 @@ const TaskCard = memo(({
     setAssignment(newAssignment);
     updateNodeData(newAssignment);
   };
-
   const handleActionToggle = (actionIndex: number, enabled: boolean) => {
     const newActions = [...actions];
     newActions[actionIndex] = {
@@ -187,7 +173,6 @@ const TaskCard = memo(({
       });
     }
   };
-
   const handleActionLabelChange = (actionIndex: number, newLabel: string) => {
     const newActions = [...actions];
     newActions[actionIndex] = {
@@ -202,7 +187,6 @@ const TaskCard = memo(({
       });
     }
   };
-
   const handleSendBackStepChange = (stepId: string) => {
     const newActions = [...actions];
     const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
@@ -222,35 +206,23 @@ const TaskCard = memo(({
       }
     }
   };
-
   const handleDeleteTask = () => {
     if (onDelete) {
       onDelete(id);
     }
     setIsDrawerOpen(false);
   };
-
   const renderAssignmentTags = () => {
     const renderAbbreviatedList = (items: string[] | undefined, type: 'roles' | 'filters') => {
       const Icon = type === 'roles' ? Users : Filter;
-      const placeholderText = data.type === "create" ? 
-        "Selected users & roles will appear here" : 
-        type === 'roles' ? "Selected users, roles & filters will appear here" : "Selected dimensions will appear here";
-      
-      return (
-        <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
+      const placeholderText = data.type === "create" ? "Selected users & roles will appear here" : type === 'roles' ? "Selected users, roles & filters will appear here" : "Selected dimensions will appear here";
+      return <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
           <Icon className="w-4 h-4" />
-          {!items?.length ? (
-            <span className="italic">{placeholderText}</span>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {items.slice(0, 2).map(item => (
-                <Badge key={item} variant={type === 'roles' ? "secondary" : "outline"} className="text-xs">
+          {!items?.length ? <span className="italic">{placeholderText}</span> : <div className="flex flex-wrap gap-2">
+              {items.slice(0, 2).map(item => <Badge key={item} variant={type === 'roles' ? "secondary" : "outline"} className="text-xs">
                   {item}
-                </Badge>
-              ))}
-              {items.length > 2 && (
-                <TooltipProvider>
+                </Badge>)}
+              {items.length > 2 && <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Badge variant={type === 'roles' ? "secondary" : "outline"} className="text-xs cursor-help">
@@ -259,61 +231,36 @@ const TaskCard = memo(({
                     </TooltipTrigger>
                     <TooltipContent className="p-2">
                       <div className="space-y-1">
-                        {items.slice(2).map(item => (
-                          <div key={item} className="text-xs">{item}</div>
-                        ))}
+                        {items.slice(2).map(item => <div key={item} className="text-xs">{item}</div>)}
                       </div>
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
-          )}
-        </div>
-      );
+                </TooltipProvider>}
+            </div>}
+        </div>;
     };
-
     if (data.type === "integration") {
-      return (
-        <div className="space-y-2">
+      return <div className="space-y-2">
           <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
             <Server className="w-4 h-4" />
-            {!data.apiConfig?.selectedApi ? (
-              <span className="italic">Selected API will show here</span>
-            ) : (
-              <Badge variant="secondary" className="text-xs">
+            {!data.apiConfig?.selectedApi ? <span className="italic">Selected API will show here</span> : <Badge variant="secondary" className="text-xs">
                 {data.apiConfig.selectedApi.name}
-              </Badge>
-            )}
+              </Badge>}
           </div>
           <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
             <ShieldAlert className="w-4 h-4" />
-            {!data.apiConfig?.failureRecourse ? (
-              <span className="italic">Selected fallback option will be shown</span>
-            ) : (
-              <Badge variant="outline" className="text-xs">
-                {data.apiConfig.failureRecourse.type === "sendBack" ? (
-                  `Step ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.sequenceNumber}: ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.label}`
-                ) : (
-                  `Assign to ${data.apiConfig.failureRecourse.assignee?.type === 'user' ? 'User' : 'Role'}`
-                )}
-              </Badge>
-            )}
+            {!data.apiConfig?.failureRecourse ? <span className="italic">Selected fallback option will be shown</span> : <Badge variant="outline" className="text-xs">
+                {data.apiConfig.failureRecourse.type === "sendBack" ? `Step ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.sequenceNumber}: ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.label}` : `Assign to ${data.apiConfig.failureRecourse.assignee?.type === 'user' ? 'User' : 'Role'}`}
+              </Badge>}
           </div>
-        </div>
-      );
+        </div>;
     }
-
     switch (assignment.type) {
       case "roles":
-        return (
-          <div className="space-y-2">
+        return <div className="space-y-2">
             {renderAbbreviatedList(assignment.roles, 'roles')}
-            {!data.type || data.type !== "create" && (
-              renderAbbreviatedList(assignment.filters, 'filters')
-            )}
-          </div>
-        );
+            {!data.type || data.type !== "create" && renderAbbreviatedList(assignment.filters, 'filters')}
+          </div>;
       case "users":
         return renderAbbreviatedList(assignment.users, 'roles');
       case "dynamic_users":
@@ -328,7 +275,6 @@ const TaskCard = memo(({
         return renderAbbreviatedList([], 'roles');
     }
   };
-
   const handleApiSelect = (selectedApi: ApiConfig) => {
     if (setNodeData) {
       setNodeData({
@@ -340,7 +286,6 @@ const TaskCard = memo(({
       });
     }
   };
-
   const handleFailureRecourseChange = (failureRecourse: FailureRecourse) => {
     if (setNodeData) {
       setNodeData({
@@ -352,99 +297,60 @@ const TaskCard = memo(({
       });
     }
   };
-
-  return (
-    <>
-      <div className={cn(
-        "bg-white rounded-lg shadow-lg border border-gray-100 p-5 w-[400px] relative group transition-all duration-200 hover:shadow-xl",
-        data.type === "create" ? "h-[175px]" : "h-[225px]"
-      )}>
-        <Handle 
-          type="target" 
-          position={Position.Top} 
-          className="!bg-primary !w-3 !h-3 !border-2 !border-white" 
-        />
-        {isHovered && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive/90 hover:bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md" 
-            onClick={handleDeleteTask}
-          >
+  return <>
+      <div className="px-[12px] py-[12px]">
+        <Handle type="target" position={Position.Top} />
+        {isHovered && <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleDeleteTask}>
             <X className="h-4 w-4" />
-          </Button>
-        )}
-        <div className="space-y-5">
-          <div className="flex items-start gap-4">
-            <div className="p-2.5 rounded-lg bg-gray-50/80 shadow-sm ring-1 ring-gray-100">
-              {getIcon()}
-            </div>
+          </Button>}
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
             <div className="flex-1 space-y-1">
-              <div className="flex items-center justify-between gap-3">
-                <input 
-                  type="text" 
-                  value={taskLabel} 
-                  onChange={e => handleLabelChange(e.target.value)} 
-                  className="flex-1 text-lg font-medium outline-none border-none focus:ring-2 focus:ring-primary/20 rounded-md px-2 py-0.5 transition-all" 
-                  maxLength={50} 
-                />
-                {data.sequenceNumber > 0 && (
-                  <span className="text-xs bg-primary/90 text-white px-2.5 py-1 rounded-full shrink-0 font-medium shadow-sm">
+              <div className="flex items-center justify-between gap-2">
+                <input type="text" value={taskLabel} onChange={e => handleLabelChange(e.target.value)} className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1" maxLength={50} />
+                {data.sequenceNumber > 0 && <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full shrink-0">
                     Step {data.sequenceNumber}
-                  </span>
-                )}
+                  </span>}
               </div>
             </div>
           </div>
 
-          <div className="space-y-3 bg-gray-50/50 p-4 rounded-lg border border-gray-100/50">
+          <div className="space-y-3 bg-gray-50/50 p-3 rounded-lg py-0 px-0">
             {renderAssignmentTags()}
           </div>
 
           <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
             <TooltipProvider>
-              {!isIntegrationTask && (
-                <Tooltip>
+              {!isIntegrationTask && <Tooltip>
                   <TooltipTrigger asChild>
-                    <button 
-                      className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" 
-                      onClick={() => handleActionClick("assignment")}
-                    >
+                    <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("assignment")}>
                       <User className="w-4 h-4 text-gray-600 mb-1" />
-                      <span className="text-xs text-gray-600 font-medium">Assignment</span>
+                      <span className="text-xs text-gray-600">Assignment</span>
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Assignment</p>
                   </TooltipContent>
-                </Tooltip>
-              )}
+                </Tooltip>}
 
-              {isIntegrationTask && (
-                <Tooltip>
+              {isIntegrationTask && <Tooltip>
                   <TooltipTrigger asChild>
-                    <button 
-                      className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" 
-                      onClick={() => handleActionClick("api-config")}
-                    >
+                    <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("api-config")}>
                       <Server className="w-4 h-4 text-gray-600 mb-1" />
-                      <span className="text-xs text-gray-600 font-medium">API Config</span>
+                      <span className="text-xs text-gray-600">API Config</span>
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>API Config</p>
                   </TooltipContent>
-                </Tooltip>
-              )}
+                </Tooltip>}
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button 
-                    className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" 
-                    onClick={() => handleActionClick("notifications")}
-                  >
+                  <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("notifications")}>
                     <Bell className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600 font-medium">Notifications</span>
+                    <span className="text-xs text-gray-600">Notifications</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -454,16 +360,9 @@ const TaskCard = memo(({
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button 
-                    className={cn(
-                      "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
-                      isIntegrationTask && "opacity-50 cursor-not-allowed"
-                    )} 
-                    disabled={isIntegrationTask} 
-                    onClick={() => !isIntegrationTask && handleActionClick("actions")}
-                  >
+                  <button className={cn("flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors", isIntegrationTask && "opacity-50 cursor-not-allowed")} disabled={isIntegrationTask} onClick={() => !isIntegrationTask && handleActionClick("actions")}>
                     <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600 font-medium">Actions</span>
+                    <span className="text-xs text-gray-600">Actions</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -473,16 +372,9 @@ const TaskCard = memo(({
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button 
-                    className={cn(
-                      "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
-                      isIntegrationTask && "opacity-50 cursor-not-allowed"
-                    )} 
-                    disabled={isIntegrationTask} 
-                    onClick={() => !isIntegrationTask && handleActionClick("visibility")}
-                  >
+                  <button className={cn("flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors", isIntegrationTask && "opacity-50 cursor-not-allowed")} disabled={isIntegrationTask} onClick={() => !isIntegrationTask && handleActionClick("visibility")}>
                     <Eye className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600 font-medium">Visibility</span>
+                    <span className="text-xs text-gray-600">Visibility</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -492,11 +384,7 @@ const TaskCard = memo(({
             </TooltipProvider>
           </div>
         </div>
-        <Handle 
-          type="source" 
-          position={Position.Bottom} 
-          className="!bg-primary !w-3 !h-3 !border-2 !border-white" 
-        />
+        <Handle type="source" position={Position.Bottom} />
       </div>
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -504,9 +392,7 @@ const TaskCard = memo(({
           <DrawerHeader className="border-b border-gray-100 shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-lg bg-gray-50/80 shadow-sm ring-1 ring-gray-100">
-                  {getIcon()}
-                </div>
+                <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
                 <Input value={taskLabel} onChange={e => handleLabelChange(e.target.value)} className="flex-1 text-lg font-medium h-auto py-1" maxLength={50} />
               </div>
               <Button variant="ghost" size="icon" onClick={() => setIsDrawerOpen(false)} className="h-8 w-8">
@@ -527,20 +413,9 @@ const TaskCard = memo(({
                     </>}
                 </TabsList>
 
-                {!isIntegrationTask && (
-                  <TabsContent value="assignment">
-                    <TaskCardAssignment
-                      assignment={assignment}
-                      onAssignmentTypeChange={handleAssignmentTypeChange}
-                      onRoleSelect={handleRoleSelect}
-                      onFilterSelect={handleFilterSelect}
-                      onUserSelect={handleUserSelect}
-                      onDynamicUserSelect={handleDynamicUserSelect}
-                      onRemoveItem={removeItem}
-                      taskType={data.type}
-                    />
-                  </TabsContent>
-                )}
+                {!isIntegrationTask && <TabsContent value="assignment">
+                    <TaskCardAssignment assignment={assignment} onAssignmentTypeChange={handleAssignmentTypeChange} onRoleSelect={handleRoleSelect} onFilterSelect={handleFilterSelect} onUserSelect={handleUserSelect} onDynamicUserSelect={handleDynamicUserSelect} onRemoveItem={removeItem} taskType={data.type} />
+                  </TabsContent>}
 
                 {isIntegrationTask && <TabsContent value="api-config">
                     <TaskCardApiConfig selectedApi={data.apiConfig?.selectedApi} failureRecourse={data.apiConfig?.failureRecourse} previousSteps={previousSteps} onApiSelect={handleApiSelect} onFailureRecourseChange={handleFailureRecourseChange} />
@@ -569,10 +444,7 @@ const TaskCard = memo(({
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-    </>
-  );
+    </>;
 });
-
 TaskCard.displayName = "TaskCard";
-
 export default TaskCard;
