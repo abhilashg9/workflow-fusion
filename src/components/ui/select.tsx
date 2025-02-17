@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"
@@ -89,6 +90,25 @@ const SelectContent = React.forwardRef<
             "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
         )}
       >
+        <div className="sticky top-0 bg-popover px-2 py-2 border-b">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-ring"
+            onChange={(e) => {
+              const input = e.target.value.toLowerCase();
+              const items = document.querySelectorAll('[role="option"]');
+              items.forEach((item) => {
+                const text = item.textContent?.toLowerCase() || '';
+                if (text.includes(input)) {
+                  item.classList.remove('hidden');
+                } else {
+                  item.classList.add('hidden');
+                }
+              });
+            }}
+          />
+        </div>
         {children}
       </SelectPrimitive.Viewport>
       <SelectScrollDownButton />

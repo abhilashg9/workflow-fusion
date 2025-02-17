@@ -34,6 +34,31 @@ export const TaskCardAssignment = ({
 }: TaskCardAssignmentProps) => {
   const isCreateTask = taskType === "create";
 
+  const handleSelect = (type: 'role' | 'filter' | 'user' | 'dynamicUser', value: string) => {
+    switch(type) {
+      case 'role':
+        if (!assignment.roles?.includes(value)) {
+          onRoleSelect(value);
+        }
+        break;
+      case 'filter':
+        if (!assignment.filters?.includes(value)) {
+          onFilterSelect(value);
+        }
+        break;
+      case 'user':
+        if (!assignment.users?.includes(value)) {
+          onUserSelect(value);
+        }
+        break;
+      case 'dynamicUser':
+        if (!assignment.dynamicUsers?.includes(value)) {
+          onDynamicUserSelect(value);
+        }
+        break;
+    }
+  };
+
   const renderAssignmentTypeDescription = (type: AssignmentConfig["type"]) => {
     switch (type) {
       case "roles":
@@ -161,13 +186,17 @@ export const TaskCardAssignment = ({
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <Select onValueChange={onRoleSelect}>
+            <Select onValueChange={(value) => handleSelect('role', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Add roles" />
               </SelectTrigger>
               <SelectContent>
                 {ROLES_OPTIONS.map((role) => (
-                  <SelectItem key={role} value={role}>
+                  <SelectItem 
+                    key={role} 
+                    value={role}
+                    disabled={assignment.roles?.includes(role)}
+                  >
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4" />
                       <span>{role}</span>
@@ -210,13 +239,17 @@ export const TaskCardAssignment = ({
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <Select onValueChange={onFilterSelect}>
+              <Select onValueChange={(value) => handleSelect('filter', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Add filters" />
                 </SelectTrigger>
                 <SelectContent>
                   {FILTERS_OPTIONS.map((filter) => (
-                    <SelectItem key={filter} value={filter}>
+                    <SelectItem 
+                      key={filter} 
+                      value={filter}
+                      disabled={assignment.filters?.includes(filter)}
+                    >
                       <div className="flex items-center gap-2">
                         <Filter className="w-4 h-4" />
                         <span>{filter}</span>
@@ -262,13 +295,17 @@ export const TaskCardAssignment = ({
               </Tooltip>
             </TooltipProvider>
           </div>
-          <Select onValueChange={onUserSelect}>
+          <Select onValueChange={(value) => handleSelect('user', value)}>
             <SelectTrigger>
               <SelectValue placeholder="Add users" />
             </SelectTrigger>
             <SelectContent>
               {USERS_OPTIONS.map((user) => (
-                <SelectItem key={user} value={user}>
+                <SelectItem 
+                  key={user} 
+                  value={user}
+                  disabled={assignment.users?.includes(user)}
+                >
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4" />
                     <span>{user}</span>
@@ -312,7 +349,7 @@ export const TaskCardAssignment = ({
               </Tooltip>
             </TooltipProvider>
           </div>
-          <Select onValueChange={onDynamicUserSelect}>
+          <Select onValueChange={(value) => handleSelect('dynamicUser', value)}>
             <SelectTrigger>
               <SelectValue placeholder="Add dynamic users" />
             </SelectTrigger>
