@@ -16,6 +16,7 @@ import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucid
 import { toast } from "sonner";
 import TaskCard from "./TaskCard";
 import { TaskNodeData, TaskType, PreviousStep } from "./workflow/types";
+import { AuxiliaryWorkflowsDialog } from "./workflow/AuxiliaryWorkflowsDialog";
 
 const VERTICAL_SPACING = 250;
 const START_Y = 150;
@@ -155,6 +156,7 @@ export const WorkflowCanvas = () => {
   const [edges, setEdges] = useState(initialEdges);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
+  const [isAuxiliaryWorkflowsOpen, setIsAuxiliaryWorkflowsOpen] = useState(false);
   const { fitView } = useReactFlow();
 
   const adjustViewport = useCallback(() => {
@@ -574,6 +576,11 @@ export const WorkflowCanvas = () => {
     setIsModalOpen(false);
   };
 
+  const handleAuxiliaryWorkflowSelect = useCallback((workflowId: string) => {
+    console.log("Selected auxiliary workflow:", workflowId);
+    // TODO: Implement the logic to load the selected auxiliary workflow
+  }, []);
+
   return (
     <>
       <div className="flex-1 bg-canvas">
@@ -604,6 +611,15 @@ export const WorkflowCanvas = () => {
             }
           `}
         </style>
+        <div className="absolute top-4 right-4 z-10">
+          <Button
+            variant="outline"
+            className="bg-white hover:bg-gray-50"
+            onClick={() => setIsAuxiliaryWorkflowsOpen(true)}
+          >
+            <span className="text-sm font-medium">Auxiliary Workflows</span>
+          </Button>
+        </div>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -663,6 +679,12 @@ export const WorkflowCanvas = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AuxiliaryWorkflowsDialog
+        open={isAuxiliaryWorkflowsOpen}
+        onOpenChange={setIsAuxiliaryWorkflowsOpen}
+        onSelect={handleAuxiliaryWorkflowSelect}
+      />
     </>
   );
 };
