@@ -200,38 +200,65 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
   };
 
   const renderAssignmentTags = () => {
+    const renderAbbreviatedList = (items: string[], variant: "secondary" | "outline") => {
+      if (!items?.length) return null;
+      
+      const displayCount = 2;
+      const remainingCount = items.length - displayCount;
+      
+      return (
+        <>
+          {items.slice(0, displayCount).map((item) => (
+            <Badge key={item} variant={variant} className="text-xs">
+              {item}
+            </Badge>
+          ))}
+          {remainingCount > 0 && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge variant={variant} className="text-xs cursor-help">
+                    +{remainingCount}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent className="p-2">
+                  <div className="space-y-1">
+                    {items.slice(displayCount).map((item) => (
+                      <div key={item} className="text-xs">{item}</div>
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </>
+      );
+    };
+
     switch (assignment.type) {
       case "roles":
         return (
           <div className="space-y-2">
             <div className="flex flex-wrap gap-2">
-              {assignment.roles?.map((role) => (
-                <Badge key={role} variant="secondary" className="text-xs">
-                  {role}
-                </Badge>
-              ))}
+              {renderAbbreviatedList(assignment.roles || [], "secondary")}
             </div>
             <div className="flex flex-wrap gap-2">
-              {assignment.filters?.map((filter) => (
-                <Badge key={filter} variant="outline" className="text-xs">
-                  {filter}
-                </Badge>
-              ))}
+              {renderAbbreviatedList(assignment.filters || [], "outline")}
             </div>
           </div>
         );
       case "users":
-        return assignment.users?.map((user) => (
-          <Badge key={user} variant="secondary" className="text-xs">
-            {user}
-          </Badge>
-        ));
+        return (
+          <div className="flex flex-wrap gap-2">
+            {renderAbbreviatedList(assignment.users || [], "secondary")}
+          </div>
+        );
       case "dynamic_users":
-        return assignment.dynamicUsers?.map((user) => (
-          <Badge key={user} variant="secondary" className="text-xs">
-            {user}
-          </Badge>
-        ));
+        return (
+          <div className="flex flex-wrap gap-2">
+            {renderAbbreviatedList(assignment.dynamicUsers || [], "secondary")}
+          </div>
+        );
       case "supplier":
         return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
       case "manager":
@@ -270,7 +297,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
   return (
     <>
       <div 
-        className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 min-w-[250px] relative group"
+        className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[250px] h-[180px] relative group"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -285,7 +312,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
             <X className="h-4 w-4" />
           </Button>
         )}
-        <div className="space-y-4">
+        <div className="space-y-4 h-full">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
             <div className="flex-1 space-y-1">
