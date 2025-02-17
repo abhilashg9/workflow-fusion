@@ -15,29 +15,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
 import TaskCard from "./TaskCard";
-import { TaskNodeData, TaskType } from "./workflow/types";
+import { TaskNodeData, TaskType, PreviousStep } from "./workflow/types";
 
 const VERTICAL_SPACING = 250;
 const START_Y = 150;
 const CENTER_X = 250;
-
-interface PreviousStep {
-  id: string;
-  label: string;
-  sequenceNumber: number;
-}
-
-interface TaskNodeData extends Record<string, unknown> {
-  type?: "create" | "approval" | "integration";
-  label: string;
-  tags?: string[];
-  previousSteps?: PreviousStep[];
-  sequenceNumber?: number;
-  onDelete?: (id: string) => void;
-  validationErrors?: string[];
-}
-
-type TaskType = "create" | "approval" | "integration";
 
 interface TaskOptionProps {
   icon: React.ElementType;
