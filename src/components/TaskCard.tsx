@@ -1,4 +1,3 @@
-
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, Users } from "lucide-react";
@@ -271,6 +270,30 @@ const TaskCard = memo(({
         return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
       default:
         return null;
+    }
+  };
+
+  const handleApiSelect = (api: any) => {
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        apiConfig: {
+          ...data.apiConfig,
+          selectedApi: api
+        }
+      });
+    }
+  };
+
+  const handleFailureRecourseChange = (recourse: any) => {
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        apiConfig: {
+          ...data.apiConfig,
+          failureRecourse: recourse
+        }
+      });
     }
   };
 
