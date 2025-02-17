@@ -1,4 +1,3 @@
-
 import {
   Select,
   SelectContent,
@@ -52,8 +51,8 @@ export const TaskCardAssignment = ({
   const isApprovalTask = taskType === "approval";
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value === "" ? undefined : parseInt(e.target.value);
-    if (onValueChange && (newValue === undefined || newValue >= 0)) {
+    const newValue = e.target.value === "" ? undefined : Number(e.target.value);
+    if (onValueChange && (newValue === undefined || !isNaN(newValue)) && newValue >= 0) {
       onValueChange(newValue);
     }
   };
@@ -327,7 +326,7 @@ export const TaskCardAssignment = ({
                 </div>
               </div>
 
-              {isApprovalTask && (
+              {isApprovalTask && assignment.type === "roles" && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b">
                     <DollarSign className="w-4 h-4 text-green-500" />
@@ -350,10 +349,13 @@ export const TaskCardAssignment = ({
                     <Input
                       type="number"
                       min="0"
+                      step="0.01"
                       value={assignment.value || ""}
                       onChange={handleValueChange}
                       placeholder="Enter amount threshold"
                       className="flex-1"
+                      inputMode="decimal"
+                      aria-label="Amount threshold"
                     />
                   </div>
                   <p className="text-sm text-gray-500 flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-100">
