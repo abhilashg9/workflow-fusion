@@ -1,7 +1,7 @@
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, Users, Filter } from "lucide-react";
-import { User, Bell, ArrowRight, Eye, Server, X, Trash2 } from "lucide-react";
+import { User, Bell, ArrowRight, Eye, Server, ShieldAlert, X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
 import { ApiConfig, FailureRecourse } from "./workflow/types";
+
 const TaskCard = memo(({
   data,
   id,
@@ -32,9 +33,11 @@ const TaskCard = memo(({
   });
   const [isHovered, setIsHovered] = useState(false);
   const [actions, setActions] = useState<TaskAction[]>(data.actions || DEFAULT_ACTIONS);
+
   useEffect(() => {
     setTaskLabel(data.label);
   }, [data.label]);
+
   const getIcon = () => {
     switch (data.type) {
       case "create":
@@ -45,11 +48,14 @@ const TaskCard = memo(({
         return <Workflow className="w-5 h-5 text-[#F97316]" />;
     }
   };
+
   const isIntegrationTask = data.type === "integration";
+
   const handleActionClick = (tab: string) => {
     setActiveTab(tab);
     setIsDrawerOpen(true);
   };
+
   const handleLabelChange = (newLabel: string) => {
     setTaskLabel(newLabel);
     if (setNodeData) {
@@ -59,6 +65,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleAssignmentTypeChange = (type: AssignmentConfig["type"]) => {
     const newAssignment: AssignmentConfig = {
       type
@@ -78,6 +85,7 @@ const TaskCard = memo(({
     setAssignment(newAssignment);
     updateNodeData(newAssignment);
   };
+
   const updateNodeData = (newAssignment: AssignmentConfig) => {
     if (setNodeData) {
       setNodeData({
@@ -86,6 +94,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleRoleSelect = (role: string) => {
     if (assignment.type === "roles" && !assignment.roles?.includes(role)) {
       const newRoles = [...(assignment.roles || []), role];
@@ -99,6 +108,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleFilterSelect = (filter: string) => {
     if (assignment.type === "roles" && !assignment.filters?.includes(filter)) {
       const newFilters = [...(assignment.filters || []), filter];
@@ -112,6 +122,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleUserSelect = (user: string) => {
     if (assignment.type === "users" && !assignment.users?.includes(user)) {
       const newUsers = [...(assignment.users || []), user];
@@ -125,6 +136,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleDynamicUserSelect = (user: string) => {
     if (assignment.type === "dynamic_users" && !assignment.dynamicUsers?.includes(user)) {
       const newUsers = [...(assignment.dynamicUsers || []), user];
@@ -138,6 +150,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const removeItem = (type: string, item: string) => {
     let newAssignment = {
       ...assignment
@@ -159,6 +172,7 @@ const TaskCard = memo(({
     setAssignment(newAssignment);
     updateNodeData(newAssignment);
   };
+
   const handleActionToggle = (actionIndex: number, enabled: boolean) => {
     const newActions = [...actions];
     newActions[actionIndex] = {
@@ -173,6 +187,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleActionLabelChange = (actionIndex: number, newLabel: string) => {
     const newActions = [...actions];
     newActions[actionIndex] = {
@@ -187,6 +202,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleSendBackStepChange = (stepId: string) => {
     const newActions = [...actions];
     const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
@@ -206,12 +222,14 @@ const TaskCard = memo(({
       }
     }
   };
+
   const handleDeleteTask = () => {
     if (onDelete) {
       onDelete(id);
     }
     setIsDrawerOpen(false);
   };
+
   const renderAssignmentTags = () => {
     const renderAbbreviatedList = (items: string[] | undefined, type: 'roles' | 'filters') => {
       const Icon = type === 'roles' ? Users : Filter;
@@ -239,12 +257,49 @@ const TaskCard = memo(({
             </div>}
         </div>;
     };
+
+    if (data.type === "integration") {
+      return (
+        <div className="space-y-2">
+          <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
+            <Server className="w-4 h-4" />
+            {!data.apiConfig?.selectedApi ? (
+              <span className="italic">Selected API will show here</span>
+            ) : (
+              <Badge variant="secondary" className="text-xs">
+                {data.apiConfig.selectedApi.name}
+              </Badge>
+            )}
+          </div>
+          <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
+            <ShieldAlert className="w-4 h-4" />
+            {!data.apiConfig?.failureRecourse ? (
+              <span className="italic">Selected fallback option will be shown</span>
+            ) : (
+              <Badge 
+                variant="outline" 
+                className="text-xs"
+              >
+                {data.apiConfig.failureRecourse.type === "sendBack" ? (
+                  `Step ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.sequenceNumber}: ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.label}`
+                ) : (
+                  `Assign to ${data.apiConfig.failureRecourse.assignee?.type === 'user' ? 'User' : 'Role'}`
+                )}
+              </Badge>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     switch (assignment.type) {
       case "roles":
-        return <div className="space-y-2">
+        return (
+          <div className="space-y-2">
             {renderAbbreviatedList(assignment.roles, 'roles')}
             {renderAbbreviatedList(assignment.filters, 'filters')}
-          </div>;
+          </div>
+        );
       case "users":
         return renderAbbreviatedList(assignment.users, 'roles');
       case "dynamic_users":
@@ -259,6 +314,7 @@ const TaskCard = memo(({
         return null;
     }
   };
+
   const handleApiSelect = (selectedApi: ApiConfig) => {
     if (setNodeData) {
       setNodeData({
@@ -270,6 +326,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleFailureRecourseChange = (failureRecourse: FailureRecourse) => {
     if (setNodeData) {
       setNodeData({
@@ -281,6 +338,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   return <>
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] h-[225px] relative group" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
         <Handle type="target" position={Position.Top} />
@@ -430,5 +488,7 @@ const TaskCard = memo(({
       </Drawer>
     </>;
 });
+
 TaskCard.displayName = "TaskCard";
+
 export default TaskCard;
