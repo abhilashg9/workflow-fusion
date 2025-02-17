@@ -19,7 +19,7 @@ export interface TaskAction {
 
 export interface TaskCardAssignmentProps {
   assignment: AssignmentConfig;
-  type: "create" | "approval" | "integration";
+  taskType: "create" | "approval" | "integration";  // Changed from 'type' to 'taskType'
   onChange: (assignment: AssignmentConfig) => void;
 }
 
@@ -32,24 +32,22 @@ export interface TaskCardActionsProps {
 }
 
 export interface TaskCardApiConfigProps {
-  apiConfig?: {
-    selectedApi?: {
-      id: string;
-      name: string;
-      type: "inbound" | "outbound";
-      endpoint: string;
-      viewUrl?: string;
-    };
-    failureRecourse?: {
-      type: "sendBack" | "assign";
-      stepId?: string;
-      assignee?: {
-        type: "user" | "role";
-        value: string;
-      };
+  selectedApi?: {
+    id: string;
+    name: string;
+    type: "inbound" | "outbound";
+    endpoint: string;
+    viewUrl?: string;
+  };
+  failureRecourse?: {
+    type: "sendBack" | "assign";
+    stepId?: string;
+    assignee?: {
+      type: "user" | "role";
+      value: string;
     };
   };
-  type: "create" | "approval" | "integration";
+  taskType: "create" | "approval" | "integration";  // Changed from 'type' to 'taskType'
   previousSteps: { id: string; label: string; sequenceNumber: number }[];
   onChange: (apiConfig: any) => void;
 }

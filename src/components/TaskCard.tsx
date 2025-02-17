@@ -112,7 +112,7 @@ export const TaskCard = ({ data, id, setNodeData, onDelete, previousSteps }: Tas
 
         <TaskCardAssignment
           assignment={initializedData.assignment}
-          type={initializedData.type}
+          taskType={initializedData.type}
           onChange={(assignment) => setNodeData?.({ ...initializedData, assignment })}
         />
 
@@ -143,8 +143,9 @@ export const TaskCard = ({ data, id, setNodeData, onDelete, previousSteps }: Tas
         />
 
         <TaskCardApiConfig
-          apiConfig={initializedData.apiConfig}
-          type={initializedData.type}
+          selectedApi={initializedData.apiConfig?.selectedApi}
+          failureRecourse={initializedData.apiConfig?.failureRecourse}
+          taskType={initializedData.type}
           previousSteps={previousSteps || []}
           onChange={(apiConfig) => setNodeData?.({ ...initializedData, apiConfig })}
         />
