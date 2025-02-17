@@ -203,7 +203,7 @@ export const WorkflowCanvas = () => {
       {
         id: defaultBranchId,
         type: "taskCard",
-        position: { x: CENTER_X - HORIZONTAL_SPACING, y: newY + VERTICAL_SPACING }, // Increased horizontal spacing
+        position: { x: CENTER_X - HORIZONTAL_SPACING + 125, y: newY + VERTICAL_SPACING },
         data: {
           type: "default",
           label: "Default Branch",
@@ -215,7 +215,7 @@ export const WorkflowCanvas = () => {
       {
         id: conditionBranchId,
         type: "taskCard",
-        position: { x: CENTER_X + HORIZONTAL_SPACING - 250, y: newY + VERTICAL_SPACING }, // Increased horizontal spacing
+        position: { x: CENTER_X + HORIZONTAL_SPACING - 375, y: newY + VERTICAL_SPACING },
         data: {
           type: "condition",
           label: "Conditions",
@@ -228,7 +228,7 @@ export const WorkflowCanvas = () => {
       {
         id: joinId,
         type: "taskCard",
-        position: { x: CENTER_X - 125, y: newY + VERTICAL_SPACING * 2 }, // Increased vertical spacing
+        position: { x: CENTER_X - 125, y: newY + VERTICAL_SPACING * 2 },
         data: {
           type: "join",
           label: "Join Branch",
@@ -244,71 +244,14 @@ export const WorkflowCanvas = () => {
       },
     ];
 
-    const newEdges: Edge[] = [
-      {
-        id: `e-${sourceNode.id}-${splitId}`,
-        source: sourceNode.id,
-        target: splitId,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#3388eb" },
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
-      },
-      {
-        id: `e-${splitId}-${defaultBranchId}`,
-        source: splitId,
-        target: defaultBranchId,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#3388eb" },
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
-      },
-      {
-        id: `e-${splitId}-${conditionBranchId}`,
-        source: splitId,
-        target: conditionBranchId,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#3388eb" },
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
-      },
-      {
-        id: `e-${defaultBranchId}-${joinId}`,
-        source: defaultBranchId,
-        target: joinId,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#3388eb" },
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
-      },
-      {
-        id: `e-${conditionBranchId}-${joinId}`,
-        source: conditionBranchId,
-        target: joinId,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#3388eb" },
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
-      },
-      {
-        id: `e-${joinId}-${targetNode.id}`,
-        source: joinId,
-        target: targetNode.id,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#3388eb" },
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
-      },
-    ];
-
-    // Update positions of subsequent nodes with increased spacing
+    // Update positions of subsequent nodes
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
         return {
           ...node,
           position: {
             x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
-            y: node.position.y + VERTICAL_SPACING * 2.5, // Increased spacing multiplier
+            y: node.position.y + VERTICAL_SPACING * 3, // Increased multiplier to ensure enough space
           },
         };
       }
