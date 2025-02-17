@@ -9,8 +9,10 @@ const Index = () => {
     <div className="flex flex-col h-screen animate-fade-in">
       <GlobalHeader />
       <ReactFlowProvider>
-        <WorkflowHeader />
-        <WorkflowCanvas />
+        <div className="flex-1 flex flex-col">
+          <WorkflowHeader />
+          <WorkflowCanvas />
+        </div>
       </ReactFlowProvider>
     </div>
   );

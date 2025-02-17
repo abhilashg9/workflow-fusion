@@ -1,7 +1,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useReactFlow } from "@xyflow/react";
+import { useReactFlow, Node } from "@xyflow/react";
 import { AlertCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -27,14 +27,14 @@ interface NodeData {
 }
 
 export const WorkflowHeader = () => {
-  const { getNodes } = useReactFlow();
+  const { getNodes } = useReactFlow<{ data: NodeData }>();
 
   const validateNodes = () => {
     const nodes = getNodes();
     let allErrors: { nodeId: string; errors: string[] }[] = [];
 
     nodes.forEach((node) => {
-      const nodeData = node.data as NodeData;
+      const nodeData = node.data;
       const errors: string[] = [];
       
       // Common validations
