@@ -19,6 +19,7 @@ interface TaskCardAssignmentProps {
   onUserSelect: (user: string) => void;
   onDynamicUserSelect: (user: string) => void;
   onRemoveItem: (type: string, item: string) => void;
+  taskType: "create" | "approval" | "integration";
 }
 
 export const TaskCardAssignment = ({
@@ -29,7 +30,10 @@ export const TaskCardAssignment = ({
   onUserSelect,
   onDynamicUserSelect,
   onRemoveItem,
+  taskType
 }: TaskCardAssignmentProps) => {
+  const isCreateTask = taskType === "create";
+
   return (
     <div className="space-y-4">
       <div>
@@ -42,12 +46,22 @@ export const TaskCardAssignment = ({
             <SelectValue placeholder="Select assignment type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="roles">Roles</SelectItem>
-            <SelectItem value="users">Users</SelectItem>
-            <SelectItem value="dynamic_users">Dynamic Users</SelectItem>
-            <SelectItem value="supplier">Supplier</SelectItem>
-            <SelectItem value="manager">Manager</SelectItem>
-            <SelectItem value="manager_hierarchy">Manager Hierarchy</SelectItem>
+            {isCreateTask ? (
+              <>
+                <SelectItem value="roles">Roles</SelectItem>
+                <SelectItem value="users">Users</SelectItem>
+                <SelectItem value="supplier">Supplier</SelectItem>
+              </>
+            ) : (
+              <>
+                <SelectItem value="roles">Roles</SelectItem>
+                <SelectItem value="users">Users</SelectItem>
+                <SelectItem value="dynamic_users">Dynamic Users</SelectItem>
+                <SelectItem value="supplier">Supplier</SelectItem>
+                <SelectItem value="manager">Manager</SelectItem>
+                <SelectItem value="manager_hierarchy">Manager Hierarchy</SelectItem>
+              </>
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -78,30 +92,32 @@ export const TaskCardAssignment = ({
               ))}
             </div>
           </div>
-          <div>
-            <label className="text-sm font-medium mb-2 block">Filters (Optional)</label>
-            <Select onValueChange={onFilterSelect}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select filters" />
-              </SelectTrigger>
-              <SelectContent>
-                {FILTERS_OPTIONS.map((filter) => (
-                  <SelectItem key={filter} value={filter}>{filter}</SelectItem>
+          {!isCreateTask && (
+            <div>
+              <label className="text-sm font-medium mb-2 block">Filters (Optional)</label>
+              <Select onValueChange={onFilterSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select filters" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FILTERS_OPTIONS.map((filter) => (
+                    <SelectItem key={filter} value={filter}>{filter}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {assignment.filters?.map((filter) => (
+                  <Badge key={filter} variant="secondary" className="gap-1">
+                    {filter}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive"
+                      onClick={() => onRemoveItem("filter", filter)}
+                    />
+                  </Badge>
                 ))}
-              </SelectContent>
-            </Select>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {assignment.filters?.map((filter) => (
-                <Badge key={filter} variant="secondary" className="gap-1">
-                  {filter}
-                  <X 
-                    className="h-3 w-3 cursor-pointer hover:text-destructive"
-                    onClick={() => onRemoveItem("filter", filter)}
-                  />
-                </Badge>
-              ))}
+              </div>
             </div>
-          </div>
+          )}
         </>
       )}
 
@@ -132,7 +148,7 @@ export const TaskCardAssignment = ({
         </div>
       )}
 
-      {assignment.type === "dynamic_users" && (
+      {assignment.type === "dynamic_users" && !isCreateTask && (
         <div>
           <label className="text-sm font-medium mb-2 block">Dynamic Users</label>
           <Select onValueChange={onDynamicUserSelect}>

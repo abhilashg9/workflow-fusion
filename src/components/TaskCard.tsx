@@ -339,7 +339,8 @@ const TaskCard = memo(({
     }
   };
 
-  return <>
+  return (
+    <>
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] h-[225px] relative group" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
         <Handle type="target" position={Position.Top} />
         {isHovered && <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleDeleteTask}>
@@ -455,9 +456,20 @@ const TaskCard = memo(({
                     </>}
                 </TabsList>
 
-                {!isIntegrationTask && <TabsContent value="assignment">
-                    <TaskCardAssignment assignment={assignment} onAssignmentTypeChange={handleAssignmentTypeChange} onRoleSelect={handleRoleSelect} onFilterSelect={handleFilterSelect} onUserSelect={handleUserSelect} onDynamicUserSelect={handleDynamicUserSelect} onRemoveItem={removeItem} />
-                  </TabsContent>}
+                {!isIntegrationTask && (
+                  <TabsContent value="assignment">
+                    <TaskCardAssignment
+                      assignment={assignment}
+                      onAssignmentTypeChange={handleAssignmentTypeChange}
+                      onRoleSelect={handleRoleSelect}
+                      onFilterSelect={handleFilterSelect}
+                      onUserSelect={handleUserSelect}
+                      onDynamicUserSelect={handleDynamicUserSelect}
+                      onRemoveItem={removeItem}
+                      taskType={data.type}
+                    />
+                  </TabsContent>
+                )}
 
                 {isIntegrationTask && <TabsContent value="api-config">
                     <TaskCardApiConfig selectedApi={data.apiConfig?.selectedApi} failureRecourse={data.apiConfig?.failureRecourse} previousSteps={previousSteps} onApiSelect={handleApiSelect} onFailureRecourseChange={handleFailureRecourseChange} />
@@ -486,7 +498,8 @@ const TaskCard = memo(({
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-    </>;
+    </>
+  );
 });
 
 TaskCard.displayName = "TaskCard";
