@@ -1,7 +1,7 @@
 
 import { Node, Edge, MarkerType } from "@xyflow/react";
 
-export type TaskType = "create" | "approval" | "integration";
+export type TaskType = "create" | "approval" | "integration" | "condition";
 
 export interface PreviousStep {
   id: string;
@@ -43,6 +43,7 @@ export interface TaskNodeData extends Record<string, unknown> {
   sequenceNumber?: number;
   onDelete?: (id: string) => void;
   validationErrors?: string[];
+  isDefault?: boolean;
   assignment?: {
     type?: 'roles' | 'users' | 'supplier' | 'manager' | 'manager_hierarchy';
     roles?: string[];
@@ -56,12 +57,6 @@ export interface TaskNodeData extends Record<string, unknown> {
 }
 
 export type CustomNode = Node<TaskNodeData>;
-
-export interface StepOption {
-  id: string;
-  label: string;
-  sequenceNumber: number;
-}
 
 export const mockApiConfigs: ApiConfig[] = [
   {
