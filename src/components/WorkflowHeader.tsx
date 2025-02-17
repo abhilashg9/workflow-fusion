@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X, AlertCircle } from "lucide-react";
-import { useReactFlow } from "@xyflow/react";
+import { useReactFlow, Node } from "@xyflow/react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface WorkflowHeaderProps {
@@ -12,11 +12,17 @@ interface WorkflowHeaderProps {
   onPublish: () => void;
 }
 
+interface NodeData {
+  validationErrors?: string[];
+  sequenceNumber?: number;
+  label?: string;
+}
+
 export const WorkflowHeader = ({ title, onTitleChange, onClose, onPublish }: WorkflowHeaderProps) => {
   const { getNodes } = useReactFlow();
   
-  const allValidationErrors = getNodes().reduce((errors, node) => {
-    if (node.data?.validationErrors?.length > 0) {
+  const allValidationErrors = getNodes().reduce((errors, node: Node<NodeData>) => {
+    if (node.data?.validationErrors && node.data.validationErrors.length > 0) {
       errors.push({
         step: node.data.sequenceNumber || 0,
         label: node.data.label || 'Unnamed Task',
@@ -59,7 +65,7 @@ export const WorkflowHeader = ({ title, onTitleChange, onClose, onPublish }: Wor
                           </p>
                           <ul className="list-disc list-inside">
                             {taskError.errors.map((error, errorIndex) => (
-                              <li key={errorIndex} className="text-xs text-gray-100">
+                              <li key={errorIndex} className="text-xs text-gray-500">
                                 {error}
                               </li>
                             ))}
