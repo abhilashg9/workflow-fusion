@@ -22,12 +22,15 @@ const HORIZONTAL_SPACING = 400;
 const START_Y = 150;
 const CENTER_X = 450;
 
-const initialNodes: Node[] = [
+const initialNodes: Node<TaskNodeData>[] = [
   {
     id: "start",
     type: "input",
     position: { x: CENTER_X - 50, y: START_Y },
-    data: { label: "Start" },
+    data: { 
+      label: "Start",
+      type: "default" as TaskType
+    },
     style: {
       background: "#2563eb",
       color: "white",
@@ -41,7 +44,10 @@ const initialNodes: Node[] = [
     id: "end",
     type: "output",
     position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
-    data: { label: "End" },
+    data: { 
+      label: "End",
+      type: "default" as TaskType
+    },
     style: {
       background: "#2563eb",
       color: "white",
@@ -123,7 +129,7 @@ const nodeTypes = {
 };
 
 export const WorkflowCanvas = () => {
-  const [nodes, setNodes] = useState<Node[]>(initialNodes);
+  const [nodes, setNodes] = useState<Node<TaskNodeData>[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
@@ -145,7 +151,7 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   }, [nodes.length, adjustViewport]);
 
-  const createSplitBranch = (sourceNode: Node, targetNode: Node) => {
+  const createSplitBranch = (sourceNode: Node<TaskNodeData>, targetNode: Node<TaskNodeData>) => {
     const newY = sourceNode.position.y + VERTICAL_SPACING;
     const sortedNodesList = [...nodes].sort((a, b) => a.position.y - b.position.y);
     const sourceNodeIndex = sortedNodesList.findIndex(n => n.id === sourceNode.id);
@@ -155,7 +161,7 @@ export const WorkflowCanvas = () => {
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
         id: node.id,
-        label: node.data.label,
+        label: node.data.label as string,
         sequenceNumber: idx + 1
       }))
       .reverse();

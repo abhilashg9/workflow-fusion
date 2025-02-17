@@ -9,6 +9,12 @@ export interface PreviousStep {
   sequenceNumber: number;
 }
 
+export interface StepOption {
+  id: string;
+  label: string;
+  sequenceNumber: number;
+}
+
 export interface Condition {
   id: string;
   name: string;
@@ -41,7 +47,7 @@ export interface TaskAction {
   };
 }
 
-export interface TaskNodeData extends Record<string, unknown> {
+export interface TaskNodeData {
   type: TaskType;
   label: string;
   tags?: string[];
