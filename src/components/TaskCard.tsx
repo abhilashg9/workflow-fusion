@@ -111,19 +111,42 @@ export const TaskCard = ({ data, id, setNodeData, onDelete, previousSteps }: Tas
         </div>
 
         <TaskCardAssignment
-          data={initializedData}
-          setNodeData={setNodeData}
+          assignment={initializedData.assignment}
+          type={initializedData.type}
+          onChange={(assignment) => setNodeData?.({ ...initializedData, assignment })}
         />
 
         <TaskCardActions
-          data={initializedData}
-          setNodeData={setNodeData}
+          actions={initializedData.actions}
+          previousSteps={previousSteps || []}
+          onActionToggle={(index, enabled) => {
+            const newActions = [...initializedData.actions];
+            newActions[index] = { ...newActions[index], enabled };
+            setNodeData?.({ ...initializedData, actions: newActions });
+          }}
+          onActionLabelChange={(index, label) => {
+            const newActions = [...initializedData.actions];
+            newActions[index] = { ...newActions[index], label };
+            setNodeData?.({ ...initializedData, actions: newActions });
+          }}
+          onSendBackStepChange={(stepId) => {
+            const newActions = [...initializedData.actions];
+            const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
+            if (sendBackIndex >= 0) {
+              newActions[sendBackIndex] = {
+                ...newActions[sendBackIndex],
+                sendBack: { step: stepId }
+              };
+              setNodeData?.({ ...initializedData, actions: newActions });
+            }
+          }}
         />
 
         <TaskCardApiConfig
-          data={initializedData}
-          setNodeData={setNodeData}
-          previousSteps={previousSteps}
+          apiConfig={initializedData.apiConfig}
+          type={initializedData.type}
+          previousSteps={previousSteps || []}
+          onChange={(apiConfig) => setNodeData?.({ ...initializedData, apiConfig })}
         />
       </div>
       <Handle type="source" position={Position.Right} id="a" />

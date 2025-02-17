@@ -17,6 +17,43 @@ export interface TaskAction {
   };
 }
 
+export interface TaskCardAssignmentProps {
+  assignment: AssignmentConfig;
+  type: "create" | "approval" | "integration";
+  onChange: (assignment: AssignmentConfig) => void;
+}
+
+export interface TaskCardActionsProps {
+  actions: TaskAction[];
+  previousSteps: { id: string; label: string; sequenceNumber: number }[];
+  onActionToggle: (index: number, enabled: boolean) => void;
+  onActionLabelChange: (index: number, label: string) => void;
+  onSendBackStepChange: (stepId: string) => void;
+}
+
+export interface TaskCardApiConfigProps {
+  apiConfig?: {
+    selectedApi?: {
+      id: string;
+      name: string;
+      type: "inbound" | "outbound";
+      endpoint: string;
+      viewUrl?: string;
+    };
+    failureRecourse?: {
+      type: "sendBack" | "assign";
+      stepId?: string;
+      assignee?: {
+        type: "user" | "role";
+        value: string;
+      };
+    };
+  };
+  type: "create" | "approval" | "integration";
+  previousSteps: { id: string; label: string; sequenceNumber: number }[];
+  onChange: (apiConfig: any) => void;
+}
+
 export interface TaskCardProps {
   data: {
     type: "create" | "approval" | "integration";
