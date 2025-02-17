@@ -400,16 +400,248 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
+    if (type === "split") {
+      const newY = sourceNode.position.y + VERTICAL_SPACING;
+      const HORIZONTAL_OFFSET = 200;
 
-    const hasExistingCreateTask = sortedNodes.some(node => 
-      node.type === "taskCard" && node.data.type === "create"
-    );
+      const mergeNode: Node = {
+        id: `merge-${Date.now()}`,
+        type: "default",
+        position: { 
+          x: CENTER_X - 50, 
+          y: newY + VERTICAL_SPACING 
+        },
+        data: { 
+          label: "Merge",
+        },
+        style: {
+          background: "#E5E7EB",
+          color: "#374151",
+          border: "none",
+          borderRadius: "4px",
+          padding: "10px 20px",
+          minWidth: "100px",
+          textAlign: "center",
+        },
+      };
 
-    const isFirstTaskAfterStart = sourceNode.id === "start";
-    
+      const leftBranch: Node = {
+        id: `branch-left-${Date.now()}`,
+        type: "default",
+        position: { 
+          x: CENTER_X - HORIZONTAL_OFFSET - 50, 
+          y: newY 
+        },
+        data: { 
+          label: "Branch A",
+        },
+        style: {
+          background: "#E5E7EB",
+          color: "#374151",
+          border: "none",
+          borderRadius: "4px",
+          padding: "10px 20px",
+          minWidth: "100px",
+          textAlign: "center",
+        },
+      };
+
+      const rightBranch: Node = {
+        id: `branch-right-${Date.now()}`,
+        type: "default",
+        position: { 
+          x: CENTER_X + HORIZONTAL_OFFSET - 50, 
+          y: newY 
+        },
+        data: { 
+          label: "Branch B",
+        },
+        style: {
+          background: "#E5E7EB",
+          color: "#374151",
+          border: "none",
+          borderRadius: "4px",
+          padding: "10px 20px",
+          minWidth: "100px",
+          textAlign: "center",
+        },
+      };
+
+      const newEdges: Edge[] = [
+        {
+          id: `e-${selectedEdge.source}-${leftBranch.id}`,
+          source: selectedEdge.source,
+          target: leftBranch.id,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+          label: "+",
+          labelStyle: { 
+            fill: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "16px",
+            opacity: 0,
+          },
+          labelBgStyle: { 
+            fill: "#2563EB",
+            opacity: 0,
+            borderRadius: "12px",
+            width: "24px",
+            height: "24px",
+          },
+          className: "workflow-edge",
+        },
+        {
+          id: `e-${selectedEdge.source}-${rightBranch.id}`,
+          source: selectedEdge.source,
+          target: rightBranch.id,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+          label: "+",
+          labelStyle: { 
+            fill: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "16px",
+            opacity: 0,
+          },
+          labelBgStyle: { 
+            fill: "#2563EB",
+            opacity: 0,
+            borderRadius: "12px",
+            width: "24px",
+            height: "24px",
+          },
+          className: "workflow-edge",
+        },
+        {
+          id: `e-${leftBranch.id}-${mergeNode.id}`,
+          source: leftBranch.id,
+          target: mergeNode.id,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+          label: "+",
+          labelStyle: { 
+            fill: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "16px",
+            opacity: 0,
+          },
+          labelBgStyle: { 
+            fill: "#2563EB",
+            opacity: 0,
+            borderRadius: "12px",
+            width: "24px",
+            height: "24px",
+          },
+          className: "workflow-edge",
+        },
+        {
+          id: `e-${rightBranch.id}-${mergeNode.id}`,
+          source: rightBranch.id,
+          target: mergeNode.id,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+          label: "+",
+          labelStyle: { 
+            fill: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "16px",
+            opacity: 0,
+          },
+          labelBgStyle: { 
+            fill: "#2563EB",
+            opacity: 0,
+            borderRadius: "12px",
+            width: "24px",
+            height: "24px",
+          },
+          className: "workflow-edge",
+        },
+        {
+          id: `e-${mergeNode.id}-${selectedEdge.target}`,
+          source: mergeNode.id,
+          target: selectedEdge.target,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+          label: "+",
+          labelStyle: { 
+            fill: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "16px",
+            opacity: 0,
+          },
+          labelBgStyle: { 
+            fill: "#2563EB",
+            opacity: 0,
+            borderRadius: "12px",
+            width: "24px",
+            height: "24px",
+          },
+          className: "workflow-edge",
+        },
+      ];
+
+      const updatedNodes = nodes.map((node) => {
+        if (node.position.y >= targetNode.position.y) {
+          return {
+            ...node,
+            position: {
+              ...node.position,
+              y: node.position.y + VERTICAL_SPACING * 2,
+            },
+          };
+        }
+        return node;
+      });
+
+      setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
+      setNodes([...updatedNodes, leftBranch, rightBranch, mergeNode]);
+      
+      setIsModalOpen(false);
+      return;
+    }
+
     if (type === "create") {
+      if (!selectedEdge) return;
+
+      const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
+      const targetNode = nodes.find((n) => n.id === selectedEdge.target);
+      
+      if (!sourceNode || !targetNode) return;
+
+      const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
+      const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
+
+      const hasExistingCreateTask = sortedNodes.some(node => 
+        node.type === "taskCard" && node.data.type === "create"
+      );
+
+      const isFirstTaskAfterStart = sourceNode.id === "start";
+      
       if (hasExistingCreateTask) {
         toast.error("Only one Create task is allowed in the workflow");
         setIsModalOpen(false);
