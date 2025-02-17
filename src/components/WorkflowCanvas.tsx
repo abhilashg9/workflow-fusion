@@ -173,185 +173,30 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   }, [nodes.length, adjustViewport]);
 
-  const handleTaskSelection = (type: TaskType) => {
-    if (!selectedEdge) return;
-
-    const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
-    const targetNode = nodes.find((n) => n.id === selectedEdge.target);
-    
-    if (!sourceNode || !targetNode) return;
-
-    const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
-
-    const hasExistingCreateTask = sortedNodes.some(node => 
-      node.type === "taskCard" && node.data.type === "create"
-    );
-
-    const isFirstTaskAfterStart = sourceNode.id === "start";
-    
-    if (type === "create") {
-      if (hasExistingCreateTask) {
-        toast.error("Only one Create task is allowed in the workflow");
-        setIsModalOpen(false);
-        return;
-      }
-      
-      if (!isFirstTaskAfterStart) {
-        toast.error("Create task can only be added as the first step");
-        setIsModalOpen(false);
-        return;
-      }
-    }
-
-    if (isFirstTaskAfterStart && hasExistingCreateTask && type !== "create") {
-      toast.error("A Create task must be the first step");
-      setIsModalOpen(false);
-      return;
-    }
-
-    const previousNodes: PreviousStep[] = sortedNodes
-      .slice(0, sourceNodeIndex + 1)
-      .filter(node => node.type === "taskCard")
-      .map((node, idx) => ({
-        id: node.id,
-        label: node.data.label,
-        sequenceNumber: idx + 1
-      }))
-      .reverse();
-
-    const newY = sourceNode.position.y + VERTICAL_SPACING;
-    const newSequenceNumber = previousNodes.length + 1;
-
-    const initialData: TaskNodeData = {
-      type,
-      label: `New ${type} task`,
-      tags: type === "integration" ? ["API Name"] : ["Role 1", "Role 2"],
-      previousSteps: previousNodes,
-      sequenceNumber: newSequenceNumber,
-      onDelete: handleDeleteNode,
-    };
-
-    const validationErrors = validateNode(initialData);
-
-    const newNode: Node<TaskNodeData> = {
-      id: `task-${Date.now()}`,
-      type: "taskCard",
-      position: { x: CENTER_X - 125, y: newY },
-      data: {
-        ...initialData,
-        validationErrors,
-      },
-      draggable: true,
-      className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
-    };
-
-    const updatedNodes = nodes.map((node) => {
-      if (node.position.y >= targetNode.position.y) {
-        if (node.type === "taskCard") {
-          const nodePreviousSteps: PreviousStep[] = sortedNodes
-            .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
-            .map((n, idx) => ({
-              id: n.id,
-              label: n.data.label,
-              sequenceNumber: idx + 1
-            }))
-            .reverse();
-
-          const updatedData: TaskNodeData = {
+  const handleNodeDataChange = (nodeId: string, data: Partial<TaskNodeData>) => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          const updatedData = {
             ...node.data,
-            previousSteps: nodePreviousSteps,
-            sequenceNumber: nodePreviousSteps.length + 2,
-          };
+            ...data,
+          } as TaskNodeData;
           
-          const nodeValidationErrors = validateNode(updatedData);
+          const validationErrors = validateNode(updatedData);
           
           return {
             ...node,
-            position: {
-              x: CENTER_X - 125,
-              y: node.position.y + VERTICAL_SPACING,
-            },
             data: {
               ...updatedData,
-              validationErrors: nodeValidationErrors,
+              validationErrors,
+              onDelete: node.data.onDelete,
             },
-            className: nodeValidationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
+            className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
           };
         }
-        return {
-          ...node,
-          position: {
-            x: CENTER_X - 50,
-            y: node.position.y + VERTICAL_SPACING,
-          },
-        };
-      }
-      return node;
-    });
-
-    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
-
-    const newEdges: Edge[] = [
-      {
-        id: `e-${selectedEdge.source}-${newNode.id}`,
-        source: selectedEdge.source,
-        target: newNode.id,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#2563EB" },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: "#2563EB",
-        },
-        label: "+",
-        labelStyle: { 
-          fill: "white",
-          fontWeight: "bold",
-          fontSize: "16px",
-          opacity: 0,
-        },
-        labelBgStyle: { 
-          fill: "#2563EB",
-          borderRadius: "12px",
-          width: 24,
-          height: 24,
-          opacity: 0,
-        },
-        className: "workflow-edge",
-      },
-      {
-        id: `e-${newNode.id}-${selectedEdge.target}`,
-        source: newNode.id,
-        target: selectedEdge.target,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#2563EB" },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: "#2563EB",
-        },
-        label: "+",
-        labelStyle: { 
-          fill: "white",
-          fontWeight: "bold",
-          fontSize: "16px",
-          opacity: 0,
-        },
-        labelBgStyle: { 
-          fill: "#2563EB",
-          borderRadius: "12px",
-          width: 24,
-          height: 24,
-          opacity: 0,
-        },
-        className: "workflow-edge",
-      },
-    ];
-
-    setNodes([...updatedNodes, newNode]);
-    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
-    setIsModalOpen(false);
+        return node;
+      })
+    );
   };
 
   const onConnect = useCallback((params: Connection) => {
@@ -547,29 +392,186 @@ export const WorkflowCanvas = () => {
     return errors;
   };
 
-  const updateNodeData = (nodeId: string, newData: Partial<TaskNodeData>) => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === nodeId) {
-          const updatedData = {
+  const handleTaskSelection = (type: TaskType) => {
+    if (!selectedEdge) return;
+
+    const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
+    const targetNode = nodes.find((n) => n.id === selectedEdge.target);
+    
+    if (!sourceNode || !targetNode) return;
+
+    const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
+    const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
+
+    const hasExistingCreateTask = sortedNodes.some(node => 
+      node.type === "taskCard" && node.data.type === "create"
+    );
+
+    const isFirstTaskAfterStart = sourceNode.id === "start";
+    
+    if (type === "create") {
+      if (hasExistingCreateTask) {
+        toast.error("Only one Create task is allowed in the workflow");
+        setIsModalOpen(false);
+        return;
+      }
+      
+      if (!isFirstTaskAfterStart) {
+        toast.error("Create task can only be added as the first step");
+        setIsModalOpen(false);
+        return;
+      }
+    }
+
+    if (isFirstTaskAfterStart && hasExistingCreateTask && type !== "create") {
+      toast.error("A Create task must be the first step");
+      setIsModalOpen(false);
+      return;
+    }
+
+    const previousNodes: PreviousStep[] = sortedNodes
+      .slice(0, sourceNodeIndex + 1)
+      .filter(node => node.type === "taskCard")
+      .map((node, idx) => ({
+        id: node.id,
+        label: node.data.label,
+        sequenceNumber: idx + 1
+      }))
+      .reverse();
+
+    const newY = sourceNode.position.y + VERTICAL_SPACING;
+    const newSequenceNumber = previousNodes.length + 1;
+
+    const initialData: TaskNodeData = {
+      type,
+      label: `New ${type} task`,
+      tags: type === "integration" ? ["API Name"] : ["Role 1", "Role 2"],
+      previousSteps: previousNodes,
+      sequenceNumber: newSequenceNumber,
+      onDelete: handleDeleteNode,
+      validationErrors: [],
+    };
+
+    const validationErrors = validateNode(initialData);
+
+    const newNode: Node<TaskNodeData> = {
+      id: `task-${Date.now()}`,
+      type: "taskCard",
+      position: { x: CENTER_X - 125, y: newY },
+      data: {
+        ...initialData,
+        validationErrors,
+      },
+      draggable: true,
+      className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
+    };
+
+    const updatedNodes = nodes.map((node) => {
+      if (node.position.y >= targetNode.position.y) {
+        if (node.type === "taskCard") {
+          const nodePreviousSteps: PreviousStep[] = sortedNodes
+            .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
+            .map((n, idx) => ({
+              id: n.id,
+              label: n.data.label,
+              sequenceNumber: idx + 1
+            }))
+            .reverse();
+
+          const updatedData: TaskNodeData = {
             ...node.data,
-            ...newData,
-          } as TaskNodeData;
+            previousSteps: nodePreviousSteps,
+            sequenceNumber: nodePreviousSteps.length + 2,
+          };
           
-          const validationErrors = validateNode(updatedData);
+          const nodeValidationErrors = validateNode(updatedData);
           
           return {
             ...node,
+            position: {
+              x: CENTER_X - 125,
+              y: node.position.y + VERTICAL_SPACING,
+            },
             data: {
               ...updatedData,
-              validationErrors,
+              validationErrors: nodeValidationErrors,
             },
-            className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
+            className: nodeValidationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
           };
         }
-        return node;
-      })
-    );
+        return {
+          ...node,
+          position: {
+            x: CENTER_X - 50,
+            y: node.position.y + VERTICAL_SPACING,
+          },
+        };
+      }
+      return node;
+    });
+
+    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
+
+    const newEdges: Edge[] = [
+      {
+        id: `e-${selectedEdge.source}-${newNode.id}`,
+        source: selectedEdge.source,
+        target: newNode.id,
+        type: "smoothstep",
+        animated: true,
+        style: { stroke: "#2563EB" },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: "#2563EB",
+        },
+        label: "+",
+        labelStyle: { 
+          fill: "white",
+          fontWeight: "bold",
+          fontSize: "16px",
+          opacity: 0,
+        },
+        labelBgStyle: { 
+          fill: "#2563EB",
+          borderRadius: "12px",
+          width: 24,
+          height: 24,
+          opacity: 0,
+        },
+        className: "workflow-edge",
+      },
+      {
+        id: `e-${newNode.id}-${selectedEdge.target}`,
+        source: newNode.id,
+        target: selectedEdge.target,
+        type: "smoothstep",
+        animated: true,
+        style: { stroke: "#2563EB" },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: "#2563EB",
+        },
+        label: "+",
+        labelStyle: { 
+          fill: "white",
+          fontWeight: "bold",
+          fontSize: "16px",
+          opacity: 0,
+        },
+        labelBgStyle: { 
+          fill: "#2563EB",
+          borderRadius: "12px",
+          width: 24,
+          height: 24,
+          opacity: 0,
+        },
+        className: "workflow-edge",
+      },
+    ];
+
+    setNodes([...updatedNodes, newNode]);
+    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
+    setIsModalOpen(false);
   };
 
   return (
