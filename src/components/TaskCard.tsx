@@ -131,7 +131,7 @@ const TaskCard = memo(({
   const isIntegrationTask = data.type === "integration";
 
   const getCardHeight = () => {
-    if (data.type === "create") return "h-[175px]";
+    if (data.type === "create") return "h-[190px]";
     if (data.type === "integration") return "h-[225px]";
     if (data.type === "approval") {
       if (assignment.type === "roles") return "h-[225px]";
