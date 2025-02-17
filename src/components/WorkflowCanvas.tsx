@@ -12,10 +12,9 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft, Split } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
 import TaskCard from "./TaskCard";
-import ConditionCard from "./task-card/ConditionCard";
 import { TaskNodeData, TaskType, PreviousStep } from "./workflow/types";
 
 const VERTICAL_SPACING = 250;
@@ -47,7 +46,6 @@ const TaskOption = ({ icon: Icon, title, subtitle, onClick, disabled }: TaskOpti
 
 const nodeTypes = {
   taskCard: TaskCard,
-  conditionCard: ConditionCard,
 };
 
 const taskTypes = [
@@ -70,10 +68,16 @@ const taskTypes = [
     type: "integration" as const,
   },
   {
-    icon: Split,
-    title: "Condition",
-    subtitle: "Add conditions to split the workflow",
-    type: "condition" as const,
+    icon: GitBranch,
+    title: "Split Branch",
+    subtitle: "Split the workflow into branches with conditions",
+    type: "split" as const,
+  },
+  {
+    icon: ArrowRightLeft,
+    title: "Parallel Branch",
+    subtitle: "Add tasks in parallel that will occur simultaneously",
+    type: "parallel" as const,
   },
 ];
 
@@ -87,38 +91,30 @@ const initialNodes: Node<TaskNodeData>[] = [
       type: undefined
     },
     style: {
-      background: "#3388eb",
+      background: "#8B5CF6",
       color: "white",
       border: "none",
       borderRadius: "4px",
       padding: "10px 20px",
       minWidth: "100px",
-      height: "40px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
       textAlign: "center",
     },
   },
   {
     id: "end",
     type: "output",
-    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING * 1.5 },
+    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
     data: { 
       label: "End",
       type: undefined
     },
     style: {
-      background: "#3388eb",
+      background: "#0EA5E9",
       color: "white",
       border: "none",
       borderRadius: "4px",
       padding: "10px 20px",
       minWidth: "100px",
-      height: "40px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
       textAlign: "center",
     },
   },
@@ -247,8 +243,7 @@ export const WorkflowCanvas = () => {
     const CENTER_X = 250;
     
     const updatedNodes = sortedNodes.map((n, index) => {
-      const isTaskCard = n.type === "taskCard";
-      const currentSequence = isTaskCard ? index : 0;
+      const currentSequence = n.type === "taskCard" ? index + 1 : 0;
       const previousNodes: PreviousStep[] = sortedNodes
         .slice(0, index)
         .filter(prev => prev.type === "taskCard")
@@ -259,16 +254,13 @@ export const WorkflowCanvas = () => {
         }))
         .reverse();
 
-      const nodeHeight = isTaskCard ? 125 : 40;
-      const verticalOffset = (nodeHeight - 40) / 2;
-
       return {
         ...n,
         position: {
-          x: CENTER_X - (isTaskCard ? 125 : 50),
-          y: START_Y + (index * VERTICAL_SPACING) + (isTaskCard ? 0 : verticalOffset),
+          x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
+          y: START_Y + (index * VERTICAL_SPACING),
         },
-        data: isTaskCard ? {
+        data: n.type === "taskCard" ? {
           ...n.data,
           previousSteps: previousNodes,
           sequenceNumber: currentSequence
@@ -276,11 +268,6 @@ export const WorkflowCanvas = () => {
         draggable: true,
       };
     });
-
-    const lastNode = updatedNodes[updatedNodes.length - 1];
-    if (lastNode.id === "end") {
-      lastNode.position.y += VERTICAL_SPACING * 0.5;
-    }
 
     setNodes(updatedNodes);
     adjustViewport();
@@ -342,8 +329,7 @@ export const WorkflowCanvas = () => {
     const CENTER_X = 250;
     
     const updatedNodes = sortedNodes.map((node, index) => {
-      const isTaskCard = node.type === "taskCard";
-      const currentSequence = isTaskCard ? index : 0;
+      const currentSequence = node.type === "taskCard" ? index + 1 : 0;
       const previousNodes: PreviousStep[] = sortedNodes
         .slice(0, index)
         .filter(prev => prev.type === "taskCard")
@@ -354,14 +340,11 @@ export const WorkflowCanvas = () => {
         }))
         .reverse();
 
-      const nodeHeight = isTaskCard ? 125 : 40;
-      const verticalOffset = (nodeHeight - 40) / 2;
-
       return {
         ...node,
         position: {
           x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
-          y: START_Y + (index * VERTICAL_SPACING) + (isTaskCard ? 0 : verticalOffset),
+          y: START_Y + (index * VERTICAL_SPACING),
         },
         data: node.type === "taskCard" ? {
           ...node.data,
@@ -457,48 +440,31 @@ export const WorkflowCanvas = () => {
       .reverse();
 
     const newY = sourceNode.position.y + VERTICAL_SPACING;
+    const newSequenceNumber = previousNodes.length + 1;
 
-    let newNode: Node<TaskNodeData>;
-    
-    if (type === "condition") {
-      newNode = {
-        id: `condition-${Date.now()}`,
-        type: "conditionCard",
-        position: { x: CENTER_X - 125, y: newY },
-        data: {
-          type: "condition",
-          label: "New condition",
-          conditions: [
-            { id: "default", name: "Default path" }
-          ],
-        },
-        draggable: true,
-      };
-    } else {
-      const initialData: TaskNodeData = {
-        type,
-        label: `New ${type} task`,
-        tags: type === "integration" ? ["API Name"] : ["Role 1", "Role 2"],
-        previousSteps: previousNodes,
-        sequenceNumber: previousNodes.length + 1,
-        onDelete: handleDeleteNode,
-        validationErrors: [],
-      };
+    const initialData: TaskNodeData = {
+      type,
+      label: `New ${type} task`,
+      tags: type === "integration" ? ["API Name"] : ["Role 1", "Role 2"],
+      previousSteps: previousNodes,
+      sequenceNumber: newSequenceNumber,
+      onDelete: handleDeleteNode,
+      validationErrors: [],
+    };
 
-      const validationErrors = validateNode(initialData);
+    const validationErrors = validateNode(initialData);
 
-      newNode = {
-        id: `task-${Date.now()}`,
-        type: "taskCard",
-        position: { x: CENTER_X - 125, y: newY },
-        data: {
-          ...initialData,
-          validationErrors,
-        },
-        draggable: true,
-        className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
-      };
-    }
+    const newNode: Node<TaskNodeData> = {
+      id: `task-${Date.now()}`,
+      type: "taskCard",
+      position: { x: CENTER_X - 125, y: newY },
+      data: {
+        ...initialData,
+        validationErrors,
+      },
+      draggable: true,
+      className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
+    };
 
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
@@ -543,6 +509,8 @@ export const WorkflowCanvas = () => {
       }
       return node;
     });
+
+    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
 
     const newEdges: Edge[] = [
       {

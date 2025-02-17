@@ -1,7 +1,7 @@
 
 import { Node, Edge, MarkerType } from "@xyflow/react";
 
-export type TaskType = "create" | "approval" | "integration" | "condition";
+export type TaskType = "create" | "approval" | "integration";
 
 export interface PreviousStep {
   id: string;
@@ -15,11 +15,6 @@ export interface ApiConfig {
   type: "inbound" | "outbound";
   endpoint: string;
   viewUrl?: string;
-}
-
-export interface Condition {
-  id: string;
-  name: string;
 }
 
 export interface FailureRecourse {
@@ -58,12 +53,10 @@ export interface TaskNodeData extends Record<string, unknown> {
     selectedApi?: ApiConfig;
     failureRecourse?: FailureRecourse;
   };
-  conditions?: Condition[];
 }
 
 export type CustomNode = Node<TaskNodeData>;
 
-// This interface is used by TaskCardApiConfig
 export interface StepOption {
   id: string;
   label: string;
