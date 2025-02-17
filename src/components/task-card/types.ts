@@ -8,6 +8,23 @@ export interface AssignmentConfig {
   value?: number;
 }
 
+export interface ApiConfig {
+  id: string;
+  name: string;
+  type: "inbound" | "outbound";
+  endpoint: string;
+  viewUrl?: string;
+}
+
+export interface FailureRecourse {
+  type: "sendBack" | "assign";
+  stepId?: string;
+  assignee?: {
+    type: "user" | "role";
+    value: string;
+  };
+}
+
 export interface TaskAction {
   action: string;
   label: string;
@@ -26,21 +43,8 @@ export interface TaskCardProps {
     actions?: TaskAction[];
     sequenceNumber?: number;
     apiConfig?: {
-      selectedApi?: {
-        id: string;
-        name: string;
-        type: "inbound" | "outbound";
-        endpoint: string;
-        viewUrl?: string;
-      };
-      failureRecourse?: {
-        type: "sendBack" | "assign";
-        stepId?: string;
-        assignee?: {
-          type: "user" | "role";
-          value: string;
-        };
-      };
+      selectedApi?: ApiConfig;
+      failureRecourse?: FailureRecourse;
     };
   };
   id: string;
@@ -49,3 +53,24 @@ export interface TaskCardProps {
   previousSteps?: { id: string; label: string; sequenceNumber: number }[];
 }
 
+export interface TaskCardAssignmentProps {
+  assignment: AssignmentConfig;
+  taskType: "create" | "approval" | "integration";
+  onChange: (assignment: AssignmentConfig) => void;
+}
+
+export interface TaskCardActionsProps {
+  actions: TaskAction[];
+  previousSteps: { id: string; label: string; sequenceNumber: number }[];
+  onActionToggle: (index: number, enabled: boolean) => void;
+  onActionLabelChange: (index: number, label: string) => void;
+  onSendBackStepChange: (stepId: string) => void;
+}
+
+export interface TaskCardApiConfigProps {
+  selectedApi?: ApiConfig;
+  failureRecourse?: FailureRecourse;
+  taskType: "create" | "approval" | "integration";
+  previousSteps: { id: string; label: string; sequenceNumber: number }[];
+  onChange: (apiConfig: any) => void;
+}

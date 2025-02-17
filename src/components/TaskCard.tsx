@@ -1,3 +1,4 @@
+
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { 
@@ -29,7 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { TaskCardActions } from "./task-card/TaskCardActions";
 import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
-import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
+import { TaskCardProps, AssignmentConfig, TaskAction, ApiConfig, FailureRecourse } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
 
