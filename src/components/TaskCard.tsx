@@ -1,4 +1,3 @@
-
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, Users, Filter } from "lucide-react";
@@ -303,7 +302,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
   return (
     <>
       <div 
-        className="bg-white rounded-xl shadow-md border border-gray-100 p-5 w-[400px] h-[240px] relative group transition-shadow hover:shadow-lg"
+        className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] h-[225px] relative group"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -318,20 +317,20 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
             <X className="h-4 w-4" />
           </Button>
         )}
-        <div className="space-y-4 h-full flex flex-col">
+        <div className="space-y-4">
           <div className="flex items-start gap-3">
-            <div className="p-2.5 rounded-xl bg-gray-50/80 ring-1 ring-gray-100">{getIcon()}</div>
+            <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between gap-2">
                 <input
                   type="text"
                   value={taskLabel}
                   onChange={(e) => handleLabelChange(e.target.value)}
-                  className="flex-1 text-lg font-medium outline-none border-none focus:ring-2 focus:ring-primary/20 rounded-lg px-2 py-1 transition-all"
+                  className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
                   maxLength={50}
                 />
                 {data.sequenceNumber > 0 && (
-                  <span className="text-xs font-medium bg-primary/10 text-primary px-2.5 py-1 rounded-full shrink-0">
+                  <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full shrink-0">
                     Step {data.sequenceNumber}
                   </span>
                 )}
@@ -339,11 +338,11 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
             </div>
           </div>
 
-          <div className="space-y-3 bg-gray-50/50 p-3.5 rounded-xl ring-1 ring-gray-100/50">
+          <div className="space-y-3 bg-gray-50/50 p-3 rounded-lg">
             {renderAssignmentTags()}
           </div>
 
-          <div className="flex items-center justify-between gap-2 pt-3 mt-auto border-t border-gray-100">
+          <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
             <TooltipProvider>
               {!isIntegrationTask && (
                 <Tooltip>
@@ -353,7 +352,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                       onClick={() => handleActionClick("assignment")}
                     >
                       <User className="w-4 h-4 text-gray-600 mb-1" />
-                      <span className="text-xs font-medium text-gray-600">Assignment</span>
+                      <span className="text-xs text-gray-600">Assignment</span>
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -370,7 +369,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                       onClick={() => handleActionClick("api-config")}
                     >
                       <Server className="w-4 h-4 text-gray-600 mb-1" />
-                      <span className="text-xs font-medium text-gray-600">API Config</span>
+                      <span className="text-xs text-gray-600">API Config</span>
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -386,7 +385,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                     onClick={() => handleActionClick("notifications")}
                   >
                     <Bell className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs font-medium text-gray-600">Notifications</span>
+                    <span className="text-xs text-gray-600">Notifications</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -405,7 +404,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                     onClick={() => !isIntegrationTask && handleActionClick("actions")}
                   >
                     <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs font-medium text-gray-600">Actions</span>
+                    <span className="text-xs text-gray-600">Actions</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -424,7 +423,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
                     onClick={() => !isIntegrationTask && handleActionClick("visibility")}
                   >
                     <Eye className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs font-medium text-gray-600">Visibility</span>
+                    <span className="text-xs text-gray-600">Visibility</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
