@@ -1,4 +1,3 @@
-
 import { ChevronDown, Plus, PenLine, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReactFlow, Node } from "@xyflow/react";
@@ -62,7 +61,7 @@ export const WorkflowHeader = () => {
     changes: ["Added approval step", "Updated integration configuration"]
   });
 
-  const [selectedWorkflow, setSelectedWorkflow] = useState<'create' | 'amend' | 'short-close' | 'cancel' | null>(null);
+  const [selectedWorkflow, setSelectedWorkflow] = useState<'create' | 'amend' | 'short-close' | 'cancel'>('create');
 
   const workflowVersions: WorkflowVersion[] = [
     {
@@ -153,10 +152,7 @@ export const WorkflowHeader = () => {
         <div className="flex items-center space-x-3">
           <div className="flex items-center gap-2">
             <h1 className="font-medium">
-              Invoice Workflow
-              {selectedWorkflow && (
-                <span className="text-gray-600 capitalize"> | {selectedWorkflow.replace('-', ' ')}</span>
-              )}
+              Invoice Workflow | <span className="text-gray-600 capitalize">{selectedWorkflow.replace('-', ' ')}</span>
             </h1>
           </div>
           <DropdownMenu>
