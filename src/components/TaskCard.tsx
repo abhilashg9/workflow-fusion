@@ -1,6 +1,26 @@
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { FilePlus2, UserCheck, Workflow, Users, Filter, ShieldAlert, Plug, AlertCircle, UserRound, UsersRound, User, Bell, ArrowRight, Eye, Server, X, GitBranch, Trash } from "lucide-react";
+import { 
+  FilePlus2, 
+  UserCheck, 
+  Workflow, 
+  Users, 
+  Filter, 
+  ShieldAlert, 
+  Plug, 
+  AlertCircle, 
+  UserRound, 
+  UsersRound,
+  User, 
+  Bell, 
+  ArrowRight, 
+  Eye, 
+  Server, 
+  X,
+  GitBranch,
+  Trash,
+  CheckSquare
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,9 +30,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { TaskCardActions } from "./task-card/TaskCardActions";
 import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
-import { TaskCardProps, AssignmentConfig, TaskAction, ApiConfig, FailureRecourse } from "./task-card/types";
+import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 const TaskCard = memo(({
   data,
   id,
@@ -31,12 +60,15 @@ const TaskCard = memo(({
   const [isHovered, setIsHovered] = useState(false);
   const [actions, setActions] = useState<TaskAction[]>(data.actions || DEFAULT_ACTIONS);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [selectedWorkflowActions, setSelectedWorkflowActions] = useState<string[]>([]);
+
   useEffect(() => {
     setTaskLabel(data.label);
   }, [data.label]);
   useEffect(() => {
     validateTask();
   }, [data]);
+
   const validateTask = () => {
     const errors: string[] = [];
 
@@ -77,6 +109,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const getIcon = () => {
     switch (data.type) {
       case "create":
@@ -87,8 +120,10 @@ const TaskCard = memo(({
         return <Workflow className="w-5 h-5 text-[#F97316]" />;
     }
   };
+
   const isCreateTask = data.type === "create";
   const isIntegrationTask = data.type === "integration";
+
   const getCardHeight = () => {
     if (data.type === "create") return "h-[175px]";
     if (data.type === "integration") return "h-[225px]";
@@ -98,10 +133,12 @@ const TaskCard = memo(({
     }
     return "h-[225px]";
   };
+
   const handleActionClick = (tab: string) => {
     setActiveTab(tab);
     setIsDrawerOpen(true);
   };
+
   const handleLabelChange = (newLabel: string) => {
     setTaskLabel(newLabel);
     if (setNodeData) {
@@ -111,6 +148,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleAssignmentTypeChange = (type: AssignmentConfig["type"]) => {
     const newAssignment: AssignmentConfig = {
       type
@@ -130,6 +168,7 @@ const TaskCard = memo(({
     setAssignment(newAssignment);
     updateNodeData(newAssignment);
   };
+
   const updateNodeData = (newAssignment: AssignmentConfig) => {
     if (setNodeData) {
       setNodeData({
@@ -138,6 +177,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleRoleSelect = (role: string) => {
     if (assignment.type === "roles" && !assignment.roles?.includes(role)) {
       const newRoles = [...(assignment.roles || []), role];
@@ -151,6 +191,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleFilterSelect = (filter: string) => {
     if (assignment.type === "roles" && !assignment.filters?.includes(filter)) {
       const newFilters = [...(assignment.filters || []), filter];
@@ -164,6 +205,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleUserSelect = (user: string) => {
     if (assignment.type === "users" && !assignment.users?.includes(user)) {
       const newUsers = [...(assignment.users || []), user];
@@ -177,6 +219,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleDynamicUserSelect = (user: string) => {
     if (assignment.type === "dynamic_users" && !assignment.dynamicUsers?.includes(user)) {
       const newUsers = [...(assignment.dynamicUsers || []), user];
@@ -190,6 +233,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const removeItem = (type: string, item: string) => {
     let newAssignment = {
       ...assignment
@@ -211,6 +255,7 @@ const TaskCard = memo(({
     setAssignment(newAssignment);
     updateNodeData(newAssignment);
   };
+
   const handleActionToggle = (actionIndex: number, enabled: boolean) => {
     const newActions = [...actions];
     newActions[actionIndex] = {
@@ -225,6 +270,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleActionLabelChange = (actionIndex: number, newLabel: string) => {
     const newActions = [...actions];
     newActions[actionIndex] = {
@@ -239,6 +285,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleSendBackStepChange = (stepId: string) => {
     const newActions = [...actions];
     const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
@@ -258,12 +305,14 @@ const TaskCard = memo(({
       }
     }
   };
+
   const handleDeleteTask = () => {
     if (onDelete) {
       onDelete(id);
     }
     setIsDrawerOpen(false);
   };
+
   const renderAssignmentTags = () => {
     const renderAbbreviatedList = (items: string[] | undefined, type: 'roles' | 'filters') => {
       const Icon = type === 'roles' ? Users : Filter;
@@ -291,6 +340,7 @@ const TaskCard = memo(({
             </div>}
         </div>;
     };
+
     if (data.type === "integration") {
       return <div className="space-y-2">
           <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
@@ -322,6 +372,7 @@ const TaskCard = memo(({
           </div>
         </div>;
     }
+
     switch (assignment.type) {
       case "roles":
         return <div className="space-y-2">
@@ -342,6 +393,7 @@ const TaskCard = memo(({
         return renderAbbreviatedList([], 'roles');
     }
   };
+
   const handleApiSelect = (selectedApi: ApiConfig) => {
     if (setNodeData) {
       setNodeData({
@@ -353,6 +405,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleFailureRecourseChange = (failureRecourse: FailureRecourse) => {
     if (setNodeData) {
       setNodeData({
@@ -364,6 +417,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleValueChange = (newValue: number | undefined) => {
     if (setNodeData) {
       setNodeData({
@@ -375,6 +429,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const renderActionButtons = () => {
     return <TooltipProvider>
         {!isIntegrationTask && <Tooltip>
@@ -438,6 +493,7 @@ const TaskCard = memo(({
         </Tooltip>
       </TooltipProvider>;
   };
+
   return <div className={cn("bg-white rounded-lg shadow-sm border p-4 w-[400px] relative group", getCardHeight(), validationErrors.length > 0 && "border-red-400")} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       {validationErrors.length > 0 && <TooltipProvider>
           <Tooltip>
@@ -462,10 +518,47 @@ const TaskCard = memo(({
             <div className="flex items-center gap-2">
               <input type="text" value={taskLabel} onChange={e => handleLabelChange(e.target.value)} className="flex-1 text-base font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1" maxLength={50} />
               <div className="flex items-center gap-1 shrink-0">
-                <GitBranch className="w-4 h-4 text-gray-400 py-0 px-0 mx-[12px] my-[12px] bg-slate-50 rounded" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-0">
+                      <GitBranch className="w-4 h-4 text-gray-400 py-0 px-0 mx-[12px] my-[12px] bg-slate-50 rounded hover:bg-slate-100 transition-colors" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-48">
+                    <DropdownMenuLabel>Workflow Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={selectedWorkflowActions.includes('amend')}
+                      onCheckedChange={() => handleWorkflowActionToggle('amend')}
+                    >
+                      <span className="flex items-center gap-2">
+                        <CheckSquare className="w-4 h-4" />
+                        Amend
+                      </span>
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={selectedWorkflowActions.includes('short_close')}
+                      onCheckedChange={() => handleWorkflowActionToggle('short_close')}
+                    >
+                      <span className="flex items-center gap-2">
+                        <CheckSquare className="w-4 h-4" />
+                        Short Close
+                      </span>
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={selectedWorkflowActions.includes('cancel')}
+                      onCheckedChange={() => handleWorkflowActionToggle('cancel')}
+                    >
+                      <span className="flex items-center gap-2">
+                        <CheckSquare className="w-4 h-4" />
+                        Cancel
+                      </span>
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 {data.sequenceNumber > 0 && <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
-                    Step {data.sequenceNumber}
-                  </span>}
+                  Step {data.sequenceNumber}
+                </span>}
               </div>
             </div>
           </div>
@@ -538,5 +631,6 @@ const TaskCard = memo(({
       </Drawer>
     </div>;
 });
+
 TaskCard.displayName = "TaskCard";
 export default TaskCard;
