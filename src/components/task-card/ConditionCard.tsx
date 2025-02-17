@@ -3,7 +3,7 @@ import React from 'react';
 import { Split } from 'lucide-react';
 import { Handle, Position } from '@xyflow/react';
 import { Badge } from '@/components/ui/badge';
-import { TaskNodeData } from '../workflow/types';
+import { TaskNodeData, Condition } from '../workflow/types';
 
 interface ConditionCardProps {
   data: TaskNodeData;
@@ -11,6 +11,8 @@ interface ConditionCardProps {
 }
 
 const ConditionCard = ({ data, id }: ConditionCardProps) => {
+  const conditions = data.conditions as Condition[] | undefined;
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200 w-[250px]">
       <Handle
@@ -26,16 +28,16 @@ const ConditionCard = ({ data, id }: ConditionCardProps) => {
           </div>
           <span className="font-medium text-sm">{data.label}</span>
         </div>
-        {data.conditions?.some(c => c.id === 'default') && (
+        {conditions?.some(c => c.id === 'default') && (
           <Badge variant="secondary" className="text-xs">
             Default
           </Badge>
         )}
       </div>
 
-      {data.conditions && data.conditions.length > 0 && (
+      {conditions && conditions.length > 0 && (
         <div className="mt-3 space-y-2">
-          {data.conditions.map((condition) => (
+          {conditions.map((condition) => (
             <div 
               key={condition.id}
               className="text-xs p-2 bg-gray-50 rounded border border-gray-100"
