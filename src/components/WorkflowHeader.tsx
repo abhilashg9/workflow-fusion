@@ -115,13 +115,11 @@ export const WorkflowHeader = () => {
 
   const handleVersionSelect = (version: WorkflowVersion) => {
     setSelectedVersion(version);
-    // Here you would load the workflow state for the selected version
   };
 
   const handleAuxiliaryWorkflow = (type: 'create' | 'amend' | 'short-close' | 'cancel') => {
     setSelectedWorkflow(type);
     toast.info(`Selected ${type} workflow`);
-    // TODO: Implement auxiliary workflow handling
   };
 
   const formatDate = (timestamp: string) => {
@@ -154,10 +152,7 @@ export const WorkflowHeader = () => {
             <h1 className="font-medium">
               Invoice Workflow
               {selectedWorkflow && (
-                <>
-                  <span className="text-gray-400 mx-2">|</span>
-                  <span className="text-gray-600 capitalize">{selectedWorkflow.replace('-', ' ')}</span>
-                </>
+                <span className="text-gray-600 capitalize"> / {selectedWorkflow.replace('-', ' ')}</span>
               )}
             </h1>
           </div>
@@ -169,13 +164,10 @@ export const WorkflowHeader = () => {
                 className="h-8 text-sm text-gray-600 hover:bg-gray-50 px-2"
               >
                 <Menu className="h-4 w-4 mr-1" />
-                Auxiliary Workflows
                 <ChevronDown className="h-3 w-3 ml-1 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuLabel>Auxiliary Workflows</DropdownMenuLabel>
-              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('create')}>
                 Create
               </DropdownMenuItem>
