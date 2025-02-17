@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Select,
@@ -17,7 +16,8 @@ import {
   Copy, 
   CheckCircle2, 
   User, 
-  Users 
+  Users,
+  Plug 
 } from "lucide-react";
 import { ApiConfig, FailureRecourse, mockApiConfigs, StepOption } from "../workflow/types";
 import {
@@ -124,7 +124,10 @@ export const TaskCardApiConfig = ({
           <SelectContent>
             {mockApiConfigs.map((api) => (
               <SelectItem key={api.id} value={api.id}>
-                {api.name}
+                <div className="flex items-center gap-2">
+                  <Plug className="w-4 h-4" />
+                  {api.name}
+                </div>
               </SelectItem>
             ))}
           </SelectContent>

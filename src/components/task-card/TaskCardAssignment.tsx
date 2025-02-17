@@ -1,4 +1,3 @@
-
 import {
   Select,
   SelectContent,
@@ -7,7 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { User, Users, Filter, X, HelpCircle } from "lucide-react";
+import { User, Users, Filter, X, HelpCircle, Building2, Network, UserCog, GitBranch } from "lucide-react";
 import { AssignmentConfig } from "./types";
 import { ROLES_OPTIONS, FILTERS_OPTIONS, USERS_OPTIONS, DYNAMIC_USERS_OPTIONS } from "./constants";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -95,7 +94,12 @@ export const TaskCardAssignment = ({
                     <span>Users</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="supplier">Supplier</SelectItem>
+                <SelectItem value="supplier">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4" />
+                    <span>Supplier</span>
+                  </div>
+                </SelectItem>
               </>
             ) : (
               <>
@@ -111,10 +115,30 @@ export const TaskCardAssignment = ({
                     <span>Users</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="dynamic_users">Dynamic Users</SelectItem>
-                <SelectItem value="supplier">Supplier</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="manager_hierarchy">Manager Hierarchy</SelectItem>
+                <SelectItem value="dynamic_users">
+                  <div className="flex items-center gap-2">
+                    <Network className="w-4 h-4" />
+                    <span>Dynamic Users</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="supplier">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4" />
+                    <span>Supplier</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="manager">
+                  <div className="flex items-center gap-2">
+                    <UserCog className="w-4 h-4" />
+                    <span>Manager</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="manager_hierarchy">
+                  <div className="flex items-center gap-2">
+                    <GitBranch className="w-4 h-4" />
+                    <span>Manager Hierarchy</span>
+                  </div>
+                </SelectItem>
               </>
             )}
           </SelectContent>
