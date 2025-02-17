@@ -223,25 +223,27 @@ export const WorkflowCanvas = () => {
     const newY = sourceNode.position.y + VERTICAL_SPACING;
     const newSequenceNumber = previousNodes.length + 1;
 
+    const initialData: TaskNodeData = {
+      type,
+      label: `New ${type} task`,
+      tags: type === "integration" ? ["API Name"] : ["Role 1", "Role 2"],
+      previousSteps: previousNodes,
+      sequenceNumber: newSequenceNumber,
+      onDelete: handleDeleteNode,
+    };
+
+    const validationErrors = validateNode(initialData);
+
     const newNode: Node<TaskNodeData> = {
       id: `task-${Date.now()}`,
       type: "taskCard",
       position: { x: CENTER_X - 125, y: newY },
       data: {
-        type,
-        label: `New ${type} task`,
-        tags: type === "integration" 
-          ? ["API Name"]
-          : ["Role 1", "Role 2"],
-        previousSteps: previousNodes,
-        sequenceNumber: newSequenceNumber,
-        onDelete: handleDeleteNode,
-        validationErrors: validateNode({
-          type,
-          label: `New ${type} task`
-        } as TaskNodeData),
+        ...initialData,
+        validationErrors,
       },
       draggable: true,
+      className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
     };
 
     const updatedNodes = nodes.map((node) => {
@@ -256,13 +258,13 @@ export const WorkflowCanvas = () => {
             }))
             .reverse();
 
-          const updatedNodeData = {
+          const updatedData: TaskNodeData = {
             ...node.data,
             previousSteps: nodePreviousSteps,
             sequenceNumber: nodePreviousSteps.length + 2,
           };
           
-          const validationErrors = validateNode(updatedNodeData as TaskNodeData);
+          const nodeValidationErrors = validateNode(updatedData);
           
           return {
             ...node,
@@ -271,10 +273,10 @@ export const WorkflowCanvas = () => {
               y: node.position.y + VERTICAL_SPACING,
             },
             data: {
-              ...updatedNodeData,
-              validationErrors,
+              ...updatedData,
+              validationErrors: nodeValidationErrors,
             },
-            className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
+            className: nodeValidationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
           };
         }
         return {
@@ -545,12 +547,17 @@ export const WorkflowCanvas = () => {
     return errors;
   };
 
-  const updateNodeValidation = (nodeId: string, newData: Partial<TaskNodeData>) => {
+  const updateNodeData = (nodeId: string, newData: Partial<TaskNodeData>) => {
     setNodes((nds) =>
       nds.map((node) => {
         if (node.id === nodeId) {
-          const updatedData = { ...node.data, ...newData } as TaskNodeData;
+          const updatedData = {
+            ...node.data,
+            ...newData,
+          } as TaskNodeData;
+          
           const validationErrors = validateNode(updatedData);
+          
           return {
             ...node,
             data: {
