@@ -355,7 +355,10 @@ const TaskCard = memo(({
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] h-[225px] relative group" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+      <div className={cn(
+        "bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] relative group",
+        data.type === "create" ? "h-[175px]" : "h-[225px]"
+      )}>
         <Handle type="target" position={Position.Top} />
         {isHovered && <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleDeleteTask}>
             <X className="h-4 w-4" />
