@@ -1,4 +1,5 @@
-import { ChevronDown } from "lucide-react";
+
+import { ChevronDown, Plus, PenLine, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReactFlow, Node } from "@xyflow/react";
 import { AlertCircle, Clock, GitBranch, User, CheckCircle2, Timer, History } from "lucide-react";
@@ -169,16 +170,20 @@ export const WorkflowHeader = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('create')}>
+              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('create')} className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
                 Create
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('amend')}>
+              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('amend')} className="flex items-center gap-2">
+                <PenLine className="h-4 w-4" />
                 Amend
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('short-close')}>
+              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('short-close')} className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
                 Short Close
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('cancel')}>
+              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('cancel')} className="flex items-center gap-2">
+                <X className="h-4 w-4" />
                 Cancel
               </DropdownMenuItem>
             </DropdownMenuContent>
