@@ -17,7 +17,8 @@ import {
   Eye, 
   Server, 
   X,
-  GitBranch 
+  GitBranch,
+  Trash
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -694,7 +695,7 @@ const TaskCard = memo(({
           </div>
           <DrawerFooter className="border-t border-gray-100 mt-auto shrink-0">
             <Button variant="destructive" onClick={handleDeleteTask} className="w-full">
-              <Trash2 className="w-4 h-4 mr-2" />
+              <Trash className="w-4 h-4 mr-2" />
               Delete Task
             </Button>
           </DrawerFooter>
