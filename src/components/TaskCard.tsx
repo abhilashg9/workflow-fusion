@@ -51,6 +51,16 @@ const TaskCard = memo(({
 
   const isIntegrationTask = data.type === "integration";
 
+  const getCardHeight = () => {
+    if (data.type === "create") return "h-[175px]";
+    if (data.type === "integration") return "h-[225px]";
+    if (data.type === "approval") {
+      if (assignment.type === "roles") return "h-[225px]";
+      return "h-[175px]";
+    }
+    return "h-[225px]";
+  };
+
   const handleActionClick = (tab: string) => {
     setActiveTab(tab);
     setIsDrawerOpen(true);
@@ -357,7 +367,7 @@ const TaskCard = memo(({
     <>
       <div className={cn(
         "bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] relative group",
-        data.type === "create" ? "h-[175px]" : "h-[225px]"
+        getCardHeight()
       )}>
         <Handle type="target" position={Position.Top} />
         {isHovered && <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleDeleteTask}>
