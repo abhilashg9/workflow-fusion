@@ -1,7 +1,7 @@
-import { memo, useState, useEffect, useMemo } from "react";
+import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, Users, Filter } from "lucide-react";
-import { User, Bell, ArrowRight, Eye, Server, ShieldAlert, X, Trash2, AlertCircle } from "lucide-react";
+import { User, Bell, ArrowRight, Eye, Server, ShieldAlert, X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -51,45 +51,6 @@ const TaskCard = memo(({
 
   const isCreateTask = data.type === "create";
   const isIntegrationTask = data.type === "integration";
-  const isApprovalTask = data.type === "approval";
-
-  const validationErrors = useMemo(() => {
-    const errors: string[] = [];
-
-    // Common validation for all task types
-    if (!taskLabel.trim()) {
-      errors.push("Task label is required");
-    }
-
-    if (isCreateTask) {
-      if (!assignment.type || 
-          (assignment.type === "roles" && (!assignment.roles?.length)) ||
-          (assignment.type === "users" && (!assignment.users?.length))) {
-        errors.push("Role or user assignment is required");
-      }
-    }
-
-    if (isApprovalTask) {
-      if (!assignment.type || 
-          (assignment.type === "roles" && (!assignment.roles?.length)) ||
-          (assignment.type === "users" && (!assignment.users?.length))) {
-        errors.push("Assignment configuration is required");
-      }
-
-      const approveAction = actions.find(a => a.action === "approve");
-      const rejectAction = actions.find(a => a.action === "reject");
-
-      if (!approveAction?.label || (rejectAction?.enabled && !rejectAction?.label)) {
-        errors.push("Action labels cannot be empty");
-      }
-    }
-
-    if (isIntegrationTask && !data.apiConfig?.selectedApi) {
-      errors.push("API selection is required");
-    }
-
-    return errors;
-  }, [taskLabel, assignment, actions, data.apiConfig, isCreateTask, isApprovalTask, isIntegrationTask]);
 
   const getCardHeight = () => {
     if (data.type === "create") return "h-[175px]";
@@ -506,8 +467,7 @@ const TaskCard = memo(({
       <div 
         className={cn(
           "bg-white rounded-lg border transition-all duration-200",
-          "hover:shadow-lg",
-          validationErrors.length > 0 ? "border-red-200" : "hover:border-primary/20",
+          "hover:shadow-lg hover:border-primary/20",
           "group/card relative",
           getCardHeight()
         )}
@@ -539,35 +499,17 @@ const TaskCard = memo(({
             </div>
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex-1 relative">
-                  <input 
-                    type="text" 
-                    value={taskLabel} 
-                    onChange={e => handleLabelChange(e.target.value)} 
-                    className={cn(
-                      "w-full text-lg font-medium bg-transparent",
-                      "outline-none border-none focus:ring-2 rounded px-1",
-                      !taskLabel.trim() ? "focus:ring-red-200" : "focus:ring-primary/20",
-                      "transition-all duration-200"
-                    )} 
-                    maxLength={50}
-                    placeholder="Enter task label"
-                  />
-                  {!taskLabel.trim() && (
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <AlertCircle className="w-4 h-4 text-red-500" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Task label is required</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  )}
-                </div>
+                <input 
+                  type="text" 
+                  value={taskLabel} 
+                  onChange={e => handleLabelChange(e.target.value)} 
+                  className={cn(
+                    "flex-1 text-lg font-medium bg-transparent",
+                    "outline-none border-none focus:ring-2 focus:ring-primary/20 rounded px-1",
+                    "transition-all duration-200"
+                  )} 
+                  maxLength={50} 
+                />
                 {data.sequenceNumber > 0 && (
                   <Badge variant="default" className="bg-primary/90 hover:bg-primary/90">
                     Step {data.sequenceNumber}
@@ -579,30 +521,113 @@ const TaskCard = memo(({
 
           <div className={cn(
             "space-y-3 bg-gray-50/50 p-3 rounded-lg transition-colors",
-            validationErrors.length > 0 && "border border-red-100",
             "group-hover/card:bg-gray-50/80"
           )}>
             {renderAssignmentTags()}
           </div>
 
-          {validationErrors.length > 0 && (
-            <div className="px-3 py-2 bg-red-50 rounded-md">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                <div className="space-y-1">
-                  {validationErrors.map((error, index) => (
-                    <p key={index} className="text-sm text-red-600">{error}</p>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
           <div className={cn(
             "flex items-center justify-between gap-2 pt-2 border-t border-gray-100",
             "group-hover/card:border-gray-200 transition-colors"
           )}>
-            {renderActionButtons()}
+            <TooltipProvider>
+              {!isIntegrationTask && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex flex-col items-center h-auto py-2 px-3"
+                      onClick={() => handleActionClick("assignment")}
+                    >
+                      <User className="w-4 h-4 text-gray-600 mb-1" />
+                      <span className="text-xs text-gray-600">Assignment</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Configure task assignment</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              {isIntegrationTask && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex flex-col items-center h-auto py-2 px-3"
+                      onClick={() => handleActionClick("api-config")}
+                    >
+                      <Server className="w-4 h-4 text-gray-600 mb-1" />
+                      <span className="text-xs text-gray-600">API Config</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Configure API integration</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "flex flex-col items-center h-auto py-2 px-3",
+                      isCreateTask && "opacity-50 cursor-not-allowed"
+                    )}
+                    onClick={() => !isCreateTask && handleActionClick("notifications")}
+                    disabled={isCreateTask}
+                  >
+                    <Bell className="w-4 h-4 text-gray-600 mb-1" />
+                    <span className="text-xs text-gray-600">Notifications</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Configure notifications</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "flex flex-col items-center h-auto py-2 px-3",
+                      (isIntegrationTask || isCreateTask) && "opacity-50 cursor-not-allowed"
+                    )}
+                    onClick={() => !isIntegrationTask && !isCreateTask && handleActionClick("actions")}
+                    disabled={isIntegrationTask || isCreateTask}
+                  >
+                    <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
+                    <span className="text-xs text-gray-600">Actions</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Configure task actions</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex flex-col items-center h-auto py-2 px-3"
+                    onClick={() => handleActionClick("visibility")}
+                  >
+                    <Eye className="w-4 h-4 text-gray-600 mb-1" />
+                    <span className="text-xs text-gray-600">Visibility</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Configure visibility rules</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
         <Handle type="source" position={Position.Bottom} className="!bg-primary" />
@@ -613,8 +638,20 @@ const TaskCard = memo(({
           <DrawerHeader className="border-b border-gray-100 shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
-                <Input value={taskLabel} onChange={e => handleLabelChange(e.target.value)} className="flex-1 text-lg font-medium h-auto py-1" maxLength={50} />
+                <div className={cn(
+                  "p-2 rounded-lg",
+                  data.type === "create" && "bg-blue-50",
+                  data.type === "approval" && "bg-sky-50",
+                  data.type === "integration" && "bg-orange-50"
+                )}>
+                  {getIcon()}
+                </div>
+                <Input 
+                  value={taskLabel} 
+                  onChange={e => handleLabelChange(e.target.value)} 
+                  className="flex-1 text-lg font-medium h-auto py-1 border-none focus-visible:ring-2 focus-visible:ring-primary/20" 
+                  maxLength={50} 
+                />
               </div>
               <Button variant="ghost" size="icon" onClick={() => setIsDrawerOpen(false)} className="h-8 w-8">
                 <X className="h-4 w-4" />
@@ -633,7 +670,7 @@ const TaskCard = memo(({
                 </TabsList>
 
                 {!isIntegrationTask && (
-                  <TabsContent value="assignment">
+                  <TabsContent value="assignment" className="pt-4">
                     <TaskCardAssignment
                       assignment={assignment}
                       onAssignmentTypeChange={handleAssignmentTypeChange}
@@ -648,34 +685,38 @@ const TaskCard = memo(({
                   </TabsContent>
                 )}
 
-                {isIntegrationTask && <TabsContent value="api-config">
-                  <TaskCardApiConfig 
-                    selectedApi={data.apiConfig?.selectedApi} 
-                    failureRecourse={data.apiConfig?.failureRecourse} 
-                    previousSteps={previousSteps} 
-                    onApiSelect={handleApiSelect} 
-                    onFailureRecourseChange={handleFailureRecourseChange} 
-                  />
-                </TabsContent>}
+                {isIntegrationTask && (
+                  <TabsContent value="api-config" className="pt-4">
+                    <TaskCardApiConfig 
+                      selectedApi={data.apiConfig?.selectedApi} 
+                      failureRecourse={data.apiConfig?.failureRecourse} 
+                      previousSteps={previousSteps} 
+                      onApiSelect={handleApiSelect} 
+                      onFailureRecourseChange={handleFailureRecourseChange} 
+                    />
+                  </TabsContent>
+                )}
 
                 <TabsContent value="notifications">
                   Notifications content
                 </TabsContent>
 
-                {!isIntegrationTask && <>
-                  <TabsContent value="actions">
-                    <TaskCardActions 
-                      actions={actions} 
-                      previousSteps={previousSteps} 
-                      onActionToggle={handleActionToggle} 
-                      onActionLabelChange={handleActionLabelChange} 
-                      onSendBackStepChange={handleSendBackStepChange} 
-                    />
-                  </TabsContent>
-                  <TabsContent value="visibility">
-                    Visibility content
-                  </TabsContent>
-                </>}
+                {!isIntegrationTask && (
+                  <>
+                    <TabsContent value="actions" className="pt-4">
+                      <TaskCardActions 
+                        actions={actions} 
+                        previousSteps={previousSteps} 
+                        onActionToggle={handleActionToggle} 
+                        onActionLabelChange={handleActionLabelChange} 
+                        onSendBackStepChange={handleSendBackStepChange} 
+                      />
+                    </TabsContent>
+                    <TabsContent value="visibility">
+                      Visibility content
+                    </TabsContent>
+                  </>
+                )}
               </Tabs>
             </div>
           </div>
