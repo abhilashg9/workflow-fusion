@@ -303,7 +303,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
   return (
     <>
       <div 
-        className="bg-white rounded-xl shadow-md border border-gray-100 p-5 w-[400px] h-[225px] relative group transition-shadow hover:shadow-lg"
+        className="bg-white rounded-xl shadow-md border border-gray-100 p-5 w-[400px] h-[240px] relative group transition-shadow hover:shadow-lg"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
