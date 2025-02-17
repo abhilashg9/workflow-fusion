@@ -223,15 +223,6 @@ export const WorkflowCanvas = () => {
     const newY = sourceNode.position.y + VERTICAL_SPACING;
     const newSequenceNumber = previousNodes.length + 1;
 
-    const validationErrors = [];
-    if (type === "create") {
-      validationErrors.push("Role/User/Supplier selection is required");
-    } else if (type === "approval") {
-      validationErrors.push("Role/User/Supplier/Manager selection is required");
-    } else if (type === "integration") {
-      validationErrors.push("API selection is required");
-    }
-
     const newNode: Node<TaskNodeData> = {
       id: `task-${Date.now()}`,
       type: "taskCard",
@@ -245,13 +236,15 @@ export const WorkflowCanvas = () => {
         previousSteps: previousNodes,
         sequenceNumber: newSequenceNumber,
         onDelete: handleDeleteNode,
-        validationErrors: validationErrors,
+        validationErrors: validateNode({
+          type,
+          label: `New ${type} task`
+        } as TaskNodeData),
       },
       draggable: true,
-      className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
     };
 
-    const updatedNodes = nodes.map((node): Node<TaskNodeData> => {
+    const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
         if (node.type === "taskCard") {
           const nodePreviousSteps: PreviousStep[] = sortedNodes
@@ -263,7 +256,13 @@ export const WorkflowCanvas = () => {
             }))
             .reverse();
 
-          const currentValidationErrors = validateNode(node.data);
+          const updatedNodeData = {
+            ...node.data,
+            previousSteps: nodePreviousSteps,
+            sequenceNumber: nodePreviousSteps.length + 2,
+          };
+          
+          const validationErrors = validateNode(updatedNodeData as TaskNodeData);
           
           return {
             ...node,
@@ -272,12 +271,10 @@ export const WorkflowCanvas = () => {
               y: node.position.y + VERTICAL_SPACING,
             },
             data: {
-              ...node.data,
-              previousSteps: nodePreviousSteps,
-              sequenceNumber: nodePreviousSteps.length + 2,
-              validationErrors: currentValidationErrors,
+              ...updatedNodeData,
+              validationErrors,
             },
-            className: currentValidationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
+            className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
           };
         }
         return {
