@@ -44,12 +44,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { NodeProps } from '@xyflow/react';
 import { TaskCardProps } from "./task-card/types";
 import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
 import { TaskCardActions } from "./task-card/TaskCardActions";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
 
-export const TaskCard = ({ data, id, setNodeData, onDelete, previousSteps }: TaskCardProps) => {
+type TaskCardNodeProps = NodeProps & TaskCardProps;
+
+function TaskCard({ data, id, setNodeData, onDelete, previousSteps }: TaskCardProps) {
   const [label, setLabel] = useState(data.label);
   const [type, setType] = useState(data.type);
   const [tags, setTags] = useState(data.tags || []);
@@ -348,4 +351,7 @@ export const TaskCard = ({ data, id, setNodeData, onDelete, previousSteps }: Tas
       </div>
     </div>
   );
-};
+}
+
+export { TaskCard };
+export default TaskCard;
