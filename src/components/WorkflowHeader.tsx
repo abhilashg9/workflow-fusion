@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReactFlow, Node } from "@xyflow/react";
 import { AlertCircle, Clock, GitBranch, User, CheckCircle2, Timer, History } from "lucide-react";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 interface NodeData extends Record<string, unknown> {
   type: 'create' | 'approval' | 'integration';
@@ -115,6 +116,11 @@ export const WorkflowHeader = () => {
     // Here you would load the workflow state for the selected version
   };
 
+  const handleAuxiliaryWorkflow = (type: 'create' | 'amend' | 'short-close' | 'cancel') => {
+    toast.info(`Selected ${type} workflow`);
+    // TODO: Implement auxiliary workflow handling
+  };
+
   const formatDate = (timestamp: string) => {
     return new Date(timestamp).toLocaleString('en-US', {
       month: 'short',
@@ -140,7 +146,38 @@ export const WorkflowHeader = () => {
   return (
     <div className="h-14 border-b bg-white flex items-center justify-between px-6">
       <div className="flex items-center space-x-4">
-        <h1 className="font-medium">Invoice Workflow</h1>
+        <div className="flex items-center space-x-3">
+          <h1 className="font-medium">Invoice Workflow</h1>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="h-8 text-sm text-gray-600 hover:bg-gray-50 px-2"
+              >
+                <Menu className="h-4 w-4 mr-1" />
+                Auxiliary Workflows
+                <ChevronDown className="h-3 w-3 ml-1 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuLabel>Auxiliary Workflows</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('create')}>
+                Create
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('amend')}>
+                Amend
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('short-close')}>
+                Short Close
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('cancel')}>
+                Cancel
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
