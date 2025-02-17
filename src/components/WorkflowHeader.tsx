@@ -1,8 +1,7 @@
-
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReactFlow, Node } from "@xyflow/react";
-import { AlertCircle, Clock, GitBranch, User, CheckCircle2, Timer } from "lucide-react";
+import { AlertCircle, Clock, GitBranch, User, CheckCircle2, Timer, History } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
@@ -61,7 +60,6 @@ export const WorkflowHeader = () => {
     changes: ["Added approval step", "Updated integration configuration"]
   });
 
-  // Mock versions data with more detailed information
   const workflowVersions: WorkflowVersion[] = [
     {
       id: "current",
@@ -149,7 +147,7 @@ export const WorkflowHeader = () => {
               variant="ghost" 
               className="text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2"
             >
-              <GitBranch className="h-4 w-4" />
+              <History className="h-4 w-4" />
               <div className="flex items-center gap-2">
                 <span className="font-medium">{selectedVersion.version}</span>
                 {!selectedVersion.isPublished && (
@@ -163,7 +161,7 @@ export const WorkflowHeader = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-96" align="start">
             <DropdownMenuLabel className="flex items-center gap-2 text-gray-700">
-              <GitBranch className="h-4 w-4" />
+              <History className="h-4 w-4" />
               Version History
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
