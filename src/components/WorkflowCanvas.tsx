@@ -27,7 +27,7 @@ interface PreviousStep {
   sequenceNumber: number;
 }
 
-interface TaskNodeData {
+interface TaskNodeData extends Record<string, unknown> {
   type?: "create" | "approval" | "integration";
   label: string;
   tags?: string[];
@@ -102,12 +102,15 @@ const taskTypes = [
   },
 ];
 
-const initialNodes: CustomNode[] = [
+const initialNodes: Node<TaskNodeData>[] = [
   {
     id: "start",
     type: "input",
     position: { x: CENTER_X - 50, y: START_Y },
-    data: { label: "Start" },
+    data: { 
+      label: "Start",
+      type: undefined
+    },
     style: {
       background: "#8B5CF6",
       color: "white",
@@ -122,7 +125,10 @@ const initialNodes: CustomNode[] = [
     id: "end",
     type: "output",
     position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
-    data: { label: "End" },
+    data: { 
+      label: "End",
+      type: undefined
+    },
     style: {
       background: "#0EA5E9",
       color: "white",
@@ -166,7 +172,7 @@ const initialEdges: Edge[] = [
 ];
 
 export const WorkflowCanvas = () => {
-  const [nodes, setNodes] = useState<CustomNode[]>(initialNodes);
+  const [nodes, setNodes] = useState<Node<TaskNodeData>[]>(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
@@ -202,7 +208,7 @@ export const WorkflowCanvas = () => {
     if (type === "create") {
       const isFirstStep = sourceNode.id === "start";
       const isParallelToCreate = sourceNode.type === "taskCard" && 
-                                (sourceNode.data as TaskNodeData).type === "create" && 
+                                sourceNode.data.type === "create" && 
                                 sourceNode.position.y === START_Y + VERTICAL_SPACING;
 
       if (!isFirstStep && !isParallelToCreate) {
@@ -217,7 +223,7 @@ export const WorkflowCanvas = () => {
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
         id: node.id,
-        label: node.data.label || "",
+        label: node.data.label,
         sequenceNumber: idx + 1
       }))
       .reverse();
@@ -225,7 +231,7 @@ export const WorkflowCanvas = () => {
     const newY = sourceNode.position.y + VERTICAL_SPACING;
     const newSequenceNumber = previousNodes.length + 1;
 
-    const newNode: CustomNode = {
+    const newNode: Node<TaskNodeData> = {
       id: `task-${Date.now()}`,
       type: "taskCard",
       position: { x: CENTER_X - 125, y: newY },
@@ -249,7 +255,7 @@ export const WorkflowCanvas = () => {
             .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
             .map((n, idx) => ({
               id: n.id,
-              label: n.data.label || "",
+              label: n.data.label,
               sequenceNumber: idx + 1
             }))
             .reverse();
@@ -274,15 +280,12 @@ export const WorkflowCanvas = () => {
             y: node.position.y + VERTICAL_SPACING,
           },
           data: {
-            ...node.data,
-            label: node.data.label,
+            ...node.data
           },
         };
       }
       return node;
-    }) as CustomNode[];
-
-    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
+    });
 
     const newEdges: Edge[] = [
       {
@@ -342,6 +345,7 @@ export const WorkflowCanvas = () => {
     ];
 
     setNodes([...updatedNodes, newNode]);
+    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
     setIsModalOpen(false);
   };
 
@@ -572,7 +576,7 @@ export const WorkflowCanvas = () => {
               const sourceNode = selectedEdge ? nodes.find(n => n.id === selectedEdge.source) : null;
               const isFirstStep = sourceNode?.id === "start";
               const isParallelToCreate = sourceNode?.type === "taskCard" && 
-                                      (sourceNode.data as TaskNodeData).type === "create" &&
+                                      sourceNode.data.type === "create" &&
                                       sourceNode.position.y === START_Y + VERTICAL_SPACING;
               
               const isDisabled = task.type === "create" && !isFirstStep && !isParallelToCreate;
