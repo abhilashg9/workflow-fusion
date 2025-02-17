@@ -1,20 +1,19 @@
+
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
   Background,
   Controls,
-  Node,
-  Edge,
   Connection,
+  Edge,
   addEdge,
   MarkerType,
   useReactFlow,
+  Node,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
-import { toast } from "sonner";
-import { TaskCard } from "@/components/TaskCard";
+
+import TaskCard from "../TaskCard";
 import { TaskSelectionModal } from "./TaskSelectionModal";
 import { WorkflowEdge } from "./WorkflowEdge";
 import { CustomNode, TaskNodeData, TaskType, PreviousStep } from "./types";
