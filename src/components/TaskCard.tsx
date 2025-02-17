@@ -1,7 +1,6 @@
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { FilePlus2, UserCheck, Workflow, Users, Filter, ShieldAlert } from "lucide-react";
-import { User, Bell, ArrowRight, Eye, Server, AlertCircle, X, Trash2 } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow, Users, Filter, ShieldAlert, Plug, ArrowLeftRight, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -339,25 +338,44 @@ const TaskCard = memo(({
           <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
             <Server className="w-4 h-4" />
             {!data.apiConfig?.selectedApi ? (
-              <span className="italic">Selected API will appear here</span>
+              <span className="italic">Select an API for integration</span>
             ) : (
-              <Badge variant="secondary" className="text-xs">
-                {data.apiConfig.selectedApi.name}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                  <Plug className="w-3 h-3" />
+                  {data.apiConfig.selectedApi.name}
+                </Badge>
+                <span className="text-xs text-gray-500 capitalize">({data.apiConfig.selectedApi.type})</span>
+              </div>
             )}
           </div>
           <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
             <ShieldAlert className="w-4 h-4" />
             {!data.apiConfig?.failureRecourse ? (
-              <span className="italic">Selected fallback option will appear here</span>
+              <span className="italic">Configure fallback option</span>
             ) : (
-              <Badge variant="outline" className="text-xs">
+              <div className="flex items-center gap-2">
                 {data.apiConfig.failureRecourse.type === "sendBack" ? (
-                  `Step ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.sequenceNumber}: ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.label}`
+                  <Badge variant="outline" className="text-xs flex items-center gap-1">
+                    <ArrowLeftRight className="w-3 h-3" />
+                    Send back to Step {previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.sequenceNumber}
+                  </Badge>
                 ) : (
-                  `Assign to ${data.apiConfig.failureRecourse.assignee?.type === 'user' ? 'User' : 'Role'}`
+                  <Badge variant="outline" className="text-xs flex items-center gap-1">
+                    {data.apiConfig.failureRecourse.assignee?.type === 'user' ? (
+                      <>
+                        <User className="w-3 h-3" />
+                        Assign to {data.apiConfig.failureRecourse.assignee.value}
+                      </>
+                    ) : (
+                      <>
+                        <Users className="w-3 h-3" />
+                        Assign to {data.apiConfig.failureRecourse.assignee?.value} (Role)
+                      </>
+                    )}
+                  </Badge>
                 )}
-              </Badge>
+              </div>
             )}
           </div>
         </div>
