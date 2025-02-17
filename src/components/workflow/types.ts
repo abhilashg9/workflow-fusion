@@ -1,7 +1,7 @@
 
 import { Node, Edge, MarkerType } from "@xyflow/react";
 
-export type TaskType = "create" | "approval" | "integration" | "condition";
+export type TaskType = "create" | "approval" | "integration" | "condition" | "split";
 
 export interface PreviousStep {
   id: string;
@@ -33,6 +33,12 @@ export interface TaskAction {
   sendBack?: {
     step: string;
   };
+}
+
+export interface StepOption {
+  id: string;
+  label: string;
+  sequenceNumber: number;
 }
 
 export interface TaskNodeData extends Record<string, unknown> {
