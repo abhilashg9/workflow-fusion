@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -16,6 +17,7 @@ import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucid
 import { toast } from "sonner";
 import TaskCard from "./TaskCard";
 
+// Move constants outside the component to make them globally available
 const VERTICAL_SPACING = 250;
 const START_Y = 150;
 const CENTER_X = 250;
@@ -221,8 +223,6 @@ export const WorkflowCanvas = () => {
       }))
       .reverse();
 
-    const VERTICAL_SPACING = 250;
-    const CENTER_X = 250;
     const newY = sourceNode.position.y + VERTICAL_SPACING;
     const newSequenceNumber = previousNodes.length + 1;
 
@@ -245,27 +245,36 @@ export const WorkflowCanvas = () => {
 
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
-        const nodePreviousSteps: PreviousStep[] = sortedNodes
-          .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
-          .map((n, idx) => ({
-            id: n.id,
-            label: `${idx + 1}. ${(n as Node<TaskNodeData>).data.label}`,
-            sequenceNumber: idx + 1
-          }))
-          .reverse();
+        if (node.type === "taskCard") {
+          const nodePreviousSteps: PreviousStep[] = sortedNodes
+            .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
+            .map((n, idx) => ({
+              id: n.id,
+              label: (n as Node<TaskNodeData>).data.label || "",
+              sequenceNumber: idx + 1
+            }))
+            .reverse();
 
+          return {
+            ...node,
+            position: {
+              x: CENTER_X - 125,
+              y: node.position.y + VERTICAL_SPACING,
+            },
+            data: {
+              ...node.data,
+              previousSteps: nodePreviousSteps,
+              sequenceNumber: nodePreviousSteps.length + 2
+            },
+          } as Node<TaskNodeData>;
+        }
         return {
           ...node,
           position: {
-            x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
-            y: node.id === targetNode.id ? newY + VERTICAL_SPACING : node.position.y + VERTICAL_SPACING,
+            x: CENTER_X - 50,
+            y: node.position.y + VERTICAL_SPACING,
           },
-          data: node.type === "taskCard" ? {
-            ...node.data,
-            previousSteps: nodePreviousSteps,
-            sequenceNumber: nodePreviousSteps.length + 2
-          } : node.data,
-        };
+        } as Node<{ label: string }>;
       }
       return node;
     });
