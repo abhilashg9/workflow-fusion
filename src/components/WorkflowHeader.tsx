@@ -1,3 +1,4 @@
+
 import { ChevronDown, Plus, PenLine, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReactFlow, Node } from "@xyflow/react";
@@ -166,8 +167,6 @@ export const WorkflowHeader = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56 bg-white shadow-lg border-[#D3E4FD]">
-              <DropdownMenuLabel className="text-[#0EA5E9]">Applies in</DropdownMenuLabel>
-              <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={() => handleAuxiliaryWorkflow('create')} 
                 className="flex items-center gap-2 hover:bg-[#D3E4FD] text-gray-700 focus:bg-[#D3E4FD] focus:text-[#0EA5E9]"
