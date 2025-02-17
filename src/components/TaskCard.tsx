@@ -30,7 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { TaskCardActions } from "./task-card/TaskCardActions";
 import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
-import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
+import { TaskCardProps, AssignmentConfig, TaskAction, ApiConfig, FailureRecourse } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
 import {
@@ -63,11 +63,17 @@ const TaskCard = memo(({
   const [selectedWorkflowActions, setSelectedWorkflowActions] = useState<string[]>([]);
 
   useEffect(() => {
-    setTaskLabel(data.label);
-  }, [data.label]);
-  useEffect(() => {
     validateTask();
   }, [data]);
+
+  const handleWorkflowActionToggle = (action: string) => {
+    setSelectedWorkflowActions(prev => {
+      if (prev.includes(action)) {
+        return prev.filter(a => a !== action);
+      }
+      return [...prev, action];
+    });
+  };
 
   const validateTask = () => {
     const errors: string[] = [];
@@ -495,18 +501,22 @@ const TaskCard = memo(({
   };
 
   return <div className={cn("bg-white rounded-lg shadow-sm border p-4 w-[400px] relative group", getCardHeight(), validationErrors.length > 0 && "border-red-400")} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-      {validationErrors.length > 0 && <TooltipProvider>
+      {validationErrors.length > 0 && (
+        <TooltipProvider>
           <Tooltip>
             <TooltipTrigger className="absolute top-2 right-2">
               <ShieldAlert className="w-4 h-4 text-red-500" />
             </TooltipTrigger>
             <TooltipContent>
               <div className="space-y-1">
-                {validationErrors.map((error, index) => <p key={index} className="text-xs text-red-500">{error}</p>)}
+                {validationErrors.map((error, index) => (
+                  <p key={index} className="text-xs text-red-500">{error}</p>
+                ))}
               </div>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>}
+        </TooltipProvider>
+      )}
       {isHovered && <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleDeleteTask}>
           <X className="h-4 w-4" />
         </Button>}
@@ -556,9 +566,11 @@ const TaskCard = memo(({
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                {data.sequenceNumber > 0 && <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
-                  Step {data.sequenceNumber}
-                </span>}
+                {data.sequenceNumber > 0 && (
+                  <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
+                    Step {data.sequenceNumber}
+                  </span>
+                )}
               </div>
             </div>
           </div>
