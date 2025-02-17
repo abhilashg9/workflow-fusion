@@ -13,6 +13,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
+import { toast } from "sonner";
 import TaskCard from "./TaskCard";
 
 interface PreviousStep {
@@ -34,15 +35,20 @@ type TaskType = "create" | "approval" | "integration";
 
 type CustomNode = Node<TaskNodeData> | Node<{ label: string }>;
 
-const TaskOption = ({ icon: Icon, title, subtitle, onClick }: { 
-  icon: any, 
-  title: string, 
-  subtitle: string,
-  onClick: () => void 
-}) => (
+interface TaskOptionProps {
+  icon: React.ElementType;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+const TaskOption = ({ icon: Icon, title, subtitle, onClick, disabled }: TaskOptionProps) => (
   <div 
-    className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-    onClick={onClick}
+    className={`flex items-start space-x-4 p-4 rounded-lg transition-colors ${
+      disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'
+    }`}
+    onClick={() => !disabled && onClick()}
   >
     <div className="p-2 rounded-lg bg-primary/10">
       <Icon className="w-6 h-6 text-primary" />
@@ -188,6 +194,21 @@ export const WorkflowCanvas = () => {
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
     const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
     
+    // Check if we're trying to add a create task
+    if (type === "create") {
+      // Only allow create tasks if source is "start" node (first step) or if parallel to another create task
+      const isFirstStep = sourceNode.id === "start";
+      const isParallelToCreate = sourceNode.type === "taskCard" && 
+                                (sourceNode.data as TaskNodeData).type === "create" && 
+                                sourceNode.position.y === START_Y + VERTICAL_SPACING;
+
+      if (!isFirstStep && !isParallelToCreate) {
+        toast.error("Create tasks can only be added as the first step or parallel to other create tasks");
+        setIsModalOpen(false);
+        return;
+      }
+    }
+
     const previousNodes: PreviousStep[] = sortedNodes
       .slice(0, sourceNodeIndex + 1)
       .filter(node => node.type === "taskCard")
@@ -534,19 +555,31 @@ export const WorkflowCanvas = () => {
             <DialogTitle>Select task to add</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {taskTypes.map((task, index) => (
-              <TaskOption
-                key={index}
-                icon={task.icon}
-                title={task.title}
-                subtitle={task.subtitle}
-                onClick={() => {
-                  if (task.type === "create" || task.type === "approval" || task.type === "integration") {
-                    handleTaskSelection(task.type);
-                  }
-                }}
-              />
-            ))}
+            {taskTypes.map((task, index) => {
+              const sourceNode = selectedEdge ? nodes.find(n => n.id === selectedEdge.source) : null;
+              const isFirstStep = sourceNode?.id === "start";
+              const isParallelToCreate = sourceNode?.type === "taskCard" && 
+                                      (sourceNode.data as TaskNodeData).type === "create" &&
+                                      sourceNode.position.y === START_Y + VERTICAL_SPACING;
+              
+              // Disable create task option unless it's first step or parallel to create
+              const isDisabled = task.type === "create" && !isFirstStep && !isParallelToCreate;
+
+              return (
+                <TaskOption
+                  key={index}
+                  icon={task.icon}
+                  title={task.title}
+                  subtitle={task.subtitle}
+                  onClick={() => {
+                    if (task.type === "create" || task.type === "approval" || task.type === "integration") {
+                      handleTaskSelection(task.type);
+                    }
+                  }}
+                  disabled={isDisabled}
+                />
+              );
+            })}
           </div>
         </DialogContent>
       </Dialog>
