@@ -94,14 +94,14 @@ export const TaskCardAssignment = ({
       {isApprovalTask && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">Value Threshold</label>
+            <label className="text-sm font-medium">Value Filter</label>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="w-[200px] text-xs">Set a value threshold for this approval task</p>
+                  <p className="w-[200px] text-xs">Set a value filter for this approval task</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -113,7 +113,7 @@ export const TaskCardAssignment = ({
               min="0"
               value={assignment.value || ""}
               onChange={handleValueChange}
-              placeholder="Enter a value to enable the task"
+              placeholder="Enter a numerical value"
               className="flex-1"
             />
           </div>
