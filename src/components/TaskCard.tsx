@@ -1,4 +1,3 @@
-
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { 
@@ -17,8 +16,8 @@ import {
   ArrowRight, 
   Eye, 
   Server, 
-  X, 
-  Trash2 
+  X,
+  GitBranch 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -32,7 +31,6 @@ import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
 import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
-import { ApiConfig, FailureRecourse } from "../components/workflow/types";
 
 const TaskCard = memo(({
   data,
@@ -553,64 +551,75 @@ const TaskCard = memo(({
   };
 
   return (
-    <>
-      <div 
-        className={cn(
-          "bg-white rounded-lg shadow-sm border p-4 w-[400px] relative group",
-          getCardHeight(),
-          validationErrors.length > 0 && "border-red-400"
-        )}
-      >
-        {validationErrors.length > 0 && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger className="absolute top-2 right-2">
-                <div className="h-4 w-4" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="space-y-1">
-                  {validationErrors.map((error, index) => (
-                    <p key={index} className="text-xs text-red-500">{error}</p>
-                  ))}
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-        {isHovered && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" 
-            onClick={handleDeleteTask}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
-        <Handle type="target" position={Position.Top} />
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
-            <div className="flex-1 space-y-1">
-              <div className="flex items-center justify-between gap-2">
-                <input type="text" value={taskLabel} onChange={e => handleLabelChange(e.target.value)} className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1" maxLength={50} />
-                {data.sequenceNumber > 0 && <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full shrink-0">
+    <div 
+      className={cn(
+        "bg-white rounded-lg shadow-sm border p-4 w-[400px] relative group",
+        getCardHeight(),
+        validationErrors.length > 0 && "border-red-400"
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {validationErrors.length > 0 && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="absolute top-2 right-2">
+              <ShieldAlert className="w-4 h-4 text-red-500" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="space-y-1">
+                {validationErrors.map((error, index) => (
+                  <p key={index} className="text-xs text-red-500">{error}</p>
+                ))}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      {isHovered && (
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" 
+          onClick={handleDeleteTask}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      )}
+      <Handle type="target" position={Position.Top} />
+      <div className="space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
+          <div className="flex-1 space-y-1">
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                value={taskLabel} 
+                onChange={e => handleLabelChange(e.target.value)} 
+                className="flex-1 text-base font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1" 
+                maxLength={50} 
+              />
+              <div className="flex items-center gap-1 shrink-0">
+                <GitBranch className="w-4 h-4 text-gray-400" />
+                {data.sequenceNumber > 0 && (
+                  <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
                     Step {data.sequenceNumber}
-                  </span>}
+                  </span>
+                )}
               </div>
             </div>
           </div>
-
-          <div className="space-y-3 bg-gray-50/50 p-3 rounded-lg py-0 px-0">
-            {renderAssignmentTags()}
-          </div>
-
-          <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
-            {renderActionButtons()}
-          </div>
         </div>
-        <Handle type="source" position={Position.Bottom} />
+
+        <div className="space-y-3 bg-gray-50/50 p-3 rounded-lg py-0 px-0">
+          {renderAssignmentTags()}
+        </div>
+
+        <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
+          {renderActionButtons()}
+        </div>
       </div>
+      <Handle type="source" position={Position.Bottom} />
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200 flex flex-col">
@@ -691,7 +700,7 @@ const TaskCard = memo(({
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-    </>
+    </div>
   );
 });
 
