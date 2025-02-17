@@ -1,10 +1,8 @@
 
 export interface AssignmentConfig {
-  type: "roles" | "users" | "dynamic_users" | "supplier" | "manager" | "manager_hierarchy";
+  type: "roles" | "users" | "supplier";
   roles?: string[];
-  filters?: string[];
   users?: string[];
-  dynamicUsers?: string[];
 }
 
 export interface TaskAction {
