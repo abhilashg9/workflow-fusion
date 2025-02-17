@@ -487,7 +487,7 @@ export const WorkflowCanvas = () => {
 
       const validationErrors = validateNode(initialData);
 
-      const newNode: Node<TaskNodeData> = {
+      newNode = {
         id: `task-${Date.now()}`,
         type: "taskCard",
         position: { x: CENTER_X - 125, y: newY },
@@ -543,8 +543,6 @@ export const WorkflowCanvas = () => {
       }
       return node;
     });
-
-    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
 
     const newEdges: Edge[] = [
       {
