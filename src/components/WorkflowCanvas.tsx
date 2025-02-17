@@ -91,30 +91,38 @@ const initialNodes: Node<TaskNodeData>[] = [
       type: undefined
     },
     style: {
-      background: "#8B5CF6",
+      background: "#3388eb",
       color: "white",
       border: "none",
       borderRadius: "4px",
       padding: "10px 20px",
       minWidth: "100px",
+      height: "40px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
       textAlign: "center",
     },
   },
   {
     id: "end",
     type: "output",
-    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
+    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING * 1.5 },
     data: { 
       label: "End",
       type: undefined
     },
     style: {
-      background: "#0EA5E9",
+      background: "#3388eb",
       color: "white",
       border: "none",
       borderRadius: "4px",
       padding: "10px 20px",
       minWidth: "100px",
+      height: "40px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
       textAlign: "center",
     },
   },
@@ -243,7 +251,8 @@ export const WorkflowCanvas = () => {
     const CENTER_X = 250;
     
     const updatedNodes = sortedNodes.map((n, index) => {
-      const currentSequence = n.type === "taskCard" ? index + 1 : 0;
+      const isTaskCard = n.type === "taskCard";
+      const currentSequence = isTaskCard ? index : 0;
       const previousNodes: PreviousStep[] = sortedNodes
         .slice(0, index)
         .filter(prev => prev.type === "taskCard")
@@ -254,13 +263,16 @@ export const WorkflowCanvas = () => {
         }))
         .reverse();
 
+      const nodeHeight = isTaskCard ? 125 : 40;
+      const verticalOffset = (nodeHeight - 40) / 2;
+
       return {
         ...n,
         position: {
-          x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
-          y: START_Y + (index * VERTICAL_SPACING),
+          x: CENTER_X - (isTaskCard ? 125 : 50),
+          y: START_Y + (index * VERTICAL_SPACING) + (isTaskCard ? 0 : verticalOffset),
         },
-        data: n.type === "taskCard" ? {
+        data: isTaskCard ? {
           ...n.data,
           previousSteps: previousNodes,
           sequenceNumber: currentSequence
@@ -268,6 +280,11 @@ export const WorkflowCanvas = () => {
         draggable: true,
       };
     });
+
+    const lastNode = updatedNodes[updatedNodes.length - 1];
+    if (lastNode.id === "end") {
+      lastNode.position.y += VERTICAL_SPACING * 0.5;
+    }
 
     setNodes(updatedNodes);
     adjustViewport();
@@ -329,7 +346,8 @@ export const WorkflowCanvas = () => {
     const CENTER_X = 250;
     
     const updatedNodes = sortedNodes.map((node, index) => {
-      const currentSequence = node.type === "taskCard" ? index + 1 : 0;
+      const isTaskCard = node.type === "taskCard";
+      const currentSequence = isTaskCard ? index : 0;
       const previousNodes: PreviousStep[] = sortedNodes
         .slice(0, index)
         .filter(prev => prev.type === "taskCard")
@@ -340,11 +358,14 @@ export const WorkflowCanvas = () => {
         }))
         .reverse();
 
+      const nodeHeight = isTaskCard ? 125 : 40;
+      const verticalOffset = (nodeHeight - 40) / 2;
+
       return {
         ...node,
         position: {
           x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
-          y: START_Y + (index * VERTICAL_SPACING),
+          y: START_Y + (index * VERTICAL_SPACING) + (isTaskCard ? 0 : verticalOffset),
         },
         data: node.type === "taskCard" ? {
           ...node.data,
