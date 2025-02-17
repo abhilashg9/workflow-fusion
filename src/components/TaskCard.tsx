@@ -1,3 +1,4 @@
+
 import { memo, useState, useEffect, useMemo } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, Users, Filter, AlertCircle } from "lucide-react";
@@ -6,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TaskCardProps } from "./task-card/types";
+import { LucideIcon } from "lucide-react";
 
 const TaskCard = memo(({
   data,
@@ -33,7 +35,7 @@ const TaskCard = memo(({
     }
   }, [validationErrors, data, setNodeData]);
 
-  const taskIcon = useMemo(() => {
+  const TaskIcon = useMemo((): LucideIcon => {
     switch (data.type) {
       case "create":
         return FilePlus2;
@@ -93,7 +95,7 @@ const TaskCard = memo(({
         </TooltipProvider>
       )}
       <div className="flex items-center space-x-2 mb-4">
-        <taskIcon className="w-5 h-5 text-gray-700" />
+        <TaskIcon className="w-5 h-5 text-gray-700" />
         <Input
           type="text"
           placeholder="Task Label"
