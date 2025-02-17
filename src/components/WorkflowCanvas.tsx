@@ -12,12 +12,12 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-import TaskCard from "../TaskCard";
-import { TaskSelectionModal } from "./TaskSelectionModal";
-import { WorkflowEdge } from "./WorkflowEdge";
-import { CustomNode, TaskNodeData, TaskType, PreviousStep } from "./types";
-import JunctionNode from "../task-card/JunctionNode";
-import ConditionCard from "../task-card/ConditionCard";
+import TaskCard from "@/components/task-card/TaskCard";
+import { TaskSelectionModal } from "@/components/workflow/TaskSelectionModal";
+import { WorkflowEdge } from "@/components/workflow/WorkflowEdge";
+import { CustomNode, TaskNodeData, TaskType, PreviousStep } from "@/components/workflow/types";
+import JunctionNode from "@/components/task-card/JunctionNode";
+import ConditionCard from "@/components/task-card/ConditionCard";
 
 const nodeTypes = {
   taskCard: TaskCard,
