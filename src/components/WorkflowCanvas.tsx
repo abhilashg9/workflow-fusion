@@ -16,6 +16,10 @@ import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucid
 import { toast } from "sonner";
 import TaskCard from "./TaskCard";
 
+const VERTICAL_SPACING = 250;
+const START_Y = 150;
+const CENTER_X = 250;
+
 interface PreviousStep {
   id: string;
   label: string;
@@ -101,7 +105,7 @@ const initialNodes: CustomNode[] = [
   {
     id: "start",
     type: "input",
-    position: { x: 250, y: 150 },
+    position: { x: CENTER_X - 50, y: START_Y },
     data: { label: "Start" },
     style: {
       background: "#8B5CF6",
@@ -116,7 +120,7 @@ const initialNodes: CustomNode[] = [
   {
     id: "end",
     type: "output",
-    position: { x: 250, y: 400 },
+    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
     data: { label: "End" },
     style: {
       background: "#0EA5E9",
@@ -194,9 +198,7 @@ export const WorkflowCanvas = () => {
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
     const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
     
-    // Check if we're trying to add a create task
     if (type === "create") {
-      // Only allow create tasks if source is "start" node (first step) or if parallel to another create task
       const isFirstStep = sourceNode.id === "start";
       const isParallelToCreate = sourceNode.type === "taskCard" && 
                                 (sourceNode.data as TaskNodeData).type === "create" && 
@@ -397,7 +399,7 @@ export const WorkflowCanvas = () => {
           ...n.data,
           previousSteps: previousNodes,
           sequenceNumber: currentSequence
-        } : n.data,
+        } : node.data,
         draggable: true,
       };
     });
@@ -562,7 +564,6 @@ export const WorkflowCanvas = () => {
                                       (sourceNode.data as TaskNodeData).type === "create" &&
                                       sourceNode.position.y === START_Y + VERTICAL_SPACING;
               
-              // Disable create task option unless it's first step or parallel to create
               const isDisabled = task.type === "create" && !isFirstStep && !isParallelToCreate;
 
               return (
