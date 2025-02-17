@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import {
   Select,
@@ -34,6 +35,10 @@ interface TaskCardApiConfigProps {
   onApiSelect: (api: ApiConfig) => void;
   onFailureRecourseChange: (recourse: FailureRecourse) => void;
 }
+
+// Mock data for roles and users - in a real app this would come from an API
+const MOCK_ROLES = ["Admin", "Manager", "Approver", "Reviewer"];
+const MOCK_USERS = ["John Doe", "Jane Smith", "Bob Wilson", "Alice Brown"];
 
 export const TaskCardApiConfig = ({
   selectedApi,
@@ -185,7 +190,7 @@ export const TaskCardApiConfig = ({
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Label className="text-sm font-medium">
-            Failure Recourse
+            Fallback Options
           </Label>
           <TooltipProvider>
             <Tooltip>
@@ -238,27 +243,81 @@ export const TaskCardApiConfig = ({
           <div className="flex items-start space-x-2">
             <RadioGroupItem value="assign" id="assign" />
             <div className="grid gap-1.5 leading-none">
-              <Label htmlFor="assign">Assign to user</Label>
+              <Label htmlFor="assign">Assign to</Label>
               {recourseType === "assign" && (
-                <div className="flex gap-2 mt-2">
-                  <Button
-                    variant={assigneeType === "user" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleAssigneeTypeChange("user")}
-                    className="flex items-center gap-2"
-                  >
-                    <User className="w-4 h-4" />
-                    User
-                  </Button>
-                  <Button
-                    variant={assigneeType === "role" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleAssigneeTypeChange("role")}
-                    className="flex items-center gap-2"
-                  >
-                    <Users className="w-4 h-4" />
-                    Role
-                  </Button>
+                <div className="space-y-3 mt-2">
+                  <div className="flex gap-2">
+                    <Button
+                      variant={assigneeType === "user" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleAssigneeTypeChange("user")}
+                      className="flex items-center gap-2"
+                    >
+                      <User className="w-4 h-4" />
+                      User
+                    </Button>
+                    <Button
+                      variant={assigneeType === "role" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleAssigneeTypeChange("role")}
+                      className="flex items-center gap-2"
+                    >
+                      <Users className="w-4 h-4" />
+                      Role
+                    </Button>
+                  </div>
+                  
+                  {assigneeType === "role" && (
+                    <Select
+                      value={failureRecourse?.assignee?.value}
+                      onValueChange={(value) =>
+                        onFailureRecourseChange({
+                          type: "assign",
+                          assignee: {
+                            type: "role",
+                            value
+                          },
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MOCK_ROLES.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+
+                  {assigneeType === "user" && (
+                    <Select
+                      value={failureRecourse?.assignee?.value}
+                      onValueChange={(value) =>
+                        onFailureRecourseChange({
+                          type: "assign",
+                          assignee: {
+                            type: "user",
+                            value
+                          },
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MOCK_USERS.map((user) => (
+                          <SelectItem key={user} value={user}>
+                            {user}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               )}
             </div>
