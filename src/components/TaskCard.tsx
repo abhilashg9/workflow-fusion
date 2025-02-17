@@ -364,6 +364,18 @@ const TaskCard = memo(({
     }
   };
 
+  const handleValueChange = (newValue: number | undefined) => {
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        assignment: {
+          ...data.assignment,
+          value: newValue
+        }
+      });
+    }
+  };
+
   const renderActionButtons = () => {
     return (
       <TooltipProvider>
@@ -518,6 +530,7 @@ const TaskCard = memo(({
                       onUserSelect={handleUserSelect}
                       onDynamicUserSelect={handleDynamicUserSelect}
                       onRemoveItem={removeItem}
+                      onValueChange={handleValueChange}
                       taskType={data.type}
                     />
                   </TabsContent>

@@ -5,6 +5,7 @@ export interface AssignmentConfig {
   filters?: string[];
   users?: string[];
   dynamicUsers?: string[];
+  value?: number;
 }
 
 export interface TaskAction {
@@ -47,3 +48,4 @@ export interface TaskCardProps {
   onDelete?: (id: string) => void;
   previousSteps?: { id: string; label: string; sequenceNumber: number }[];
 }
+

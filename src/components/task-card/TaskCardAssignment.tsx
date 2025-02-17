@@ -6,7 +6,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { User, Users, Filter, X, HelpCircle, Building2, Network, UserCog, GitBranch } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { User, Users, Filter, X, HelpCircle, Building2, Network, UserCog, GitBranch, DollarSign } from "lucide-react";
 import { AssignmentConfig } from "./types";
 import { ROLES_OPTIONS, FILTERS_OPTIONS, USERS_OPTIONS, DYNAMIC_USERS_OPTIONS } from "./constants";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -19,6 +20,7 @@ interface TaskCardAssignmentProps {
   onUserSelect: (user: string) => void;
   onDynamicUserSelect: (user: string) => void;
   onRemoveItem: (type: string, item: string) => void;
+  onValueChange?: (value: number | undefined) => void;
   taskType: "create" | "approval" | "integration";
 }
 
@@ -30,9 +32,18 @@ export const TaskCardAssignment = ({
   onUserSelect,
   onDynamicUserSelect,
   onRemoveItem,
+  onValueChange,
   taskType
 }: TaskCardAssignmentProps) => {
   const isCreateTask = taskType === "create";
+  const isApprovalTask = taskType === "approval";
+
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value === "" ? undefined : parseInt(e.target.value);
+    if (onValueChange && (newValue === undefined || newValue >= 0)) {
+      onValueChange(newValue);
+    }
+  };
 
   const handleSelect = (type: 'role' | 'filter' | 'user' | 'dynamicUser', value: string) => {
     switch(type) {
@@ -80,6 +91,38 @@ export const TaskCardAssignment = ({
 
   return (
     <div className="space-y-6">
+      {isApprovalTask && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium">Value Threshold</label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="w-[200px] text-xs">Set a value threshold for this approval task</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-gray-400" />
+            <Input
+              type="number"
+              min="0"
+              value={assignment.value || ""}
+              onChange={handleValueChange}
+              placeholder="Enter a value to enable the task"
+              className="flex-1"
+            />
+          </div>
+          <p className="text-sm text-gray-500 italic">
+            The task will be active for all transactions with a value greater than the entered amount.
+          </p>
+        </div>
+      )}
+
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">Assignment Type</label>
