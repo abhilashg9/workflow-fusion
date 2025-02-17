@@ -25,6 +25,7 @@ export interface TaskCardProps {
     assignment?: AssignmentConfig;
     actions?: TaskAction[];
     sequenceNumber?: number;
+    workflows?: ("amend" | "short-close" | "cancel")[];
     apiConfig?: {
       selectedApi?: {
         id: string;
@@ -48,4 +49,3 @@ export interface TaskCardProps {
   onDelete?: (id: string) => void;
   previousSteps?: { id: string; label: string; sequenceNumber: number }[];
 }
-
