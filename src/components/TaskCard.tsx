@@ -1,3 +1,4 @@
+
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, Users, Filter, ShieldAlert } from "lucide-react";
@@ -515,16 +516,16 @@ const TaskCard = memo(({
     <>
       <div 
         className={cn(
-          "bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] relative group",
+          "bg-white rounded-lg shadow-sm border p-4 w-[400px] relative group",
           getCardHeight(),
-          validationErrors.length > 0 && "border-red-200"
+          validationErrors.length > 0 && "border-red-400 border-2"
         )}
       >
         {validationErrors.length > 0 && (
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <AlertCircle className="absolute top-2 right-2 h-4 w-4 text-red-500" />
+              <TooltipTrigger className="absolute top-2 right-2">
+                <div className="h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent>
                 <div className="space-y-1">
@@ -536,10 +537,17 @@ const TaskCard = memo(({
             </Tooltip>
           </TooltipProvider>
         )}
-        <Handle type="target" position={Position.Top} />
-        {isHovered && <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleDeleteTask}>
+        {isHovered && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" 
+            onClick={handleDeleteTask}
+          >
             <X className="h-4 w-4" />
-          </Button>}
+          </Button>
+        )}
+        <Handle type="target" position={Position.Top} />
         <div className="space-y-4">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
