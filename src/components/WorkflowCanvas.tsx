@@ -565,11 +565,11 @@ export const WorkflowCanvas = () => {
     return errors;
   };
 
-  const updateNodeValidation = (nodeId: string, newData: any) => {
+  const updateNodeValidation = (nodeId: string, newData: Partial<TaskNodeData>) => {
     setNodes((nds) =>
       nds.map((node) => {
         if (node.id === nodeId) {
-          const updatedData = { ...node.data, ...newData };
+          const updatedData = { ...node.data, ...newData } as TaskNodeData;
           const validationErrors = validateNode(updatedData);
           return {
             ...node,

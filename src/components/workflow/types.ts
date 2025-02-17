@@ -26,6 +26,15 @@ export interface FailureRecourse {
   };
 }
 
+export interface TaskAction {
+  action: string;
+  label: string;
+  enabled: boolean;
+  sendBack?: {
+    step: string;
+  };
+}
+
 export interface TaskNodeData extends Record<string, unknown> {
   type: TaskType;
   label: string;
@@ -33,6 +42,13 @@ export interface TaskNodeData extends Record<string, unknown> {
   previousSteps?: PreviousStep[];
   sequenceNumber?: number;
   onDelete?: (id: string) => void;
+  validationErrors?: string[];
+  assignment?: {
+    type?: 'roles' | 'users' | 'supplier' | 'manager' | 'manager_hierarchy';
+    roles?: string[];
+    users?: string[];
+  };
+  actions?: TaskAction[];
   apiConfig?: {
     selectedApi?: ApiConfig;
     failureRecourse?: FailureRecourse;
