@@ -1,11 +1,12 @@
 
-import { TaskType } from "./types";
 import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
+import { TaskType } from "./types";
 
 export const VERTICAL_SPACING = 250;
+export const START_Y = 150;
 export const CENTER_X = 250;
 
-export const taskTypes = [
+export const TASK_TYPES = [
   {
     icon: FilePlus2,
     title: "Create Task",
@@ -28,24 +29,21 @@ export const taskTypes = [
     icon: GitBranch,
     title: "Split Branch",
     subtitle: "Split the workflow into branches with conditions",
-    type: "split" as const,
-  },
-  {
-    icon: ArrowRightLeft,
-    title: "Parallel Branch",
-    subtitle: "Add tasks in parallel that will occur simultaneously",
-    type: "parallel" as const,
+    type: "split" as TaskType,
   },
 ];
 
-export const initialNodes = [
+export const INITIAL_NODES = [
   {
     id: "start",
     type: "input",
-    position: { x: CENTER_X, y: 150 },
-    data: { label: "Start" },
+    position: { x: CENTER_X - 50, y: START_Y },
+    data: { 
+      label: "Start",
+      type: undefined
+    },
     style: {
-      background: "#8B5CF6",
+      background: "#3388eb",
       color: "white",
       border: "none",
       borderRadius: "4px",
@@ -57,8 +55,11 @@ export const initialNodes = [
   {
     id: "end",
     type: "output",
-    position: { x: CENTER_X, y: 400 },
-    data: { label: "End" },
+    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
+    data: { 
+      label: "End",
+      type: undefined
+    },
     style: {
       background: "#0EA5E9",
       color: "white",
@@ -71,11 +72,32 @@ export const initialNodes = [
   },
 ];
 
-export const defaultEdgeOptions = {
-  type: "smoothstep",
-  style: { stroke: "#2563EB" },
-  markerEnd: {
-    type: "arrowclosed" as const,
-    color: "#2563EB",
+export const INITIAL_EDGES = [
+  {
+    id: "start-end",
+    source: "start",
+    target: "end",
+    type: "smoothstep",
+    animated: true,
+    style: { stroke: "#3388eb" },
+    markerEnd: {
+      type: "arrowclosed",
+      color: "#3388eb",
+    },
+    label: "+",
+    labelStyle: { 
+      fill: "#ffffff",
+      fontWeight: "bold",
+      fontSize: "16px",
+      opacity: 0,
+    },
+    labelBgStyle: { 
+      fill: "#3388eb",
+      opacity: 0,
+      borderRadius: "12px",
+      width: "24px",
+      height: "24px",
+    },
+    className: "workflow-edge",
   },
-};
+];

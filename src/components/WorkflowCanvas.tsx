@@ -7,152 +7,22 @@ import {
   Edge,
   Connection,
   addEdge,
-  MarkerType,
   useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
 import TaskCard from "./TaskCard";
 import { TaskNodeData, TaskType, PreviousStep } from "./workflow/types";
-
-const VERTICAL_SPACING = 250;
-const START_Y = 150;
-const CENTER_X = 250;
-
-interface TaskOptionProps {
-  icon: React.ElementType;
-  title: string;
-  subtitle: string;
-  onClick: () => void;
-  disabled?: boolean;
-}
-
-const TaskOption = ({ icon: Icon, title, subtitle, onClick, disabled }: TaskOptionProps) => (
-  <div 
-    className={`flex items-start space-x-4 p-4 rounded-lg ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'} transition-colors`}
-    onClick={() => !disabled && onClick()}
-  >
-    <div className="p-2 rounded-lg bg-primary/10">
-      <Icon className="w-6 h-6 text-primary" />
-    </div>
-    <div>
-      <h3 className="font-medium">{title}</h3>
-      <p className="text-sm text-gray-500">{subtitle}</p>
-    </div>
-  </div>
-);
+import { TaskSelectionDialog } from "./workflow/TaskSelectionDialog";
+import { INITIAL_NODES, INITIAL_EDGES, VERTICAL_SPACING, CENTER_X } from "./workflow/constants";
 
 const nodeTypes = {
   taskCard: TaskCard,
 };
 
-const taskTypes = [
-  {
-    icon: FilePlus2,
-    title: "Create Task",
-    subtitle: "Add a create task and assign creators",
-    type: "create" as const,
-  },
-  {
-    icon: UserCheck,
-    title: "Approval Task",
-    subtitle: "Add an approval task and configure",
-    type: "approval" as const,
-  },
-  {
-    icon: Workflow,
-    title: "Integration Task",
-    subtitle: "Add an integration task and configure the APIs",
-    type: "integration" as const,
-  },
-  {
-    icon: GitBranch,
-    title: "Split Branch",
-    subtitle: "Split the workflow into branches with conditions",
-    type: "split" as const,
-  },
-  {
-    icon: ArrowRightLeft,
-    title: "Parallel Branch",
-    subtitle: "Add tasks in parallel that will occur simultaneously",
-    type: "parallel" as const,
-  },
-];
-
-const initialNodes: Node<TaskNodeData>[] = [
-  {
-    id: "start",
-    type: "input",
-    position: { x: CENTER_X - 50, y: START_Y },
-    data: { 
-      label: "Start",
-      type: undefined
-    },
-    style: {
-      background: "#8B5CF6",
-      color: "white",
-      border: "none",
-      borderRadius: "4px",
-      padding: "10px 20px",
-      minWidth: "100px",
-      textAlign: "center",
-    },
-  },
-  {
-    id: "end",
-    type: "output",
-    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
-    data: { 
-      label: "End",
-      type: undefined
-    },
-    style: {
-      background: "#0EA5E9",
-      color: "white",
-      border: "none",
-      borderRadius: "4px",
-      padding: "10px 20px",
-      minWidth: "100px",
-      textAlign: "center",
-    },
-  },
-];
-
-const initialEdges: Edge[] = [
-  {
-    id: "start-end",
-    source: "start",
-    target: "end",
-    type: "smoothstep",
-    animated: true,
-    style: { stroke: "#2563EB" },
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-      color: "#2563EB",
-    },
-    label: "+",
-    labelStyle: { 
-      fill: "#ffffff",
-      fontWeight: "bold",
-      fontSize: "16px",
-      opacity: 0,
-    },
-    labelBgStyle: { 
-      fill: "#2563EB",
-      opacity: 0,
-      borderRadius: "12px",
-      width: "24px",
-      height: "24px",
-    },
-    className: "workflow-edge",
-  },
-];
-
 export const WorkflowCanvas = () => {
-  const [nodes, setNodes] = useState<Node<TaskNodeData>[]>(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+  const [nodes, setNodes] = useState<Node<TaskNodeData>[]>(INITIAL_NODES);
+  const [edges, setEdges] = useState(INITIAL_EDGES);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
   const { fitView } = useReactFlow();
@@ -577,33 +447,6 @@ export const WorkflowCanvas = () => {
   return (
     <>
       <div className="flex-1 bg-canvas">
-        <style>
-          {`
-            .workflow-edge:hover .react-flow__edge-label {
-              opacity: 1 !important;
-              transition: opacity 0.3s ease;
-            }
-            .workflow-edge:hover .react-flow__edge-label-background {
-              opacity: 1 !important;
-              transition: opacity 0.3s ease;
-            }
-            .workflow-edge .react-flow__edge-label,
-            .workflow-edge .react-flow__edge-label-background {
-              transition: opacity 0.3s ease;
-            }
-            .react-flow__edge-label {
-              background: transparent !important;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            .react-flow__edge-label-background {
-              border-radius: 50% !important;
-              width: 24px !important;
-              height: 24px !important;
-            }
-          `}
-        </style>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -613,14 +456,6 @@ export const WorkflowCanvas = () => {
           nodeTypes={nodeTypes}
           fitView
           className="bg-canvas"
-          defaultEdgeOptions={{
-            type: "smoothstep",
-            style: { stroke: "#2563EB" },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              color: "#2563EB",
-            },
-          }}
         >
           <Background
             color="#ccc"
@@ -632,37 +467,13 @@ export const WorkflowCanvas = () => {
         </ReactFlow>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle>Select task to add</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {taskTypes.map((task, index) => {
-              const sourceNode = selectedEdge ? nodes.find(n => n.id === selectedEdge.source) : null;
-              const isFirstTaskAfterStart = sourceNode?.id === "start";
-              
-              const isDisabled = (task.type === "create" && !isFirstTaskAfterStart) ||
-                               (!isFirstTaskAfterStart && task.type === "create");
-
-              return (
-                <TaskOption
-                  key={index}
-                  icon={task.icon}
-                  title={task.title}
-                  subtitle={task.subtitle}
-                  onClick={() => {
-                    if (task.type === "create" || task.type === "approval" || task.type === "integration") {
-                      handleTaskSelection(task.type);
-                    }
-                  }}
-                  disabled={isDisabled}
-                />
-              );
-            })}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <TaskSelectionDialog
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onTaskSelect={handleTaskSelection}
+        nodes={nodes}
+        selectedEdgeSourceId={selectedEdge?.source ?? null}
+      />
     </>
   );
 };
