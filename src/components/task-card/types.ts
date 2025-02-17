@@ -23,7 +23,7 @@ export interface ApiConfig {
   failureRecourse?: string;
 }
 
-export interface TaskData extends Record<string, unknown> {
+export interface TaskNodeData {
   label: string;
   type: "create" | "approval" | "integration";
   tags?: string[];
@@ -35,4 +35,4 @@ export interface TaskData extends Record<string, unknown> {
   previousSteps?: { id: string; label: string }[];
 }
 
-export type TaskCardProps = NodeProps<TaskData>;
+export type TaskCardProps = NodeProps<TaskNodeData>;

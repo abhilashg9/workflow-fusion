@@ -44,12 +44,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { TaskCardProps, TaskData } from "./task-card/types";
+import { TaskCardProps, TaskNodeData } from "./task-card/types";
 import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
 import { TaskCardActions } from "./task-card/TaskCardActions";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
 
-function TaskCard({ data, id }: TaskCardProps) {
+function TaskCard({ data: nodeData, id }: TaskCardProps) {
+  const data = nodeData as TaskNodeData;
   const [label, setLabel] = useState(data.label);
   const [type, setType] = useState(data.type);
   const [tags, setTags] = useState(data.tags || []);
@@ -92,7 +93,7 @@ function TaskCard({ data, id }: TaskCardProps) {
     data.setNodeData?.({ ...data, tags: newTags });
   };
 
-  const handleAssignmentChange = (newAssignment: any) => {
+  const handleAssignmentChange = (newAssignment: AssignmentConfig) => {
     setAssignment(newAssignment);
     data.setNodeData?.({ ...data, assignment: newAssignment });
   };
@@ -350,5 +351,4 @@ function TaskCard({ data, id }: TaskCardProps) {
   );
 }
 
-export { TaskCard };
 export default TaskCard;
