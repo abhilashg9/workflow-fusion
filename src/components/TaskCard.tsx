@@ -1,4 +1,3 @@
-
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { 
@@ -19,7 +18,8 @@ import {
   Server, 
   X,
   GitBranch,
-  Trash
+  Trash,
+  CheckSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,14 @@ import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
 import { TaskCardProps, AssignmentConfig, TaskAction, ApiConfig, FailureRecourse } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const TaskCard = memo(({
   data,
@@ -52,6 +60,7 @@ const TaskCard = memo(({
   const [isHovered, setIsHovered] = useState(false);
   const [actions, setActions] = useState<TaskAction[]>(data.actions || DEFAULT_ACTIONS);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [selectedWorkflowActions, setSelectedWorkflowActions] = useState<string[]>([]);
 
   useEffect(() => {
     setTaskLabel(data.label);
@@ -552,6 +561,15 @@ const TaskCard = memo(({
     );
   };
 
+  const handleWorkflowActionToggle = (action: string) => {
+    setSelectedWorkflowActions(prev => {
+      if (prev.includes(action)) {
+        return prev.filter(a => a !== action);
+      }
+      return [...prev, action];
+    });
+  };
+
   return (
     <div 
       className={cn(
@@ -594,6 +612,44 @@ const TaskCard = memo(({
           <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-1.5 rounded border border-gray-200 hover:bg-gray-50 transition-colors">
+                    <Workflow className="w-4 h-4 text-gray-600" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48">
+                  <DropdownMenuLabel>Workflow Actions</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={selectedWorkflowActions.includes('amend')}
+                    onCheckedChange={() => handleWorkflowActionToggle('amend')}
+                  >
+                    <span className="flex items-center gap-2">
+                      <CheckSquare className="w-4 h-4" />
+                      Amend
+                    </span>
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedWorkflowActions.includes('short_close')}
+                    onCheckedChange={() => handleWorkflowActionToggle('short_close')}
+                  >
+                    <span className="flex items-center gap-2">
+                      <CheckSquare className="w-4 h-4" />
+                      Short Close
+                    </span>
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedWorkflowActions.includes('cancel')}
+                    onCheckedChange={() => handleWorkflowActionToggle('cancel')}
+                  >
+                    <span className="flex items-center gap-2">
+                      <CheckSquare className="w-4 h-4" />
+                      Cancel
+                    </span>
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <input 
                 type="text" 
                 value={taskLabel} 
