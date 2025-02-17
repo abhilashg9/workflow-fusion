@@ -233,44 +233,29 @@ const TaskCard = memo(({
   const renderAssignmentTags = () => {
     const renderAbbreviatedList = (items: string[] | undefined, type: 'roles' | 'filters') => {
       const Icon = type === 'roles' ? Users : Filter;
-      const placeholderText = type === 'roles' ? 
-        data.type === "create" ? "Selected users & roles will appear here" : "Selected users, roles & filters will appear here" 
-        : "Selected dimensions will appear here";
-      
-      return (
-        <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
+      const placeholderText = type === 'roles' ? "Selected users & roles will appear here" : "Selected dimensions will appear here";
+      return <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
           <Icon className="w-4 h-4" />
-          {!items?.length ? (
-            <span className="italic">{placeholderText}</span>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {items.slice(0, 2).map(item => (
-                <Badge key={item} variant="secondary" className="text-xs">
+          {!items?.length ? <span className="italic">{placeholderText}</span> : <div className="flex flex-wrap gap-2">
+              {items.slice(0, 2).map(item => <Badge key={item} variant={type === 'roles' ? "secondary" : "outline"} className="text-xs">
                   {item}
-                </Badge>
-              ))}
-              {items.length > 2 && (
-                <TooltipProvider>
+                </Badge>)}
+              {items.length > 2 && <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Badge variant="secondary" className="text-xs cursor-help">
+                      <Badge variant={type === 'roles' ? "secondary" : "outline"} className="text-xs cursor-help">
                         +{items.length - 2}
                       </Badge>
                     </TooltipTrigger>
                     <TooltipContent className="p-2">
                       <div className="space-y-1">
-                        {items.slice(2).map(item => (
-                          <div key={item} className="text-xs">{item}</div>
-                        ))}
+                        {items.slice(2).map(item => <div key={item} className="text-xs">{item}</div>)}
                       </div>
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
-          )}
-        </div>
-      );
+                </TooltipProvider>}
+            </div>}
+        </div>;
     };
 
     if (data.type === "integration") {
@@ -291,7 +276,10 @@ const TaskCard = memo(({
             {!data.apiConfig?.failureRecourse ? (
               <span className="italic">Selected fallback option will be shown</span>
             ) : (
-              <Badge variant="outline" className="text-xs">
+              <Badge 
+                variant="outline" 
+                className="text-xs"
+              >
                 {data.apiConfig.failureRecourse.type === "sendBack" ? (
                   `Step ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.sequenceNumber}: ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.label}`
                 ) : (
@@ -304,25 +292,12 @@ const TaskCard = memo(({
       );
     }
 
-    if (data.type === "create") {
-      switch (assignment.type) {
-        case "roles":
-          return renderAbbreviatedList(assignment.roles, 'roles');
-        case "users":
-          return renderAbbreviatedList(assignment.users, 'roles');
-        case "supplier":
-          return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
-        default:
-          return renderAbbreviatedList([], 'roles');
-      }
-    }
-
     switch (assignment.type) {
       case "roles":
         return (
           <div className="space-y-2">
             {renderAbbreviatedList(assignment.roles, 'roles')}
-            {assignment.filters && assignment.filters.length > 0 && renderAbbreviatedList(assignment.filters, 'filters')}
+            {renderAbbreviatedList(assignment.filters, 'filters')}
           </div>
         );
       case "users":
@@ -336,7 +311,7 @@ const TaskCard = memo(({
       case "manager_hierarchy":
         return <Badge variant="secondary" className="text-xs">Manager Hierarchy</Badge>;
       default:
-        return renderAbbreviatedList([], 'roles');
+        return null;
     }
   };
 
