@@ -1,3 +1,4 @@
+
 import {
   Select,
   SelectContent,
@@ -91,38 +92,6 @@ export const TaskCardAssignment = ({
 
   return (
     <div className="space-y-6">
-      {isApprovalTask && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">Value Filter</label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="w-[200px] text-xs">Set a value filter for this approval task</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <div className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-gray-400" />
-            <Input
-              type="number"
-              min="0"
-              value={assignment.value || ""}
-              onChange={handleValueChange}
-              placeholder="Enter a numerical value"
-              className="flex-1"
-            />
-          </div>
-          <p className="text-sm text-gray-500 italic">
-            The task will be active for all transactions with a value greater than the entered amount.
-          </p>
-        </div>
-      )}
-
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">Assignment Type</label>
@@ -268,56 +237,90 @@ export const TaskCardAssignment = ({
           </div>
 
           {!isCreateTask && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium">Filters (Optional)</label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="w-[200px] text-xs">Add filters to refine which users can perform this task</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <Select onValueChange={(value) => handleSelect('filter', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Add filters" />
-                </SelectTrigger>
-                <SelectContent>
-                  {FILTERS_OPTIONS.map((filter) => (
-                    <SelectItem 
-                      key={filter} 
-                      value={filter}
-                      disabled={assignment.filters?.includes(filter)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Filter className="w-4 h-4" />
-                        <span>{filter}</span>
-                      </div>
-                    </SelectItem>
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium">Dimensions</label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="w-[200px] text-xs">Add filters to refine which users can perform this task</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <Select onValueChange={(value) => handleSelect('filter', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Add filters" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FILTERS_OPTIONS.map((filter) => (
+                      <SelectItem 
+                        key={filter} 
+                        value={filter}
+                        disabled={assignment.filters?.includes(filter)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Filter className="w-4 h-4" />
+                          <span>{filter}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex flex-wrap gap-2 min-h-[32px] p-2 rounded-md bg-gray-50/50">
+                  {!assignment.filters?.length && (
+                    <span className="text-sm text-gray-400 italic">No filters applied</span>
+                  )}
+                  {assignment.filters?.map((filter) => (
+                    <Badge key={filter} variant="outline" className="group">
+                      <Filter className="w-3 h-3 mr-1" />
+                      {filter}
+                      <button
+                        onClick={() => onRemoveItem("filter", filter)}
+                        className="ml-1 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
                   ))}
-                </SelectContent>
-              </Select>
-              <div className="flex flex-wrap gap-2 min-h-[32px] p-2 rounded-md bg-gray-50/50">
-                {!assignment.filters?.length && (
-                  <span className="text-sm text-gray-400 italic">No filters applied</span>
-                )}
-                {assignment.filters?.map((filter) => (
-                  <Badge key={filter} variant="outline" className="group">
-                    <Filter className="w-3 h-3 mr-1" />
-                    {filter}
-                    <button
-                      onClick={() => onRemoveItem("filter", filter)}
-                      className="ml-1 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
+                </div>
               </div>
+
+              {isApprovalTask && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium">Value</label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-[200px] text-xs">Set a value filter for this approval task</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-gray-400" />
+                    <Input
+                      type="number"
+                      min="0"
+                      value={assignment.value || ""}
+                      onChange={handleValueChange}
+                      placeholder="Enter a numerical value"
+                      className="flex-1"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500 italic">
+                    The task will be active for all transactions with a value greater than the entered amount.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
