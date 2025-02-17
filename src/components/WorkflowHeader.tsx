@@ -1,4 +1,4 @@
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReactFlow, Node } from "@xyflow/react";
 import { AlertCircle, Clock, GitBranch, User, CheckCircle2, Timer, History } from "lucide-react";
@@ -119,7 +119,9 @@ export const WorkflowHeader = () => {
 
   const handleAuxiliaryWorkflow = (type: 'create' | 'amend' | 'short-close' | 'cancel') => {
     setSelectedWorkflow(type);
-    toast.info(`Selected ${type} workflow`);
+    toast.info(`Selected ${type} workflow`, {
+      duration: 2000
+    });
   };
 
   const formatDate = (timestamp: string) => {
@@ -152,7 +154,7 @@ export const WorkflowHeader = () => {
             <h1 className="font-medium">
               Invoice Workflow
               {selectedWorkflow && (
-                <span className="text-gray-600 capitalize"> / {selectedWorkflow.replace('-', ' ')}</span>
+                <span className="text-gray-600 capitalize"> | {selectedWorkflow.replace('-', ' ')}</span>
               )}
             </h1>
           </div>
@@ -163,8 +165,7 @@ export const WorkflowHeader = () => {
                 size="sm"
                 className="h-8 text-sm text-gray-600 hover:bg-gray-50 px-2"
               >
-                <Menu className="h-4 w-4 mr-1" />
-                <ChevronDown className="h-3 w-3 ml-1 opacity-50" />
+                <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
