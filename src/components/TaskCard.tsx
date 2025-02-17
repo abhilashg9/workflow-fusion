@@ -93,22 +93,19 @@ export const TaskCard = ({ data, id, setNodeData, onDelete, previousSteps }: Tas
         </div>
 
         <TaskCardAssignment
-          assignment={data.assignment}
-          type={data.type}
-          onChange={(assignment) => setNodeData?.({ ...data, assignment })}
+          data={data}
+          setNodeData={setNodeData}
         />
 
         <TaskCardActions
-          actions={data.actions}
-          type={data.type}
-          onChange={(actions) => setNodeData?.({ ...data, actions })}
+          data={data}
+          setNodeData={setNodeData}
         />
 
         <TaskCardApiConfig
-          apiConfig={data.apiConfig}
-          type={data.type}
+          data={data}
+          setNodeData={setNodeData}
           previousSteps={previousSteps}
-          onChange={(apiConfig) => setNodeData?.({ ...data, apiConfig })}
         />
       </div>
       <Handle type="source" position={Position.Right} id="a" />
