@@ -370,12 +370,8 @@ const TaskCard = memo(({
         {!isIntegrationTask && <Tooltip>
           <TooltipTrigger asChild>
             <button 
-              className={cn(
-                "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
-                isCreateTask && "opacity-50 cursor-not-allowed"
-              )} 
-              onClick={() => !isCreateTask && handleActionClick("assignment")}
-              disabled={isCreateTask}
+              className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors"
+              onClick={() => handleActionClick("assignment")}
             >
               <User className="w-4 h-4 text-gray-600 mb-1" />
               <span className="text-xs text-gray-600">Assignment</span>
@@ -439,12 +435,8 @@ const TaskCard = memo(({
         <Tooltip>
           <TooltipTrigger asChild>
             <button 
-              className={cn(
-                "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
-                (isIntegrationTask || isCreateTask) && "opacity-50 cursor-not-allowed"
-              )} 
-              onClick={() => !isIntegrationTask && !isCreateTask && handleActionClick("visibility")}
-              disabled={isIntegrationTask || isCreateTask}
+              className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors"
+              onClick={() => handleActionClick("visibility")}
             >
               <Eye className="w-4 h-4 text-gray-600 mb-1" />
               <span className="text-xs text-gray-600">Visibility</span>
@@ -509,11 +501,11 @@ const TaskCard = memo(({
             <div className="p-4">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="w-full justify-start sticky top-0 z-50 bg-white">
-                  {!isIntegrationTask && <TabsTrigger value="assignment" disabled={isCreateTask}>Assignment</TabsTrigger>}
+                  {!isIntegrationTask && <TabsTrigger value="assignment">Assignment</TabsTrigger>}
                   {isIntegrationTask && <TabsTrigger value="api-config">API Config</TabsTrigger>}
                   <TabsTrigger value="notifications" disabled={isCreateTask}>Notifications</TabsTrigger>
                   {!isIntegrationTask && <TabsTrigger value="actions" disabled={isCreateTask}>Actions</TabsTrigger>}
-                  {!isIntegrationTask && <TabsTrigger value="visibility" disabled={isCreateTask}>Visibility</TabsTrigger>}
+                  {!isIntegrationTask && <TabsTrigger value="visibility">Visibility</TabsTrigger>}
                 </TabsList>
 
                 {!isIntegrationTask && (
@@ -532,21 +524,33 @@ const TaskCard = memo(({
                 )}
 
                 {isIntegrationTask && <TabsContent value="api-config">
-                    <TaskCardApiConfig selectedApi={data.apiConfig?.selectedApi} failureRecourse={data.apiConfig?.failureRecourse} previousSteps={previousSteps} onApiSelect={handleApiSelect} onFailureRecourseChange={handleFailureRecourseChange} />
-                  </TabsContent>}
+                  <TaskCardApiConfig 
+                    selectedApi={data.apiConfig?.selectedApi} 
+                    failureRecourse={data.apiConfig?.failureRecourse} 
+                    previousSteps={previousSteps} 
+                    onApiSelect={handleApiSelect} 
+                    onFailureRecourseChange={handleFailureRecourseChange} 
+                  />
+                </TabsContent>}
 
                 <TabsContent value="notifications">
                   Notifications content
                 </TabsContent>
 
                 {!isIntegrationTask && <>
-                    <TabsContent value="actions">
-                      <TaskCardActions actions={actions} previousSteps={previousSteps} onActionToggle={handleActionToggle} onActionLabelChange={handleActionLabelChange} onSendBackStepChange={handleSendBackStepChange} />
-                    </TabsContent>
-                    <TabsContent value="visibility">
-                      Visibility content
-                    </TabsContent>
-                  </>}
+                  <TabsContent value="actions">
+                    <TaskCardActions 
+                      actions={actions} 
+                      previousSteps={previousSteps} 
+                      onActionToggle={handleActionToggle} 
+                      onActionLabelChange={handleActionLabelChange} 
+                      onSendBackStepChange={handleSendBackStepChange} 
+                    />
+                  </TabsContent>
+                  <TabsContent value="visibility">
+                    Visibility content
+                  </TabsContent>
+                </>}
               </Tabs>
             </div>
           </div>
