@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -95,7 +96,7 @@ const initialNodes: CustomNode[] = [
   {
     id: "start",
     type: "input",
-    position: { x: 250, y: 150 },
+    position: { x: 250, y: 75 }, // Changed from 150 to 75
     data: { label: "Start" },
     style: {
       background: "#8B5CF6",
@@ -110,7 +111,7 @@ const initialNodes: CustomNode[] = [
   {
     id: "end",
     type: "output",
-    position: { x: 250, y: 400 },
+    position: { x: 250, y: 325 }, // Changed from 400 to 325
     data: { label: "End" },
     style: {
       background: "#0EA5E9",
@@ -350,8 +351,8 @@ export const WorkflowCanvas = () => {
 
   const onNodeDragStop = (_: React.MouseEvent, node: Node) => {
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const VERTICAL_SPACING = 250;
-    const START_Y = 150;
+    const VERTICAL_SPACING = 125; // Changed from 250 to 125
+    const START_Y = 75; // Changed from 150 to 75
     const CENTER_X = 250;
     
     const updatedNodes = sortedNodes.map((n, index) => {
