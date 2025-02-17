@@ -1,7 +1,6 @@
-
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { FilePlus2, UserCheck, Workflow } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow, Users, Filter } from "lucide-react";
 import { User, Bell, ArrowRight, Eye, Server, X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -200,38 +199,71 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
   };
 
   const renderAssignmentTags = () => {
+    const renderAbbreviatedList = (items: string[] | undefined, placeholderText: string) => {
+      if (!items?.length) {
+        return (
+          <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
+            {placeholderText === "Select roles or users" ? (
+              <Users className="w-4 h-4" />
+            ) : (
+              <Filter className="w-4 h-4" />
+            )}
+            <span className="italic">{placeholderText}</span>
+          </div>
+        );
+      }
+
+      const maxDisplay = 2;
+      const remainingCount = items.length - maxDisplay;
+
+      return (
+        <div className="flex flex-wrap gap-2">
+          {items.slice(0, maxDisplay).map((item) => (
+            <Badge 
+              key={item} 
+              variant={placeholderText.includes("roles") ? "secondary" : "outline"}
+              className="text-xs"
+            >
+              {item}
+            </Badge>
+          ))}
+          {remainingCount > 0 && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge 
+                    variant={placeholderText.includes("roles") ? "secondary" : "outline"}
+                    className="text-xs cursor-help"
+                  >
+                    +{remainingCount}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent className="p-2">
+                  <div className="space-y-1">
+                    {items.slice(maxDisplay).map((item) => (
+                      <div key={item} className="text-xs">{item}</div>
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+      );
+    };
+
     switch (assignment.type) {
       case "roles":
         return (
           <div className="space-y-2">
-            <div className="flex flex-wrap gap-2">
-              {assignment.roles?.map((role) => (
-                <Badge key={role} variant="secondary" className="text-xs">
-                  {role}
-                </Badge>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {assignment.filters?.map((filter) => (
-                <Badge key={filter} variant="outline" className="text-xs">
-                  {filter}
-                </Badge>
-              ))}
-            </div>
+            {renderAbbreviatedList(assignment.roles, "Select roles or users")}
+            {renderAbbreviatedList(assignment.filters, "Select dimensions or filters")}
           </div>
         );
       case "users":
-        return assignment.users?.map((user) => (
-          <Badge key={user} variant="secondary" className="text-xs">
-            {user}
-          </Badge>
-        ));
+        return renderAbbreviatedList(assignment.users, "Select users");
       case "dynamic_users":
-        return assignment.dynamicUsers?.map((user) => (
-          <Badge key={user} variant="secondary" className="text-xs">
-            {user}
-          </Badge>
-        ));
+        return renderAbbreviatedList(assignment.dynamicUsers, "Select dynamic users");
       case "supplier":
         return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
       case "manager":
@@ -270,7 +302,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
   return (
     <>
       <div 
-        className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 min-w-[250px] relative group"
+        className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] h-[225px] relative group"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -306,7 +338,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3 bg-gray-50/50 p-3 rounded-lg">
             {renderAssignmentTags()}
           </div>
 
