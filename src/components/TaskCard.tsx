@@ -1,6 +1,22 @@
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { FilePlus2, UserCheck, Workflow, Users, Filter, ShieldAlert, Plug, ArrowLeftRight, User, Users } from "lucide-react";
+import { 
+  FilePlus2, 
+  UserCheck, 
+  Workflow, 
+  Users, 
+  Filter, 
+  ShieldAlert, 
+  Plug, 
+  ArrowLeftRight, 
+  User,
+  Server,
+  Bell,
+  ArrowRight,
+  Eye,
+  X,
+  Trash2
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
