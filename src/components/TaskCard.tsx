@@ -15,6 +15,7 @@ import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
 import { ApiConfig, FailureRecourse } from "./workflow/types";
+
 const TaskCard = memo(({
   data,
   id,
@@ -32,9 +33,11 @@ const TaskCard = memo(({
   });
   const [isHovered, setIsHovered] = useState(false);
   const [actions, setActions] = useState<TaskAction[]>(data.actions || DEFAULT_ACTIONS);
+
   useEffect(() => {
     setTaskLabel(data.label);
   }, [data.label]);
+
   const getIcon = () => {
     switch (data.type) {
       case "create":
@@ -45,11 +48,14 @@ const TaskCard = memo(({
         return <Workflow className="w-5 h-5 text-[#F97316]" />;
     }
   };
+
   const isIntegrationTask = data.type === "integration";
+
   const handleActionClick = (tab: string) => {
     setActiveTab(tab);
     setIsDrawerOpen(true);
   };
+
   const handleLabelChange = (newLabel: string) => {
     setTaskLabel(newLabel);
     if (setNodeData) {
@@ -59,6 +65,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleAssignmentTypeChange = (type: AssignmentConfig["type"]) => {
     const newAssignment: AssignmentConfig = {
       type
@@ -78,6 +85,7 @@ const TaskCard = memo(({
     setAssignment(newAssignment);
     updateNodeData(newAssignment);
   };
+
   const updateNodeData = (newAssignment: AssignmentConfig) => {
     if (setNodeData) {
       setNodeData({
@@ -86,6 +94,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleRoleSelect = (role: string) => {
     if (assignment.type === "roles" && !assignment.roles?.includes(role)) {
       const newRoles = [...(assignment.roles || []), role];
@@ -99,6 +108,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleFilterSelect = (filter: string) => {
     if (assignment.type === "roles" && !assignment.filters?.includes(filter)) {
       const newFilters = [...(assignment.filters || []), filter];
@@ -112,6 +122,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleUserSelect = (user: string) => {
     if (assignment.type === "users" && !assignment.users?.includes(user)) {
       const newUsers = [...(assignment.users || []), user];
@@ -125,6 +136,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleDynamicUserSelect = (user: string) => {
     if (assignment.type === "dynamic_users" && !assignment.dynamicUsers?.includes(user)) {
       const newUsers = [...(assignment.dynamicUsers || []), user];
@@ -138,6 +150,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const removeItem = (type: string, item: string) => {
     let newAssignment = {
       ...assignment
@@ -159,6 +172,7 @@ const TaskCard = memo(({
     setAssignment(newAssignment);
     updateNodeData(newAssignment);
   };
+
   const handleActionToggle = (actionIndex: number, enabled: boolean) => {
     const newActions = [...actions];
     newActions[actionIndex] = {
@@ -173,6 +187,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleActionLabelChange = (actionIndex: number, newLabel: string) => {
     const newActions = [...actions];
     newActions[actionIndex] = {
@@ -187,6 +202,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleSendBackStepChange = (stepId: string) => {
     const newActions = [...actions];
     const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
@@ -206,23 +222,35 @@ const TaskCard = memo(({
       }
     }
   };
+
   const handleDeleteTask = () => {
     if (onDelete) {
       onDelete(id);
     }
     setIsDrawerOpen(false);
   };
+
   const renderAssignmentTags = () => {
     const renderAbbreviatedList = (items: string[] | undefined, type: 'roles' | 'filters') => {
       const Icon = type === 'roles' ? Users : Filter;
-      const placeholderText = data.type === "create" ? "Selected users & roles will appear here" : type === 'roles' ? "Selected users, roles & filters will appear here" : "Selected dimensions will appear here";
-      return <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
+      const placeholderText = data.type === "create" ? 
+        "Selected users & roles will appear here" : 
+        type === 'roles' ? "Selected users, roles & filters will appear here" : "Selected dimensions will appear here";
+      
+      return (
+        <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
           <Icon className="w-4 h-4" />
-          {!items?.length ? <span className="italic">{placeholderText}</span> : <div className="flex flex-wrap gap-2">
-              {items.slice(0, 2).map(item => <Badge key={item} variant={type === 'roles' ? "secondary" : "outline"} className="text-xs">
+          {!items?.length ? (
+            <span className="italic">{placeholderText}</span>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {items.slice(0, 2).map(item => (
+                <Badge key={item} variant={type === 'roles' ? "secondary" : "outline"} className="text-xs">
                   {item}
-                </Badge>)}
-              {items.length > 2 && <TooltipProvider>
+                </Badge>
+              ))}
+              {items.length > 2 && (
+                <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Badge variant={type === 'roles' ? "secondary" : "outline"} className="text-xs cursor-help">
@@ -231,36 +259,61 @@ const TaskCard = memo(({
                     </TooltipTrigger>
                     <TooltipContent className="p-2">
                       <div className="space-y-1">
-                        {items.slice(2).map(item => <div key={item} className="text-xs">{item}</div>)}
+                        {items.slice(2).map(item => (
+                          <div key={item} className="text-xs">{item}</div>
+                        ))}
                       </div>
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>}
-            </div>}
-        </div>;
+                </TooltipProvider>
+              )}
+            </div>
+          )}
+        </div>
+      );
     };
+
     if (data.type === "integration") {
-      return <div className="space-y-2">
+      return (
+        <div className="space-y-2">
           <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
             <Server className="w-4 h-4" />
-            {!data.apiConfig?.selectedApi ? <span className="italic">Selected API will show here</span> : <Badge variant="secondary" className="text-xs">
+            {!data.apiConfig?.selectedApi ? (
+              <span className="italic">Selected API will show here</span>
+            ) : (
+              <Badge variant="secondary" className="text-xs">
                 {data.apiConfig.selectedApi.name}
-              </Badge>}
+              </Badge>
+            )}
           </div>
           <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
             <ShieldAlert className="w-4 h-4" />
-            {!data.apiConfig?.failureRecourse ? <span className="italic">Selected fallback option will be shown</span> : <Badge variant="outline" className="text-xs">
-                {data.apiConfig.failureRecourse.type === "sendBack" ? `Step ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.sequenceNumber}: ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.label}` : `Assign to ${data.apiConfig.failureRecourse.assignee?.type === 'user' ? 'User' : 'Role'}`}
-              </Badge>}
+            {!data.apiConfig?.failureRecourse ? (
+              <span className="italic">Selected fallback option will be shown</span>
+            ) : (
+              <Badge variant="outline" className="text-xs">
+                {data.apiConfig.failureRecourse.type === "sendBack" ? (
+                  `Step ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.sequenceNumber}: ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.label}`
+                ) : (
+                  `Assign to ${data.apiConfig.failureRecourse.assignee?.type === 'user' ? 'User' : 'Role'}`
+                )}
+              </Badge>
+            )}
           </div>
-        </div>;
+        </div>
+      );
     }
+
     switch (assignment.type) {
       case "roles":
-        return <div className="space-y-2">
+        return (
+          <div className="space-y-2">
             {renderAbbreviatedList(assignment.roles, 'roles')}
-            {!data.type || data.type !== "create" && renderAbbreviatedList(assignment.filters, 'filters')}
-          </div>;
+            {!data.type || data.type !== "create" && (
+              renderAbbreviatedList(assignment.filters, 'filters')
+            )}
+          </div>
+        );
       case "users":
         return renderAbbreviatedList(assignment.users, 'roles');
       case "dynamic_users":
@@ -275,6 +328,7 @@ const TaskCard = memo(({
         return renderAbbreviatedList([], 'roles');
     }
   };
+
   const handleApiSelect = (selectedApi: ApiConfig) => {
     if (setNodeData) {
       setNodeData({
@@ -286,6 +340,7 @@ const TaskCard = memo(({
       });
     }
   };
+
   const handleFailureRecourseChange = (failureRecourse: FailureRecourse) => {
     if (setNodeData) {
       setNodeData({
@@ -297,8 +352,13 @@ const TaskCard = memo(({
       });
     }
   };
-  return <>
-      <div className="px-[12px] py-[12px]">
+
+  return (
+    <>
+      <div className={cn(
+        "bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] relative group",
+        data.type === "create" ? "h-[175px]" : "h-[225px]"
+      )}>
         <Handle type="target" position={Position.Top} />
         {isHovered && <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleDeleteTask}>
             <X className="h-4 w-4" />
@@ -413,9 +473,20 @@ const TaskCard = memo(({
                     </>}
                 </TabsList>
 
-                {!isIntegrationTask && <TabsContent value="assignment">
-                    <TaskCardAssignment assignment={assignment} onAssignmentTypeChange={handleAssignmentTypeChange} onRoleSelect={handleRoleSelect} onFilterSelect={handleFilterSelect} onUserSelect={handleUserSelect} onDynamicUserSelect={handleDynamicUserSelect} onRemoveItem={removeItem} taskType={data.type} />
-                  </TabsContent>}
+                {!isIntegrationTask && (
+                  <TabsContent value="assignment">
+                    <TaskCardAssignment
+                      assignment={assignment}
+                      onAssignmentTypeChange={handleAssignmentTypeChange}
+                      onRoleSelect={handleRoleSelect}
+                      onFilterSelect={handleFilterSelect}
+                      onUserSelect={handleUserSelect}
+                      onDynamicUserSelect={handleDynamicUserSelect}
+                      onRemoveItem={removeItem}
+                      taskType={data.type}
+                    />
+                  </TabsContent>
+                )}
 
                 {isIntegrationTask && <TabsContent value="api-config">
                     <TaskCardApiConfig selectedApi={data.apiConfig?.selectedApi} failureRecourse={data.apiConfig?.failureRecourse} previousSteps={previousSteps} onApiSelect={handleApiSelect} onFailureRecourseChange={handleFailureRecourseChange} />
@@ -444,7 +515,10 @@ const TaskCard = memo(({
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-    </>;
+    </>
+  );
 });
+
 TaskCard.displayName = "TaskCard";
+
 export default TaskCard;
