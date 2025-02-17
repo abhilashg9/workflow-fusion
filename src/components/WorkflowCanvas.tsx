@@ -73,12 +73,6 @@ const taskTypes = [
     subtitle: "Split the workflow into branches with conditions",
     type: "split" as const,
   },
-  {
-    icon: ArrowRightLeft,
-    title: "Parallel Branch",
-    subtitle: "Add tasks in parallel that will occur simultaneously",
-    type: "parallel" as const,
-  },
 ];
 
 const initialNodes: Node<TaskNodeData>[] = [
@@ -400,6 +394,32 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
+    const sortedNodesList = [...nodes].sort((a, b) => a.position.y - b.position.y);
+    const isStartNode = sourceNode.id === "start";
+    const hasCreateTask = sortedNodesList.some(node => 
+      node.type === "taskCard" && node.data.type === "create"
+    );
+
+    if (type === "create") {
+      if (!isStartNode) {
+        toast.error("Create task can only be added as the first step");
+        setIsModalOpen(false);
+        return;
+      }
+      
+      if (hasCreateTask) {
+        toast.error("Only one Create task is allowed in the workflow");
+        setIsModalOpen(false);
+        return;
+      }
+    }
+
+    if (!isStartNode && hasCreateTask && type !== "create") {
+      toast.error("A Create task must be the first step");
+      setIsModalOpen(false);
+      return;
+    }
+
     if (type === "split") {
       const newY = sourceNode.position.y + VERTICAL_SPACING;
       const HORIZONTAL_OFFSET = 200;
@@ -628,32 +648,6 @@ export const WorkflowCanvas = () => {
       return;
     }
 
-    const sortedNodesList = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const isStartNode = sourceNode.id === "start";
-    const hasCreateTask = sortedNodesList.some(node => 
-      node.type === "taskCard" && node.data.type === "create"
-    );
-
-    if (type === "create") {
-      if (!isStartNode) {
-        toast.error("Create task can only be added as the first step");
-        setIsModalOpen(false);
-        return;
-      }
-      
-      if (hasCreateTask) {
-        toast.error("Only one Create task is allowed in the workflow");
-        setIsModalOpen(false);
-        return;
-      }
-    }
-
-    if (!isStartNode && hasCreateTask && type !== "create") {
-      toast.error("A Create task must be the first step");
-      setIsModalOpen(false);
-      return;
-    }
-
     const sourceIndex = sortedNodesList.findIndex(n => n.id === sourceNode.id);
     const previousNodes: PreviousStep[] = sortedNodesList
       .slice(0, sourceIndex + 1)
@@ -866,10 +860,13 @@ export const WorkflowCanvas = () => {
           <div className="grid gap-4 py-4">
             {taskTypes.map((task, index) => {
               const sourceNode = selectedEdge ? nodes.find(n => n.id === selectedEdge.source) : null;
-              const isFirstTaskAfterStart = sourceNode?.id === "start";
-              
-              const isDisabled = (task.type === "create" && !isFirstTaskAfterStart) ||
-                               (!isFirstTaskAfterStart && task.type === "create");
+              const isSelectedNodeStart = sourceNode?.id === "start";
+              const hasExistingCreateTask = nodes.some(
+                node => node.type === "taskCard" && node.data.type === "create"
+              );
+
+              const isDisabled = (task.type === "create" && !isSelectedNodeStart) ||
+                               (!isSelectedNodeStart && task.type !== "create" && !hasExistingCreateTask);
 
               return (
                 <TaskOption
@@ -877,11 +874,7 @@ export const WorkflowCanvas = () => {
                   icon={task.icon}
                   title={task.title}
                   subtitle={task.subtitle}
-                  onClick={() => {
-                    if (task.type === "create" || task.type === "approval" || task.type === "integration") {
-                      handleTaskSelection(task.type);
-                    }
-                  }}
+                  onClick={() => handleTaskSelection(task.type)}
                   disabled={isDisabled}
                 />
               );
