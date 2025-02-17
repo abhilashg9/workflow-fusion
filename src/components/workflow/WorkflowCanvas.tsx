@@ -236,8 +236,8 @@ export const WorkflowCanvas = () => {
         },
       ];
 
-      setNodes((nds) => [
-        ...nds.map(node => {
+      setNodes((nds: CustomNode[]) => [
+        ...nds.map((node: CustomNode) => {
           if (node.position.y > sourceNode.position.y) {
             return {
               ...node,
@@ -245,14 +245,19 @@ export const WorkflowCanvas = () => {
                 ...node.position,
                 y: node.position.y + (VERTICAL_SPACING * 2),
               },
-            };
+              data: {
+                ...node.data,
+                type: node.data.type,
+                label: node.data.label,
+              },
+            } as CustomNode;
           }
           return node;
         }),
         junctionNode,
         leftConditionNode,
         rightConditionNode,
-      ]);
+      ] as CustomNode[]);
 
       setEdges((eds) => 
         eds
