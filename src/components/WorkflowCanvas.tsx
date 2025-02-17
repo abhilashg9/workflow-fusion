@@ -9,7 +9,6 @@ import {
   addEdge,
   MarkerType,
   useReactFlow,
-  NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -45,7 +44,7 @@ const TaskOption = ({ icon: Icon, title, subtitle, onClick, disabled }: TaskOpti
   </div>
 );
 
-const nodeTypes: NodeTypes = {
+const nodeTypes = {
   taskCard: TaskCard,
 };
 
