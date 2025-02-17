@@ -49,6 +49,7 @@ const TaskCard = memo(({
     }
   };
 
+  const isCreateTask = data.type === "create";
   const isIntegrationTask = data.type === "integration";
 
   const getCardHeight = () => {
@@ -363,6 +364,100 @@ const TaskCard = memo(({
     }
   };
 
+  const renderActionButtons = () => {
+    return (
+      <TooltipProvider>
+        {!isIntegrationTask && <Tooltip>
+          <TooltipTrigger asChild>
+            <button 
+              className={cn(
+                "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
+                isCreateTask && "opacity-50 cursor-not-allowed"
+              )} 
+              onClick={() => !isCreateTask && handleActionClick("assignment")}
+              disabled={isCreateTask}
+            >
+              <User className="w-4 h-4 text-gray-600 mb-1" />
+              <span className="text-xs text-gray-600">Assignment</span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Assignment</p>
+          </TooltipContent>
+        </Tooltip>}
+
+        {isIntegrationTask && <Tooltip>
+          <TooltipTrigger asChild>
+            <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("api-config")}>
+              <Server className="w-4 h-4 text-gray-600 mb-1" />
+              <span className="text-xs text-gray-600">API Config</span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>API Config</p>
+          </TooltipContent>
+        </Tooltip>}
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button 
+              className={cn(
+                "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
+                isCreateTask && "opacity-50 cursor-not-allowed"
+              )} 
+              onClick={() => !isCreateTask && handleActionClick("notifications")}
+              disabled={isCreateTask}
+            >
+              <Bell className="w-4 h-4 text-gray-600 mb-1" />
+              <span className="text-xs text-gray-600">Notifications</span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Notifications</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button 
+              className={cn(
+                "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
+                (isIntegrationTask || isCreateTask) && "opacity-50 cursor-not-allowed"
+              )} 
+              onClick={() => !isIntegrationTask && !isCreateTask && handleActionClick("actions")}
+              disabled={isIntegrationTask || isCreateTask}
+            >
+              <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
+              <span className="text-xs text-gray-600">Actions</span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Actions</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button 
+              className={cn(
+                "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
+                (isIntegrationTask || isCreateTask) && "opacity-50 cursor-not-allowed"
+              )} 
+              onClick={() => !isIntegrationTask && !isCreateTask && handleActionClick("visibility")}
+              disabled={isIntegrationTask || isCreateTask}
+            >
+              <Eye className="w-4 h-4 text-gray-600 mb-1" />
+              <span className="text-xs text-gray-600">Visibility</span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Visibility</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
   return (
     <>
       <div className={cn(
@@ -391,67 +486,7 @@ const TaskCard = memo(({
           </div>
 
           <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
-            <TooltipProvider>
-              {!isIntegrationTask && <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("assignment")}>
-                      <User className="w-4 h-4 text-gray-600 mb-1" />
-                      <span className="text-xs text-gray-600">Assignment</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Assignment</p>
-                  </TooltipContent>
-                </Tooltip>}
-
-              {isIntegrationTask && <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("api-config")}>
-                      <Server className="w-4 h-4 text-gray-600 mb-1" />
-                      <span className="text-xs text-gray-600">API Config</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>API Config</p>
-                  </TooltipContent>
-                </Tooltip>}
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("notifications")}>
-                    <Bell className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">Notifications</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Notifications</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className={cn("flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors", isIntegrationTask && "opacity-50 cursor-not-allowed")} disabled={isIntegrationTask} onClick={() => !isIntegrationTask && handleActionClick("actions")}>
-                    <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">Actions</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Actions</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className={cn("flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors", isIntegrationTask && "opacity-50 cursor-not-allowed")} disabled={isIntegrationTask} onClick={() => !isIntegrationTask && handleActionClick("visibility")}>
-                    <Eye className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">Visibility</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Visibility</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {renderActionButtons()}
           </div>
         </div>
         <Handle type="source" position={Position.Bottom} />
@@ -474,13 +509,11 @@ const TaskCard = memo(({
             <div className="p-4">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="w-full justify-start sticky top-0 z-50 bg-white">
-                  {!isIntegrationTask && <TabsTrigger value="assignment">Assignment</TabsTrigger>}
+                  {!isIntegrationTask && <TabsTrigger value="assignment" disabled={isCreateTask}>Assignment</TabsTrigger>}
                   {isIntegrationTask && <TabsTrigger value="api-config">API Config</TabsTrigger>}
-                  <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                  {!isIntegrationTask && <>
-                      <TabsTrigger value="actions">Actions</TabsTrigger>
-                      <TabsTrigger value="visibility">Visibility</TabsTrigger>
-                    </>}
+                  <TabsTrigger value="notifications" disabled={isCreateTask}>Notifications</TabsTrigger>
+                  {!isIntegrationTask && <TabsTrigger value="actions" disabled={isCreateTask}>Actions</TabsTrigger>}
+                  {!isIntegrationTask && <TabsTrigger value="visibility" disabled={isCreateTask}>Visibility</TabsTrigger>}
                 </TabsList>
 
                 {!isIntegrationTask && (
