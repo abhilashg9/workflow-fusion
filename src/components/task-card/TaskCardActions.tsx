@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TaskAction } from "./types";
-import { Edit2, Ban, ArrowLeftRight, Check, AlertCircle } from "lucide-react";
+import { Edit2, Ban, ArrowLeftRight, Check, AlertCircle, Settings2 } from "lucide-react";
 
 interface TaskCardActionsProps {
   actions: TaskAction[];
@@ -47,38 +47,53 @@ export const TaskCardActions = ({
   const isRejectEnabled = actions[getActionIndex("reject")]?.enabled || false;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Enable Actions Section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-          <Check className="w-4 h-4 text-green-500" />
-          Enable Actions
+        <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2 pb-2 border-b">
+          <Settings2 className="w-4 h-4 text-blue-500" />
+          Configure Actions
         </h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-            <div className="flex items-center gap-2">
-              <Edit2 className="w-4 h-4 text-blue-500" />
-              <span className="text-sm text-gray-700">Edit</span>
+        <div className="grid gap-4">
+          <div className="flex items-center justify-between p-4 bg-white border rounded-lg shadow-sm hover:border-blue-200 transition-colors duration-200">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-50 rounded-md">
+                <Edit2 className="w-4 h-4 text-blue-500" />
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Edit</span>
+                <p className="text-xs text-gray-500 mt-0.5">Allow users to modify the content</p>
+              </div>
             </div>
             <Switch
               checked={actions[getActionIndex("edit")]?.enabled || false}
               onCheckedChange={(checked) => handleToggle("edit", checked)}
             />
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-            <div className="flex items-center gap-2">
-              <Ban className="w-4 h-4 text-red-500" />
-              <span className="text-sm text-gray-700">Reject</span>
+          <div className="flex items-center justify-between p-4 bg-white border rounded-lg shadow-sm hover:border-red-200 transition-colors duration-200">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-50 rounded-md">
+                <Ban className="w-4 h-4 text-red-500" />
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Reject</span>
+                <p className="text-xs text-gray-500 mt-0.5">Allow users to reject the request</p>
+              </div>
             </div>
             <Switch
               checked={isRejectEnabled}
               onCheckedChange={(checked) => handleToggle("reject", checked)}
             />
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-            <div className="flex items-center gap-2">
-              <ArrowLeftRight className="w-4 h-4 text-orange-500" />
-              <span className="text-sm text-gray-700">Send Back</span>
+          <div className="flex items-center justify-between p-4 bg-white border rounded-lg shadow-sm hover:border-orange-200 transition-colors duration-200">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-50 rounded-md">
+                <ArrowLeftRight className="w-4 h-4 text-orange-500" />
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Send Back</span>
+                <p className="text-xs text-gray-500 mt-0.5">Return to a previous step</p>
+              </div>
             </div>
             <Switch
               checked={actions[getActionIndex("sendBack")]?.enabled || false}
@@ -90,42 +105,46 @@ export const TaskCardActions = ({
 
       {/* Label Actions Section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2 pb-2 border-b">
           <AlertCircle className="w-4 h-4 text-blue-500" />
-          Label Actions
+          Action Labels
         </h3>
-        <div className="space-y-3">
+        <div className="grid gap-4">
           <div className="space-y-2">
-            <label className="text-sm text-gray-600 flex items-center gap-2">
-              <Check className="w-4 h-4 text-green-500" />
-              Approve
-            </label>
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-green-50 rounded-md">
+                <Check className="w-3.5 h-3.5 text-green-500" />
+              </div>
+              <label className="text-sm font-medium text-gray-700">Approve Label</label>
+            </div>
             <Input
               value={actions[getActionIndex("approve")]?.label || ""}
               onChange={(e) => handleLabelChange("approve", e.target.value)}
-              placeholder="Enter label"
+              placeholder="Enter approve button label"
               maxLength={15}
               className="h-9"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-gray-600 flex items-center gap-2">
-              <Ban className="w-4 h-4 text-red-500" />
-              Reject
-            </label>
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-red-50 rounded-md">
+                <Ban className="w-3.5 h-3.5 text-red-500" />
+              </div>
+              <label className="text-sm font-medium text-gray-700">Reject Label</label>
+            </div>
             <Input
               value={actions[getActionIndex("reject")]?.label || ""}
               onChange={(e) => handleLabelChange("reject", e.target.value)}
-              placeholder="Enter label"
+              placeholder="Enter reject button label"
               maxLength={15}
               className="h-9"
               disabled={!isRejectEnabled}
             />
             {!isRejectEnabled && (
-              <p className="text-sm text-gray-500 italic flex items-center gap-2">
-                <AlertCircle className="w-4 h-4" />
-                Enable Reject action to modify its label
-              </p>
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md mt-2">
+                <AlertCircle className="w-4 h-4 text-gray-400" />
+                <p className="text-sm text-gray-500">Enable Reject action to modify its label</p>
+              </div>
             )}
           </div>
         </div>
@@ -133,18 +152,20 @@ export const TaskCardActions = ({
 
       {/* Send Back Configuration */}
       {actions[getActionIndex("sendBack")]?.enabled && (
-        <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-          <label className="text-sm text-gray-600 block flex items-center gap-2">
-            <ArrowLeftRight className="w-4 h-4 text-orange-500" />
-            Send Transaction Back To
-          </label>
+        <div className="space-y-4 border rounded-lg p-4 bg-orange-50/50">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-orange-100 rounded-md">
+              <ArrowLeftRight className="w-4 h-4 text-orange-500" />
+            </div>
+            <label className="text-sm font-medium text-gray-700">Send Back Configuration</label>
+          </div>
           <Select
             value={actions[getActionIndex("sendBack")]?.sendBack?.step || ""}
             onValueChange={onSendBackStepChange}
             disabled={previousSteps.length === 0}
           >
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Select step" />
+            <SelectTrigger className="bg-white border-orange-200">
+              <SelectValue placeholder="Select a step to send back to" />
             </SelectTrigger>
             <SelectContent>
               {previousSteps.length === 0 ? (
@@ -158,10 +179,11 @@ export const TaskCardActions = ({
               )}
             </SelectContent>
           </Select>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-600 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-orange-400" />
             {previousSteps.length === 0 
               ? "This is the first step in the workflow."
-              : "Select a previous step in the workflow to configure the \"send back\" action."}
+              : "Select a previous step to send the workflow back to."}
           </p>
         </div>
       )}
