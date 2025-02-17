@@ -1,6 +1,6 @@
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { FilePlus2, UserCheck, Workflow, Users, Filter } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow, Users, Filter, ShieldAlert } from "lucide-react";
 import { User, Bell, ArrowRight, Eye, Server, AlertCircle, X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,6 @@ import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
 import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
-import { ApiConfig, FailureRecourse } from "./workflow/types";
 
 const TaskCard = memo(({
   data,

@@ -26,14 +26,16 @@ interface NodeData {
   validationErrors?: string[];
 }
 
+type CustomNode = Node<NodeData>;
+
 export const WorkflowHeader = () => {
-  const { getNodes } = useReactFlow<{ data: NodeData }>();
+  const { getNodes } = useReactFlow<NodeData>();
 
   const validateNodes = () => {
     const nodes = getNodes();
     let allErrors: { nodeId: string; errors: string[] }[] = [];
 
-    nodes.forEach((node) => {
+    nodes.forEach((node: CustomNode) => {
       const nodeData = node.data;
       const errors: string[] = [];
       
