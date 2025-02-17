@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import TaskCard from "./TaskCard";
 import { TaskNodeData, TaskType, PreviousStep } from "./workflow/types";
 import { TaskSelectionDialog } from "./workflow/TaskSelectionDialog";
-import { INITIAL_NODES, INITIAL_EDGES, VERTICAL_SPACING, CENTER_X } from "./workflow/constants";
+import { INITIAL_NODES, INITIAL_EDGES, VERTICAL_SPACING, HORIZONTAL_SPACING, CENTER_X } from "./workflow/constants";
 
 const nodeTypes = {
   taskCard: TaskCard,
@@ -203,7 +203,7 @@ export const WorkflowCanvas = () => {
       {
         id: defaultBranchId,
         type: "taskCard",
-        position: { x: CENTER_X - 225, y: newY + VERTICAL_SPACING },
+        position: { x: CENTER_X - HORIZONTAL_SPACING, y: newY + VERTICAL_SPACING }, // Increased horizontal spacing
         data: {
           type: "default",
           label: "Default Branch",
@@ -215,7 +215,7 @@ export const WorkflowCanvas = () => {
       {
         id: conditionBranchId,
         type: "taskCard",
-        position: { x: CENTER_X - 25, y: newY + VERTICAL_SPACING },
+        position: { x: CENTER_X + HORIZONTAL_SPACING - 250, y: newY + VERTICAL_SPACING }, // Increased horizontal spacing
         data: {
           type: "condition",
           label: "Conditions",
@@ -228,7 +228,7 @@ export const WorkflowCanvas = () => {
       {
         id: joinId,
         type: "taskCard",
-        position: { x: CENTER_X - 125, y: newY + VERTICAL_SPACING * 2 },
+        position: { x: CENTER_X - 125, y: newY + VERTICAL_SPACING * 2 }, // Increased vertical spacing
         data: {
           type: "join",
           label: "Join Branch",
@@ -301,13 +301,14 @@ export const WorkflowCanvas = () => {
       },
     ];
 
+    // Update positions of subsequent nodes with increased spacing
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
         return {
           ...node,
           position: {
             x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
-            y: node.position.y + VERTICAL_SPACING * 2,
+            y: node.position.y + VERTICAL_SPACING * 2.5, // Increased spacing multiplier
           },
         };
       }

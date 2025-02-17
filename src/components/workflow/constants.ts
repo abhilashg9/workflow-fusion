@@ -3,9 +3,10 @@ import { FilePlus2, UserCheck, Workflow, GitBranch } from "lucide-react";
 import { TaskType } from "./types";
 import { MarkerType, Node, Edge } from "@xyflow/react";
 
-export const VERTICAL_SPACING = 250;
+export const VERTICAL_SPACING = 300; // Increased from 250
+export const HORIZONTAL_SPACING = 300; // Added for split branches
 export const START_Y = 150;
-export const CENTER_X = 250;
+export const CENTER_X = 350; // Increased from 250 to provide more horizontal space
 
 export const TASK_TYPES = [
   {
