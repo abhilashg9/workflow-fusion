@@ -12,9 +12,10 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft, Split } from "lucide-react";
 import { toast } from "sonner";
 import TaskCard from "./TaskCard";
+import ConditionCard from "./task-card/ConditionCard";
 import { TaskNodeData, TaskType, PreviousStep } from "./workflow/types";
 
 const VERTICAL_SPACING = 250;
@@ -46,6 +47,7 @@ const TaskOption = ({ icon: Icon, title, subtitle, onClick, disabled }: TaskOpti
 
 const nodeTypes = {
   taskCard: TaskCard,
+  conditionCard: ConditionCard,
 };
 
 const taskTypes = [
@@ -68,16 +70,10 @@ const taskTypes = [
     type: "integration" as const,
   },
   {
-    icon: GitBranch,
-    title: "Split Branch",
-    subtitle: "Split the workflow into branches with conditions",
-    type: "split" as const,
-  },
-  {
-    icon: ArrowRightLeft,
-    title: "Parallel Branch",
-    subtitle: "Add tasks in parallel that will occur simultaneously",
-    type: "parallel" as const,
+    icon: Split,
+    title: "Condition",
+    subtitle: "Add conditions to split the workflow",
+    type: "condition" as const,
   },
 ];
 
@@ -461,31 +457,48 @@ export const WorkflowCanvas = () => {
       .reverse();
 
     const newY = sourceNode.position.y + VERTICAL_SPACING;
-    const newSequenceNumber = previousNodes.length + 1;
 
-    const initialData: TaskNodeData = {
-      type,
-      label: `New ${type} task`,
-      tags: type === "integration" ? ["API Name"] : ["Role 1", "Role 2"],
-      previousSteps: previousNodes,
-      sequenceNumber: newSequenceNumber,
-      onDelete: handleDeleteNode,
-      validationErrors: [],
-    };
+    let newNode: Node<TaskNodeData>;
+    
+    if (type === "condition") {
+      newNode = {
+        id: `condition-${Date.now()}`,
+        type: "conditionCard",
+        position: { x: CENTER_X - 125, y: newY },
+        data: {
+          type: "condition",
+          label: "New condition",
+          conditions: [
+            { id: "default", name: "Default path" }
+          ],
+        },
+        draggable: true,
+      };
+    } else {
+      const initialData: TaskNodeData = {
+        type,
+        label: `New ${type} task`,
+        tags: type === "integration" ? ["API Name"] : ["Role 1", "Role 2"],
+        previousSteps: previousNodes,
+        sequenceNumber: previousNodes.length + 1,
+        onDelete: handleDeleteNode,
+        validationErrors: [],
+      };
 
-    const validationErrors = validateNode(initialData);
+      const validationErrors = validateNode(initialData);
 
-    const newNode: Node<TaskNodeData> = {
-      id: `task-${Date.now()}`,
-      type: "taskCard",
-      position: { x: CENTER_X - 125, y: newY },
-      data: {
-        ...initialData,
-        validationErrors,
-      },
-      draggable: true,
-      className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
-    };
+      const newNode: Node<TaskNodeData> = {
+        id: `task-${Date.now()}`,
+        type: "taskCard",
+        position: { x: CENTER_X - 125, y: newY },
+        data: {
+          ...initialData,
+          validationErrors,
+        },
+        draggable: true,
+        className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
+      };
+    }
 
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
