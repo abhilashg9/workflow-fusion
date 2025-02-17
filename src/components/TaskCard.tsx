@@ -39,6 +39,19 @@ const TaskCard = memo(({
     setTaskLabel(data.label);
   }, [data.label]);
 
+  const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseInt(event.target.value) || 0;
+    if (newValue >= 0) {
+      setValue(newValue);
+      if (setNodeData) {
+        setNodeData({
+          ...data,
+          value: newValue
+        });
+      }
+    }
+  };
+
   const getIcon = () => {
     switch (data.type) {
       case "create":
