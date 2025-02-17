@@ -61,8 +61,7 @@ const TaskCard = memo(({
     }
   }, [data.label, data.assignment, data.actions]);
 
-  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newLabel = e.target.value;
+  const handleLabelChange = (newLabel: string) => {
     setTaskLabel(newLabel);
     if (setNodeData) {
       setNodeData({
@@ -290,6 +289,115 @@ const TaskCard = memo(({
 
   const isIntegrationTask = data.type === "integration";
 
+  const getIcon = () => {
+    switch (data.type) {
+      case "create":
+        return <FilePlus2 className="w-5 h-5" />;
+      case "approval":
+        return <UserCheck className="w-5 h-5" />;
+      case "integration":
+        return <Plug className="w-5 h-5" />;
+      default:
+        return null;
+    }
+  };
+
+  const handleAssignmentTypeChange = (type: AssignmentConfig["type"]) => {
+    setAssignment(prev => ({ ...prev, type }));
+    setNodeData({ ...data, assignment: { ...assignment, type } });
+  };
+
+  const handleRoleSelect = (role: string) => {
+    const newRoles = [...(assignment.roles || []), role];
+    setAssignment(prev => ({ ...prev, roles: newRoles }));
+    setNodeData({ ...data, assignment: { ...assignment, roles: newRoles } });
+  };
+
+  const handleFilterSelect = (filter: string) => {
+    const newFilters = [...(assignment.filters || []), filter];
+    setAssignment(prev => ({ ...prev, filters: newFilters }));
+    setNodeData({ ...data, assignment: { ...assignment, filters: newFilters } });
+  };
+
+  const handleUserSelect = (user: string) => {
+    const newUsers = [...(assignment.users || []), user];
+    setAssignment(prev => ({ ...prev, users: newUsers }));
+    setNodeData({ ...data, assignment: { ...assignment, users: newUsers } });
+  };
+
+  const handleDynamicUserSelect = (user: string) => {
+    const newDynamicUsers = [...(assignment.dynamicUsers || []), user];
+    setAssignment(prev => ({ ...prev, dynamicUsers: newDynamicUsers }));
+    setNodeData({ ...data, assignment: { ...assignment, dynamicUsers: newDynamicUsers } });
+  };
+
+  const removeItem = (type: string, item: string) => {
+    let updatedItems;
+    switch (type) {
+      case "role":
+        updatedItems = assignment.roles?.filter(r => r !== item) || [];
+        setAssignment(prev => ({ ...prev, roles: updatedItems }));
+        setNodeData({ ...data, assignment: { ...assignment, roles: updatedItems } });
+        break;
+      case "filter":
+        updatedItems = assignment.filters?.filter(f => f !== item) || [];
+        setAssignment(prev => ({ ...prev, filters: updatedItems }));
+        setNodeData({ ...data, assignment: { ...assignment, filters: updatedItems } });
+        break;
+      case "user":
+        updatedItems = assignment.users?.filter(u => u !== item) || [];
+        setAssignment(prev => ({ ...prev, users: updatedItems }));
+        setNodeData({ ...data, assignment: { ...assignment, users: updatedItems } });
+        break;
+      case "dynamicUser":
+        updatedItems = assignment.dynamicUsers?.filter(u => u !== item) || [];
+        setAssignment(prev => ({ ...prev, dynamicUsers: updatedItems }));
+        setNodeData({ ...data, assignment: { ...assignment, dynamicUsers: updatedItems } });
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleValueChange = (value: number | undefined) => {
+    setAssignment(prev => ({ ...prev, value }));
+    setNodeData({ ...data, assignment: { ...assignment, value } });
+  };
+
+  const handleActionToggle = (index: number, enabled: boolean) => {
+    const newActions = [...actions];
+    newActions[index] = { ...newActions[index], enabled };
+    setActions(newActions);
+    setNodeData({ ...data, actions: newActions });
+  };
+
+  const handleActionLabelChange = (index: number, label: string) => {
+    const newActions = [...actions];
+    newActions[index] = { ...newActions[index], label };
+    setActions(newActions);
+    setNodeData({ ...data, actions: newActions });
+  };
+
+  const handleSendBackStepChange = (stepId: string) => {
+    const newActions = [...actions];
+    const sendBackActionIndex = newActions.findIndex(action => action.action === "sendBack");
+    if (sendBackActionIndex !== -1) {
+      newActions[sendBackActionIndex] = {
+        ...newActions[sendBackActionIndex],
+        sendBack: { step: stepId }
+      };
+      setActions(newActions);
+      setNodeData({ ...data, actions: newActions });
+    }
+  };
+
+  const handleDeleteTask = () => {
+    if (onDelete) {
+      onDelete(id);
+    }
+    setIsDrawerOpen(false);
+  };
+
   return (
     <>
       <div 
@@ -335,7 +443,7 @@ const TaskCard = memo(({
               type="text"
               placeholder="Task Label"
               value={taskLabel}
-              onChange={handleLabelChange}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleLabelChange(e.target.value)}
               className="text-sm font-medium !ring-0 !border-0 focus-visible:!ring-0 focus-visible:!border-0 !shadow-none !bg-transparent"
             />
           </div>
@@ -359,59 +467,84 @@ const TaskCard = memo(({
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200 flex flex-col">
-          <DrawerHeader>
+          <DrawerHeader className="border-b border-gray-100 shrink-0">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Configure Task</h2>
-              <Button variant="ghost" size="icon" onClick={() => setIsDrawerOpen(false)}>
-                <X className="w-5 h-5" />
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
+                <Input value={taskLabel} onChange={e => handleLabelChange(e.target.value)} className="flex-1 text-lg font-medium h-auto py-1" maxLength={50} />
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setIsDrawerOpen(false)} className="h-8 w-8">
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </DrawerHeader>
-
           <div className="flex-1 overflow-y-auto">
-            <Tabs defaultValue="assignment" className="m-4" onValueChange={(value) => setActiveTab(value)}>
-              <TabsList>
-                <TabsTrigger value="assignment">
-                  <User className="w-4 h-4 mr-2" />
-                  Assignment
-                </TabsTrigger>
-                <TabsTrigger value="actions">
-                  <Bell className="w-4 h-4 mr-2" />
-                  Actions
-                </TabsTrigger>
-                {isIntegrationTask && (
-                  <TabsTrigger value="api-config">
-                    <Plug className="w-4 h-4 mr-2" />
-                    API Configuration
-                  </TabsTrigger>
+            <div className="p-4">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="w-full justify-start sticky top-0 z-50 bg-white">
+                  {!isIntegrationTask && <TabsTrigger value="assignment">Assignment</TabsTrigger>}
+                  {isIntegrationTask && <TabsTrigger value="api-config">API Config</TabsTrigger>}
+                  <TabsTrigger value="notifications" disabled={data.type === "create"}>Notifications</TabsTrigger>
+                  {!isIntegrationTask && <TabsTrigger value="actions" disabled={data.type === "create"}>Actions</TabsTrigger>}
+                  {!isIntegrationTask && <TabsTrigger value="visibility">Visibility</TabsTrigger>}
+                </TabsList>
+
+                {!isIntegrationTask && (
+                  <TabsContent value="assignment">
+                    <TaskCardAssignment
+                      assignment={assignment}
+                      onAssignmentTypeChange={handleAssignmentTypeChange}
+                      onRoleSelect={handleRoleSelect}
+                      onFilterSelect={handleFilterSelect}
+                      onUserSelect={handleUserSelect}
+                      onDynamicUserSelect={handleDynamicUserSelect}
+                      onRemoveItem={removeItem}
+                      onValueChange={handleValueChange}
+                      taskType={data.type}
+                    />
+                  </TabsContent>
                 )}
-              </TabsList>
-              <TabsContent value="assignment">
-                <TaskCardAssignment assignment={assignment} setAssignment={handleAssignmentChange} />
-              </TabsContent>
-              <TabsContent value="actions">
-                <TaskCardActions actions={actions} setActions={handleActionsChange} />
-              </TabsContent>
 
-              {isIntegrationTask && (
-                <TabsContent value="api-config">
-                  <TaskCardApiConfig 
-                    selectedApi={data.apiConfig?.selectedApi}
-                    failureRecourse={data.apiConfig?.failureRecourse}
-                    previousSteps={previousSteps}
-                    onApiSelect={handleApiSelect}
-                    onFailureRecourseChange={handleFailureRecourseChange}
-                  />
+                {isIntegrationTask && (
+                  <TabsContent value="api-config">
+                    <TaskCardApiConfig 
+                      selectedApi={data.apiConfig?.selectedApi}
+                      failureRecourse={data.apiConfig?.failureRecourse}
+                      previousSteps={previousSteps}
+                      onApiSelect={handleApiSelect}
+                      onFailureRecourseChange={handleFailureRecourseChange}
+                    />
+                  </TabsContent>
+                )}
+
+                <TabsContent value="notifications">
+                  Notifications content
                 </TabsContent>
-              )}
-            </Tabs>
-          </div>
 
-          <DrawerFooter className="flex justify-end p-4">
-            <Button variant="outline" onClick={() => setIsDrawerOpen(false)}>
-              Cancel
+                {!isIntegrationTask && (
+                  <>
+                    <TabsContent value="actions">
+                      <TaskCardActions 
+                        actions={actions}
+                        previousSteps={previousSteps}
+                        onActionToggle={handleActionToggle}
+                        onActionLabelChange={handleActionLabelChange}
+                        onSendBackStepChange={handleSendBackStepChange}
+                      />
+                    </TabsContent>
+                    <TabsContent value="visibility">
+                      Visibility content
+                    </TabsContent>
+                  </>
+                )}
+              </Tabs>
+            </div>
+          </div>
+          <DrawerFooter className="border-t border-gray-100 mt-auto shrink-0">
+            <Button variant="destructive" onClick={handleDeleteTask} className="w-full">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Task
             </Button>
-            <Button onClick={() => setIsDrawerOpen(false)}>Save</Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
