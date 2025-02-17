@@ -8,8 +8,8 @@ const Index = () => {
   return (
     <div className="flex flex-col h-screen animate-fade-in">
       <GlobalHeader />
-      <WorkflowHeader />
       <ReactFlowProvider>
+        <WorkflowHeader />
         <WorkflowCanvas />
       </ReactFlowProvider>
     </div>

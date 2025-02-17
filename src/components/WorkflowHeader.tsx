@@ -1,7 +1,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useReactFlow, Node } from "@xyflow/react";
+import { useReactFlow } from "@xyflow/react";
 import { AlertCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -27,33 +27,34 @@ interface NodeData {
 }
 
 export const WorkflowHeader = () => {
-  const { getNodes } = useReactFlow<NodeData>();
+  const { getNodes } = useReactFlow();
 
   const validateNodes = () => {
     const nodes = getNodes();
     let allErrors: { nodeId: string; errors: string[] }[] = [];
 
     nodes.forEach((node) => {
+      const nodeData = node.data as NodeData;
       const errors: string[] = [];
       
       // Common validations
-      if (!node.data.label || node.data.label.trim() === '') {
+      if (!nodeData.label || nodeData.label.trim() === '') {
         errors.push('Task label is required');
       }
 
       // Create task validations
-      if (node.data.type === 'create') {
-        if (!node.data.assignment?.type) {
+      if (nodeData.type === 'create') {
+        if (!nodeData.assignment?.type) {
           errors.push('Role/User/Supplier selection is required');
         }
       }
 
       // Approval task validations
-      if (node.data.type === 'approval') {
-        if (!node.data.assignment?.type) {
+      if (nodeData.type === 'approval') {
+        if (!nodeData.assignment?.type) {
           errors.push('Role/User/Supplier/Manager selection is required');
         }
-        const hasEmptyActionLabel = node.data.actions?.some(
+        const hasEmptyActionLabel = nodeData.actions?.some(
           action => !action.label || action.label.trim() === ''
         );
         if (hasEmptyActionLabel) {
@@ -62,8 +63,8 @@ export const WorkflowHeader = () => {
       }
 
       // Integration task validations
-      if (node.data.type === 'integration') {
-        if (!node.data.apiConfig?.selectedApi) {
+      if (nodeData.type === 'integration') {
+        if (!nodeData.apiConfig?.selectedApi) {
           errors.push('API selection is required');
         }
       }
