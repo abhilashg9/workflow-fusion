@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -28,8 +27,8 @@ interface PreviousStep {
   sequenceNumber: number;
 }
 
-interface TaskNodeData extends Record<string, unknown> {
-  type: "create" | "approval" | "integration";
+interface TaskNodeData {
+  type?: "create" | "approval" | "integration";
   label: string;
   tags?: string[];
   previousSteps?: PreviousStep[];
@@ -39,7 +38,7 @@ interface TaskNodeData extends Record<string, unknown> {
 
 type TaskType = "create" | "approval" | "integration";
 
-type CustomNode = Node<TaskNodeData> | Node<{ label: string }>;
+type CustomNode = Node<TaskNodeData>;
 
 interface TaskOptionProps {
   icon: React.ElementType;
@@ -218,7 +217,7 @@ export const WorkflowCanvas = () => {
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
         id: node.id,
-        label: (node as Node<TaskNodeData>).data.label || "",
+        label: node.data.label || "",
         sequenceNumber: idx + 1
       }))
       .reverse();
@@ -226,7 +225,7 @@ export const WorkflowCanvas = () => {
     const newY = sourceNode.position.y + VERTICAL_SPACING;
     const newSequenceNumber = previousNodes.length + 1;
 
-    const newNode: Node<TaskNodeData> = {
+    const newNode: CustomNode = {
       id: `task-${Date.now()}`,
       type: "taskCard",
       position: { x: CENTER_X - 125, y: newY },
@@ -250,7 +249,7 @@ export const WorkflowCanvas = () => {
             .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
             .map((n, idx) => ({
               id: n.id,
-              label: (n as Node<TaskNodeData>).data.label || "",
+              label: n.data.label || "",
               sequenceNumber: idx + 1
             }))
             .reverse();
@@ -266,7 +265,7 @@ export const WorkflowCanvas = () => {
               previousSteps: nodePreviousSteps,
               sequenceNumber: nodePreviousSteps.length + 2
             },
-          } as Node<TaskNodeData>;
+          };
         }
         return {
           ...node,
@@ -274,12 +273,16 @@ export const WorkflowCanvas = () => {
             x: CENTER_X - 50,
             y: node.position.y + VERTICAL_SPACING,
           },
-        } as Node<{ label: string }>;
+          data: {
+            ...node.data,
+            label: node.data.label,
+          },
+        };
       }
       return node;
-    });
+    }) as CustomNode[];
 
-    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
+    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
 
     const newEdges: Edge[] = [
       {
@@ -339,7 +342,6 @@ export const WorkflowCanvas = () => {
     ];
 
     setNodes([...updatedNodes, newNode]);
-    setEdges((eds) => [...eds, ...newEdges]);
     setIsModalOpen(false);
   };
 
