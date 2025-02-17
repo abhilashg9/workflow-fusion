@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -14,6 +15,30 @@ import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
 import TaskCard from "./TaskCard";
+
+// Add TaskOption interface
+interface TaskOptionProps {
+  icon: React.ElementType;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+}
+
+// Add TaskOption component
+const TaskOption = ({ icon: Icon, title, subtitle, onClick }: TaskOptionProps) => (
+  <div 
+    className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+    onClick={onClick}
+  >
+    <div className="p-2 rounded-lg bg-primary/10">
+      <Icon className="w-6 h-6 text-primary" />
+    </div>
+    <div>
+      <h3 className="font-medium">{title}</h3>
+      <p className="text-sm text-gray-500">{subtitle}</p>
+    </div>
+  </div>
+);
 
 interface PreviousStep {
   id: string;
