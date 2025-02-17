@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
 import TaskCard from "./TaskCard";
+import { TaskNodeData, TaskType } from "./workflow/types";
 
 const VERTICAL_SPACING = 250;
 const START_Y = 150;
@@ -531,7 +532,7 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   };
 
-  const validateNode = (nodeData: TaskNodeData) => {
+  const validateNode = (nodeData: TaskNodeData): string[] => {
     const errors: string[] = [];
     
     if (!nodeData.label || nodeData.label.trim() === '') {
