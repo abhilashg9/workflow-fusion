@@ -1,4 +1,3 @@
-
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, Users, Filter, ShieldAlert } from "lucide-react";
@@ -518,7 +517,7 @@ const TaskCard = memo(({
         className={cn(
           "bg-white rounded-lg shadow-sm border p-4 w-[400px] relative group",
           getCardHeight(),
-          validationErrors.length > 0 && "border-red-400 border-2"
+          validationErrors.length > 0 && "border-red-400"
         )}
       >
         {validationErrors.length > 0 && (
