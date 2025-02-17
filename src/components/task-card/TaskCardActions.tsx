@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TaskAction } from "./types";
+import { Edit2, Ban, ArrowLeftRight, Check, AlertCircle } from "lucide-react";
 
 interface TaskCardActionsProps {
   actions: TaskAction[];
@@ -49,24 +50,36 @@ export const TaskCardActions = ({
     <div className="space-y-6">
       {/* Enable Actions Section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-900">Enable Actions</h3>
+        <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+          <Check className="w-4 h-4 text-green-500" />
+          Enable Actions
+        </h3>
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <span className="text-sm text-gray-700">Edit</span>
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <div className="flex items-center gap-2">
+              <Edit2 className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-gray-700">Edit</span>
+            </div>
             <Switch
               checked={actions[getActionIndex("edit")]?.enabled || false}
               onCheckedChange={(checked) => handleToggle("edit", checked)}
             />
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <span className="text-sm text-gray-700">Reject</span>
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <div className="flex items-center gap-2">
+              <Ban className="w-4 h-4 text-red-500" />
+              <span className="text-sm text-gray-700">Reject</span>
+            </div>
             <Switch
               checked={isRejectEnabled}
               onCheckedChange={(checked) => handleToggle("reject", checked)}
             />
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <span className="text-sm text-gray-700">Send Back</span>
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <div className="flex items-center gap-2">
+              <ArrowLeftRight className="w-4 h-4 text-orange-500" />
+              <span className="text-sm text-gray-700">Send Back</span>
+            </div>
             <Switch
               checked={actions[getActionIndex("sendBack")]?.enabled || false}
               onCheckedChange={(checked) => handleToggle("sendBack", checked)}
@@ -77,10 +90,16 @@ export const TaskCardActions = ({
 
       {/* Label Actions Section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-900">Label Actions</h3>
+        <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-blue-500" />
+          Label Actions
+        </h3>
         <div className="space-y-3">
           <div className="space-y-2">
-            <label className="text-sm text-gray-600">Approve</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-500" />
+              Approve
+            </label>
             <Input
               value={actions[getActionIndex("approve")]?.label || ""}
               onChange={(e) => handleLabelChange("approve", e.target.value)}
@@ -90,7 +109,10 @@ export const TaskCardActions = ({
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm text-gray-600">Reject</label>
+            <label className="text-sm text-gray-600 flex items-center gap-2">
+              <Ban className="w-4 h-4 text-red-500" />
+              Reject
+            </label>
             <Input
               value={actions[getActionIndex("reject")]?.label || ""}
               onChange={(e) => handleLabelChange("reject", e.target.value)}
@@ -100,7 +122,8 @@ export const TaskCardActions = ({
               disabled={!isRejectEnabled}
             />
             {!isRejectEnabled && (
-              <p className="text-sm text-gray-500 italic">
+              <p className="text-sm text-gray-500 italic flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
                 Enable Reject action to modify its label
               </p>
             )}
@@ -111,7 +134,8 @@ export const TaskCardActions = ({
       {/* Send Back Configuration */}
       {actions[getActionIndex("sendBack")]?.enabled && (
         <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-          <label className="text-sm text-gray-600 block">
+          <label className="text-sm text-gray-600 block flex items-center gap-2">
+            <ArrowLeftRight className="w-4 h-4 text-orange-500" />
             Send Transaction Back To
           </label>
           <Select
