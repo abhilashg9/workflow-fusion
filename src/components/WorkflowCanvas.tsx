@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -13,7 +14,12 @@ import {
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
+import { toast } from "sonner";
 import TaskCard from "./TaskCard";
+
+const VERTICAL_SPACING = 250;
+const START_Y = 150;
+const CENTER_X = 250;
 
 interface PreviousStep {
   id: string;
@@ -22,7 +28,7 @@ interface PreviousStep {
 }
 
 interface TaskNodeData extends Record<string, unknown> {
-  type: "create" | "approval" | "integration";
+  type?: "create" | "approval" | "integration";
   label: string;
   tags?: string[];
   previousSteps?: PreviousStep[];
@@ -32,17 +38,18 @@ interface TaskNodeData extends Record<string, unknown> {
 
 type TaskType = "create" | "approval" | "integration";
 
-type CustomNode = Node<TaskNodeData> | Node<{ label: string }>;
+interface TaskOptionProps {
+  icon: React.ElementType;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
 
-const TaskOption = ({ icon: Icon, title, subtitle, onClick }: { 
-  icon: any, 
-  title: string, 
-  subtitle: string,
-  onClick: () => void 
-}) => (
+const TaskOption = ({ icon: Icon, title, subtitle, onClick, disabled }: TaskOptionProps) => (
   <div 
-    className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-    onClick={onClick}
+    className={`flex items-start space-x-4 p-4 rounded-lg ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'} transition-colors`}
+    onClick={() => !disabled && onClick()}
   >
     <div className="p-2 rounded-lg bg-primary/10">
       <Icon className="w-6 h-6 text-primary" />
@@ -91,12 +98,15 @@ const taskTypes = [
   },
 ];
 
-const initialNodes: CustomNode[] = [
+const initialNodes: Node<TaskNodeData>[] = [
   {
     id: "start",
     type: "input",
-    position: { x: 250, y: 150 },
-    data: { label: "Start" },
+    position: { x: CENTER_X - 50, y: START_Y },
+    data: { 
+      label: "Start",
+      type: undefined
+    },
     style: {
       background: "#8B5CF6",
       color: "white",
@@ -110,8 +120,11 @@ const initialNodes: CustomNode[] = [
   {
     id: "end",
     type: "output",
-    position: { x: 250, y: 400 },
-    data: { label: "End" },
+    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
+    data: { 
+      label: "End",
+      type: undefined
+    },
     style: {
       background: "#0EA5E9",
       color: "white",
@@ -155,7 +168,7 @@ const initialEdges: Edge[] = [
 ];
 
 export const WorkflowCanvas = () => {
-  const [nodes, setNodes] = useState<CustomNode[]>(initialNodes);
+  const [nodes, setNodes] = useState<Node<TaskNodeData>[]>(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
@@ -187,19 +200,34 @@ export const WorkflowCanvas = () => {
 
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
     const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
+
+    // Check if this is the first task after Start
+    const isFirstTaskAfterStart = sourceNode.id === "start";
     
+    // If trying to add a Create task after the first step
+    if (type === "create" && !isFirstTaskAfterStart) {
+      toast.error("Create tasks can only be added as the first step");
+      setIsModalOpen(false);
+      return;
+    }
+
+    // If adding the first task and it's not a Create task
+    if (isFirstTaskAfterStart && type !== "create") {
+      toast.error("The first task must be a Create task");
+      setIsModalOpen(false);
+      return;
+    }
+
     const previousNodes: PreviousStep[] = sortedNodes
       .slice(0, sourceNodeIndex + 1)
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
         id: node.id,
-        label: (node as Node<TaskNodeData>).data.label || "",
+        label: node.data.label,
         sequenceNumber: idx + 1
       }))
       .reverse();
 
-    const VERTICAL_SPACING = 250;
-    const CENTER_X = 250;
     const newY = sourceNode.position.y + VERTICAL_SPACING;
     const newSequenceNumber = previousNodes.length + 1;
 
@@ -220,28 +248,37 @@ export const WorkflowCanvas = () => {
       draggable: true,
     };
 
-    const updatedNodes = nodes.map((node) => {
+    const updatedNodes = nodes.map((node): Node<TaskNodeData> => {
       if (node.position.y >= targetNode.position.y) {
-        const nodePreviousSteps: PreviousStep[] = sortedNodes
-          .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
-          .map((n, idx) => ({
-            id: n.id,
-            label: `${idx + 1}. ${(n as Node<TaskNodeData>).data.label}`,
-            sequenceNumber: idx + 1
-          }))
-          .reverse();
+        if (node.type === "taskCard") {
+          const nodePreviousSteps: PreviousStep[] = sortedNodes
+            .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
+            .map((n, idx) => ({
+              id: n.id,
+              label: n.data.label,
+              sequenceNumber: idx + 1
+            }))
+            .reverse();
 
+          return {
+            ...node,
+            position: {
+              x: CENTER_X - 125,
+              y: node.position.y + VERTICAL_SPACING,
+            },
+            data: {
+              ...node.data,
+              previousSteps: nodePreviousSteps,
+              sequenceNumber: nodePreviousSteps.length + 2,
+            },
+          };
+        }
         return {
           ...node,
           position: {
-            x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
-            y: node.id === targetNode.id ? newY + VERTICAL_SPACING : node.position.y + VERTICAL_SPACING,
+            x: CENTER_X - 50,
+            y: node.position.y + VERTICAL_SPACING,
           },
-          data: node.type === "taskCard" ? {
-            ...node.data,
-            previousSteps: nodePreviousSteps,
-            sequenceNumber: nodePreviousSteps.length + 2
-          } : node.data,
         };
       }
       return node;
@@ -307,7 +344,7 @@ export const WorkflowCanvas = () => {
     ];
 
     setNodes([...updatedNodes, newNode]);
-    setEdges((eds) => [...eds, ...newEdges]);
+    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
     setIsModalOpen(false);
   };
 
@@ -534,19 +571,29 @@ export const WorkflowCanvas = () => {
             <DialogTitle>Select task to add</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {taskTypes.map((task, index) => (
-              <TaskOption
-                key={index}
-                icon={task.icon}
-                title={task.title}
-                subtitle={task.subtitle}
-                onClick={() => {
-                  if (task.type === "create" || task.type === "approval" || task.type === "integration") {
-                    handleTaskSelection(task.type);
-                  }
-                }}
-              />
-            ))}
+            {taskTypes.map((task, index) => {
+              const sourceNode = selectedEdge ? nodes.find(n => n.id === selectedEdge.source) : null;
+              const isFirstTaskAfterStart = sourceNode?.id === "start";
+              
+              // Disable Create task option if not the first task
+              const isDisabled = (task.type === "create" && !isFirstTaskAfterStart) ||
+                               (!isFirstTaskAfterStart && task.type === "create");
+
+              return (
+                <TaskOption
+                  key={index}
+                  icon={task.icon}
+                  title={task.title}
+                  subtitle={task.subtitle}
+                  onClick={() => {
+                    if (task.type === "create" || task.type === "approval" || task.type === "integration") {
+                      handleTaskSelection(task.type);
+                    }
+                  }}
+                  disabled={isDisabled}
+                />
+              );
+            })}
           </div>
         </DialogContent>
       </Dialog>
