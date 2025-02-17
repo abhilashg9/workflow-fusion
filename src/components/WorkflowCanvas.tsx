@@ -8,6 +8,7 @@ import {
   Connection,
   addEdge,
   useReactFlow,
+  MarkerType,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { toast } from "sonner";
@@ -22,7 +23,7 @@ const nodeTypes = {
 
 export const WorkflowCanvas = () => {
   const [nodes, setNodes] = useState<Node<TaskNodeData>[]>(INITIAL_NODES);
-  const [edges, setEdges] = useState(INITIAL_EDGES);
+  const [edges, setEdges] = useState<Edge[]>(INITIAL_EDGES);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
   const { fitView } = useReactFlow();
@@ -43,32 +44,6 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   }, [nodes.length, adjustViewport]);
 
-  const handleNodeDataChange = (nodeId: string, data: Partial<TaskNodeData>) => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === nodeId) {
-          const updatedData = {
-            ...node.data,
-            ...data,
-          } as TaskNodeData;
-          
-          const validationErrors = validateNode(updatedData);
-          
-          return {
-            ...node,
-            data: {
-              ...updatedData,
-              validationErrors,
-              onDelete: node.data.onDelete,
-            },
-            className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
-          };
-        }
-        return node;
-      })
-    );
-  };
-
   const onConnect = useCallback((params: Connection) => {
     setEdges((prevEdges) =>
       addEdge(
@@ -78,7 +53,7 @@ export const WorkflowCanvas = () => {
           animated: true,
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: "#2563EB",
+            color: "#3388eb",
           },
           label: "+",
           labelStyle: { 
@@ -88,7 +63,7 @@ export const WorkflowCanvas = () => {
             opacity: 0,
           },
           labelBgStyle: { 
-            fill: "#2563EB",
+            fill: "#3388eb",
             opacity: 0,
             borderRadius: "12px",
             width: "24px",
@@ -104,43 +79,6 @@ export const WorkflowCanvas = () => {
   const onEdgeClick = (event: React.MouseEvent, edge: Edge) => {
     setSelectedEdge(edge);
     setIsModalOpen(true);
-  };
-
-  const onNodeDragStop = (_: React.MouseEvent, node: Node) => {
-    const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const VERTICAL_SPACING = 250;
-    const START_Y = 150;
-    const CENTER_X = 250;
-    
-    const updatedNodes = sortedNodes.map((n, index) => {
-      const currentSequence = n.type === "taskCard" ? index + 1 : 0;
-      const previousNodes: PreviousStep[] = sortedNodes
-        .slice(0, index)
-        .filter(prev => prev.type === "taskCard")
-        .map((prev, idx) => ({
-          id: prev.id,
-          label: `${idx + 1}. ${prev.data.label}`,
-          sequenceNumber: idx + 1
-        }))
-        .reverse();
-
-      return {
-        ...n,
-        position: {
-          x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
-          y: START_Y + (index * VERTICAL_SPACING),
-        },
-        data: n.type === "taskCard" ? {
-          ...n.data,
-          previousSteps: previousNodes,
-          sequenceNumber: currentSequence
-        } : n.data,
-        draggable: true,
-      };
-    });
-
-    setNodes(updatedNodes);
-    adjustViewport();
   };
 
   const handleDeleteNode = (nodeId: string) => {
@@ -159,10 +97,10 @@ export const WorkflowCanvas = () => {
           target: targetEdge.target,
           type: "smoothstep",
           animated: true,
-          style: { stroke: "#2563EB" },
+          style: { stroke: "#3388eb" },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: "#2563EB",
+            color: "#3388eb",
           },
           label: "+",
           labelStyle: { 
@@ -172,7 +110,7 @@ export const WorkflowCanvas = () => {
             opacity: 0,
           },
           labelBgStyle: { 
-            fill: "#2563EB",
+            fill: "#3388eb",
             opacity: 0,
             borderRadius: "12px",
             width: "24px",
@@ -180,6 +118,7 @@ export const WorkflowCanvas = () => {
           },
           className: "workflow-edge",
         };
+
         setEdges((eds) => 
           eds
             .filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
@@ -228,40 +167,6 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   };
 
-  const validateNode = (nodeData: TaskNodeData): string[] => {
-    const errors: string[] = [];
-    
-    if (!nodeData.label || nodeData.label.trim() === '') {
-      errors.push('Task label is required');
-    }
-
-    if (nodeData.type === 'create') {
-      if (!nodeData.assignment?.type) {
-        errors.push('Role/User/Supplier selection is required');
-      }
-    }
-
-    if (nodeData.type === 'approval') {
-      if (!nodeData.assignment?.type) {
-        errors.push('Role/User/Supplier/Manager selection is required');
-      }
-      const hasEmptyActionLabel = nodeData.actions?.some(
-        action => !action.label || action.label.trim() === ''
-      );
-      if (hasEmptyActionLabel) {
-        errors.push('Accept/Reject labels cannot be empty');
-      }
-    }
-
-    if (nodeData.type === 'integration') {
-      if (!nodeData.apiConfig?.selectedApi) {
-        errors.push('API selection is required');
-      }
-    }
-
-    return errors;
-  };
-
   const handleTaskSelection = (type: TaskType) => {
     if (!selectedEdge) return;
 
@@ -270,36 +175,35 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
-
-    const hasExistingCreateTask = sortedNodes.some(node => 
+    const sortedNodesList = [...nodes].sort((a, b) => a.position.y - b.position.y);
+    const isStartNode = sourceNode.id === "start";
+    const hasCreateTask = sortedNodesList.some(node => 
       node.type === "taskCard" && node.data.type === "create"
     );
 
-    const isFirstTaskAfterStart = sourceNode.id === "start";
-    
     if (type === "create") {
-      if (hasExistingCreateTask) {
+      if (hasCreateTask) {
         toast.error("Only one Create task is allowed in the workflow");
         setIsModalOpen(false);
         return;
       }
       
-      if (!isFirstTaskAfterStart) {
+      if (!isStartNode) {
         toast.error("Create task can only be added as the first step");
         setIsModalOpen(false);
         return;
       }
     }
 
-    if (isFirstTaskAfterStart && hasExistingCreateTask && type !== "create") {
+    if (isStartNode && hasCreateTask && type !== "create") {
       toast.error("A Create task must be the first step");
       setIsModalOpen(false);
       return;
     }
 
-    const previousNodes: PreviousStep[] = sortedNodes
+    const sourceNodeIndex = sortedNodesList.findIndex(n => n.id === sourceNode.id);
+
+    const previousNodes: PreviousStep[] = sortedNodesList
       .slice(0, sourceNodeIndex + 1)
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
@@ -322,65 +226,26 @@ export const WorkflowCanvas = () => {
       validationErrors: [],
     };
 
-    const validationErrors = validateNode(initialData);
-
     const newNode: Node<TaskNodeData> = {
       id: `task-${Date.now()}`,
       type: "taskCard",
       position: { x: CENTER_X - 125, y: newY },
-      data: {
-        ...initialData,
-        validationErrors,
-      },
+      data: initialData,
       draggable: true,
-      className: validationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
     };
 
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
-        if (node.type === "taskCard") {
-          const nodePreviousSteps: PreviousStep[] = sortedNodes
-            .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
-            .map((n, idx) => ({
-              id: n.id,
-              label: n.data.label,
-              sequenceNumber: idx + 1
-            }))
-            .reverse();
-
-          const updatedData: TaskNodeData = {
-            ...node.data,
-            previousSteps: nodePreviousSteps,
-            sequenceNumber: nodePreviousSteps.length + 2,
-          };
-          
-          const nodeValidationErrors = validateNode(updatedData);
-          
-          return {
-            ...node,
-            position: {
-              x: CENTER_X - 125,
-              y: node.position.y + VERTICAL_SPACING,
-            },
-            data: {
-              ...updatedData,
-              validationErrors: nodeValidationErrors,
-            },
-            className: nodeValidationErrors.length > 0 ? 'border-red-500' : 'border-gray-200',
-          };
-        }
         return {
           ...node,
           position: {
-            x: CENTER_X - 50,
+            x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
             y: node.position.y + VERTICAL_SPACING,
           },
         };
       }
       return node;
     });
-
-    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
 
     const newEdges: Edge[] = [
       {
@@ -389,10 +254,10 @@ export const WorkflowCanvas = () => {
         target: newNode.id,
         type: "smoothstep",
         animated: true,
-        style: { stroke: "#2563EB" },
+        style: { stroke: "#3388eb" },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: "#2563EB",
+          color: "#3388eb",
         },
         label: "+",
         labelStyle: { 
@@ -402,7 +267,7 @@ export const WorkflowCanvas = () => {
           opacity: 0,
         },
         labelBgStyle: { 
-          fill: "#2563EB",
+          fill: "#3388eb",
           borderRadius: "12px",
           width: 24,
           height: 24,
@@ -416,10 +281,10 @@ export const WorkflowCanvas = () => {
         target: selectedEdge.target,
         type: "smoothstep",
         animated: true,
-        style: { stroke: "#2563EB" },
+        style: { stroke: "#3388eb" },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: "#2563EB",
+          color: "#3388eb",
         },
         label: "+",
         labelStyle: { 
@@ -429,7 +294,7 @@ export const WorkflowCanvas = () => {
           opacity: 0,
         },
         labelBgStyle: { 
-          fill: "#2563EB",
+          fill: "#3388eb",
           borderRadius: "12px",
           width: 24,
           height: 24,

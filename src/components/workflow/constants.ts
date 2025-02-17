@@ -1,6 +1,7 @@
 
-import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow, GitBranch } from "lucide-react";
 import { TaskType } from "./types";
+import { MarkerType, Node, Edge } from "@xyflow/react";
 
 export const VERTICAL_SPACING = 250;
 export const START_Y = 150;
@@ -33,7 +34,7 @@ export const TASK_TYPES = [
   },
 ];
 
-export const INITIAL_NODES = [
+export const INITIAL_NODES: Node[] = [
   {
     id: "start",
     type: "input",
@@ -49,7 +50,7 @@ export const INITIAL_NODES = [
       borderRadius: "4px",
       padding: "10px 20px",
       minWidth: "100px",
-      textAlign: "center",
+      textAlign: "center" as const,
     },
   },
   {
@@ -67,12 +68,12 @@ export const INITIAL_NODES = [
       borderRadius: "4px",
       padding: "10px 20px",
       minWidth: "100px",
-      textAlign: "center",
+      textAlign: "center" as const,
     },
   },
 ];
 
-export const INITIAL_EDGES = [
+export const INITIAL_EDGES: Edge[] = [
   {
     id: "start-end",
     source: "start",
@@ -81,7 +82,7 @@ export const INITIAL_EDGES = [
     animated: true,
     style: { stroke: "#3388eb" },
     markerEnd: {
-      type: "arrowclosed",
+      type: MarkerType.ArrowClosed,
       color: "#3388eb",
     },
     label: "+",
