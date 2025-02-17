@@ -255,7 +255,7 @@ export const WorkflowCanvas = () => {
       draggable: true,
     };
 
-    const updatedNodes: Node<TaskNodeData>[] = nodes.map((node): Node<TaskNodeData> => {
+    const updatedNodes = nodes.map((node): Node<TaskNodeData> => {
       if (node.position.y >= targetNode.position.y) {
         if (node.type === "taskCard") {
           const nodePreviousSteps: PreviousStep[] = sortedNodes
@@ -276,7 +276,8 @@ export const WorkflowCanvas = () => {
             data: {
               ...node.data,
               previousSteps: nodePreviousSteps,
-              sequenceNumber: nodePreviousSteps.length + 2
+              sequenceNumber: nodePreviousSteps.length + 2,
+              label: node.data.label
             },
           };
         }
@@ -286,10 +287,8 @@ export const WorkflowCanvas = () => {
             x: CENTER_X - 50,
             y: node.position.y + VERTICAL_SPACING,
           },
-          data: {
-            ...node.data
-          },
-        } as Node<TaskNodeData>;
+          data: node.data,
+        };
       }
       return node;
     });
@@ -351,7 +350,7 @@ export const WorkflowCanvas = () => {
       },
     ];
 
-    setNodes([...updatedNodes, newNode]);
+    setNodes([...updatedNodes, newNode] as Node<TaskNodeData>[]);
     setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
     setIsModalOpen(false);
   };
