@@ -36,43 +36,11 @@ export const WorkflowHeader = () => {
     let allErrors: { nodeId: string; errors: string[] }[] = [];
 
     nodes.forEach((node) => {
-      const nodeData = node.data;
-      const errors: string[] = [];
-      
-      // Common validations
-      if (!nodeData.label || nodeData.label.trim() === '') {
-        errors.push('Task label is required');
-      }
-
-      // Create task validations
-      if (nodeData.type === 'create') {
-        if (!nodeData.assignment?.type) {
-          errors.push('Role/User/Supplier selection is required');
-        }
-      }
-
-      // Approval task validations
-      if (nodeData.type === 'approval') {
-        if (!nodeData.assignment?.type) {
-          errors.push('Role/User/Supplier/Manager selection is required');
-        }
-        const hasEmptyActionLabel = nodeData.actions?.some(
-          action => !action.label || action.label.trim() === ''
-        );
-        if (hasEmptyActionLabel) {
-          errors.push('Accept/Reject labels cannot be empty');
-        }
-      }
-
-      // Integration task validations
-      if (nodeData.type === 'integration') {
-        if (!nodeData.apiConfig?.selectedApi) {
-          errors.push('API selection is required');
-        }
-      }
-
-      if (errors.length > 0) {
-        allErrors.push({ nodeId: node.id, errors });
+      if (node.data.validationErrors && node.data.validationErrors.length > 0) {
+        allErrors.push({
+          nodeId: node.id,
+          errors: node.data.validationErrors
+        });
       }
     });
 
