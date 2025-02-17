@@ -464,173 +464,36 @@ const TaskCard = memo(({
 
   return (
     <>
-      <div 
-        className={cn(
-          "bg-white rounded-lg border transition-all duration-200",
-          "hover:shadow-lg hover:border-primary/20",
-          "group/card relative",
-          getCardHeight()
-        )}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <Handle type="target" position={Position.Top} className="!bg-primary" />
-        
-        {isHovered && (
-          <Button 
-            variant="destructive" 
-            size="icon" 
-            className="absolute -top-2 -right-2 h-8 w-8 rounded-full opacity-0 group-hover/card:opacity-100 transition-opacity z-10 shadow-md" 
-            onClick={handleDeleteTask}
-          >
+      <div className={cn(
+        "bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] relative group",
+        getCardHeight()
+      )}>
+        <Handle type="target" position={Position.Top} />
+        {isHovered && <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleDeleteTask}>
             <X className="h-4 w-4" />
-          </Button>
-        )}
-
-        <div className="space-y-4 p-4">
+          </Button>}
+        <div className="space-y-4">
           <div className="flex items-start gap-3">
-            <div className={cn(
-              "p-2 rounded-lg transition-colors",
-              data.type === "create" && "bg-blue-50",
-              data.type === "approval" && "bg-sky-50",
-              data.type === "integration" && "bg-orange-50"
-            )}>
-              {getIcon()}
-            </div>
+            <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <input 
-                  type="text" 
-                  value={taskLabel} 
-                  onChange={e => handleLabelChange(e.target.value)} 
-                  className={cn(
-                    "flex-1 text-lg font-medium bg-transparent",
-                    "outline-none border-none focus:ring-2 focus:ring-primary/20 rounded px-1",
-                    "transition-all duration-200"
-                  )} 
-                  maxLength={50} 
-                />
-                {data.sequenceNumber > 0 && (
-                  <Badge variant="default" className="bg-primary/90 hover:bg-primary/90">
+                <input type="text" value={taskLabel} onChange={e => handleLabelChange(e.target.value)} className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1" maxLength={50} />
+                {data.sequenceNumber > 0 && <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full shrink-0">
                     Step {data.sequenceNumber}
-                  </Badge>
-                )}
+                  </span>}
               </div>
             </div>
           </div>
 
-          <div className={cn(
-            "space-y-3 bg-gray-50/50 p-3 rounded-lg transition-colors",
-            "group-hover/card:bg-gray-50/80"
-          )}>
+          <div className="space-y-3 bg-gray-50/50 p-3 rounded-lg py-0 px-0">
             {renderAssignmentTags()}
           </div>
 
-          <div className={cn(
-            "flex items-center justify-between gap-2 pt-2 border-t border-gray-100",
-            "group-hover/card:border-gray-200 transition-colors"
-          )}>
-            <TooltipProvider>
-              {!isIntegrationTask && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex flex-col items-center h-auto py-2 px-3"
-                      onClick={() => handleActionClick("assignment")}
-                    >
-                      <User className="w-4 h-4 text-gray-600 mb-1" />
-                      <span className="text-xs text-gray-600">Assignment</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Configure task assignment</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-
-              {isIntegrationTask && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex flex-col items-center h-auto py-2 px-3"
-                      onClick={() => handleActionClick("api-config")}
-                    >
-                      <Server className="w-4 h-4 text-gray-600 mb-1" />
-                      <span className="text-xs text-gray-600">API Config</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Configure API integration</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      "flex flex-col items-center h-auto py-2 px-3",
-                      isCreateTask && "opacity-50 cursor-not-allowed"
-                    )}
-                    onClick={() => !isCreateTask && handleActionClick("notifications")}
-                    disabled={isCreateTask}
-                  >
-                    <Bell className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">Notifications</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Configure notifications</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      "flex flex-col items-center h-auto py-2 px-3",
-                      (isIntegrationTask || isCreateTask) && "opacity-50 cursor-not-allowed"
-                    )}
-                    onClick={() => !isIntegrationTask && !isCreateTask && handleActionClick("actions")}
-                    disabled={isIntegrationTask || isCreateTask}
-                  >
-                    <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">Actions</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Configure task actions</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex flex-col items-center h-auto py-2 px-3"
-                    onClick={() => handleActionClick("visibility")}
-                  >
-                    <Eye className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">Visibility</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Configure visibility rules</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
+            {renderActionButtons()}
           </div>
         </div>
-        <Handle type="source" position={Position.Bottom} className="!bg-primary" />
+        <Handle type="source" position={Position.Bottom} />
       </div>
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -638,20 +501,8 @@ const TaskCard = memo(({
           <DrawerHeader className="border-b border-gray-100 shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={cn(
-                  "p-2 rounded-lg",
-                  data.type === "create" && "bg-blue-50",
-                  data.type === "approval" && "bg-sky-50",
-                  data.type === "integration" && "bg-orange-50"
-                )}>
-                  {getIcon()}
-                </div>
-                <Input 
-                  value={taskLabel} 
-                  onChange={e => handleLabelChange(e.target.value)} 
-                  className="flex-1 text-lg font-medium h-auto py-1 border-none focus-visible:ring-2 focus-visible:ring-primary/20" 
-                  maxLength={50} 
-                />
+                <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
+                <Input value={taskLabel} onChange={e => handleLabelChange(e.target.value)} className="flex-1 text-lg font-medium h-auto py-1" maxLength={50} />
               </div>
               <Button variant="ghost" size="icon" onClick={() => setIsDrawerOpen(false)} className="h-8 w-8">
                 <X className="h-4 w-4" />
@@ -670,7 +521,7 @@ const TaskCard = memo(({
                 </TabsList>
 
                 {!isIntegrationTask && (
-                  <TabsContent value="assignment" className="pt-4">
+                  <TabsContent value="assignment">
                     <TaskCardAssignment
                       assignment={assignment}
                       onAssignmentTypeChange={handleAssignmentTypeChange}
@@ -685,38 +536,34 @@ const TaskCard = memo(({
                   </TabsContent>
                 )}
 
-                {isIntegrationTask && (
-                  <TabsContent value="api-config" className="pt-4">
-                    <TaskCardApiConfig 
-                      selectedApi={data.apiConfig?.selectedApi} 
-                      failureRecourse={data.apiConfig?.failureRecourse} 
-                      previousSteps={previousSteps} 
-                      onApiSelect={handleApiSelect} 
-                      onFailureRecourseChange={handleFailureRecourseChange} 
-                    />
-                  </TabsContent>
-                )}
+                {isIntegrationTask && <TabsContent value="api-config">
+                  <TaskCardApiConfig 
+                    selectedApi={data.apiConfig?.selectedApi} 
+                    failureRecourse={data.apiConfig?.failureRecourse} 
+                    previousSteps={previousSteps} 
+                    onApiSelect={handleApiSelect} 
+                    onFailureRecourseChange={handleFailureRecourseChange} 
+                  />
+                </TabsContent>}
 
                 <TabsContent value="notifications">
                   Notifications content
                 </TabsContent>
 
-                {!isIntegrationTask && (
-                  <>
-                    <TabsContent value="actions" className="pt-4">
-                      <TaskCardActions 
-                        actions={actions} 
-                        previousSteps={previousSteps} 
-                        onActionToggle={handleActionToggle} 
-                        onActionLabelChange={handleActionLabelChange} 
-                        onSendBackStepChange={handleSendBackStepChange} 
-                      />
-                    </TabsContent>
-                    <TabsContent value="visibility">
-                      Visibility content
-                    </TabsContent>
-                  </>
-                )}
+                {!isIntegrationTask && <>
+                  <TabsContent value="actions">
+                    <TaskCardActions 
+                      actions={actions} 
+                      previousSteps={previousSteps} 
+                      onActionToggle={handleActionToggle} 
+                      onActionLabelChange={handleActionLabelChange} 
+                      onSendBackStepChange={handleSendBackStepChange} 
+                    />
+                  </TabsContent>
+                  <TabsContent value="visibility">
+                    Visibility content
+                  </TabsContent>
+                </>}
               </Tabs>
             </div>
           </div>
