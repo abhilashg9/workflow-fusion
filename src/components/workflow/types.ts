@@ -41,7 +41,7 @@ export interface TaskAction {
   };
 }
 
-export interface TaskNodeData {
+export interface TaskNodeData extends Record<string, unknown> {
   type: TaskType;
   label: string;
   tags?: string[];
@@ -64,12 +64,6 @@ export interface TaskNodeData {
 }
 
 export type CustomNode = Node<TaskNodeData>;
-
-export interface StepOption {
-  id: string;
-  label: string;
-  sequenceNumber: number;
-}
 
 export const mockApiConfigs: ApiConfig[] = [
   {

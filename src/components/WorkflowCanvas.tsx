@@ -22,6 +22,52 @@ const HORIZONTAL_SPACING = 400;
 const START_Y = 150;
 const CENTER_X = 450;
 
+const initialNodes: Node[] = [
+  {
+    id: "start",
+    type: "input",
+    position: { x: CENTER_X - 50, y: START_Y },
+    data: { label: "Start" },
+    style: {
+      background: "#2563eb",
+      color: "white",
+      border: "none",
+      width: 100,
+      borderRadius: "4px",
+      padding: "10px",
+    },
+  },
+  {
+    id: "end",
+    type: "output",
+    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
+    data: { label: "End" },
+    style: {
+      background: "#2563eb",
+      color: "white",
+      border: "none",
+      width: 100,
+      borderRadius: "4px",
+      padding: "10px",
+    },
+  },
+];
+
+const initialEdges: Edge[] = [
+  {
+    id: "start-end",
+    source: "start",
+    target: "end",
+    type: "smoothstep",
+    animated: true,
+    style: { stroke: "#2563eb" },
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      color: "#2563eb",
+    },
+  },
+];
+
 interface TaskOptionProps {
   icon: React.ElementType;
   title: string;
@@ -77,8 +123,8 @@ const nodeTypes = {
 };
 
 export const WorkflowCanvas = () => {
-  const [nodes, setNodes] = useState<CustomNode[]>(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+  const [nodes, setNodes] = useState<Node[]>(initialNodes);
+  const [edges, setEdges] = useState<Edge[]>(initialEdges);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
   const { fitView } = useReactFlow();
@@ -235,7 +281,6 @@ export const WorkflowCanvas = () => {
       },
     ];
 
-    // Update positions of subsequent nodes
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
         return {
@@ -413,23 +458,9 @@ export const WorkflowCanvas = () => {
           animated: true,
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: "#2563EB",
+            color: "#2563eb",
           },
-          label: "+",
-          labelStyle: { 
-            fill: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "16px",
-            opacity: 0,
-          },
-          labelBgStyle: { 
-            fill: "#2563EB",
-            opacity: 0,
-            borderRadius: "12px",
-            width: "24px",
-            height: "24px",
-          },
-          className: "workflow-edge",
+          style: { stroke: "#2563eb" },
         },
         prevEdges
       )
@@ -638,10 +669,10 @@ export const WorkflowCanvas = () => {
           className="bg-canvas"
           defaultEdgeOptions={{
             type: "smoothstep",
-            style: { stroke: "#2563EB" },
+            style: { stroke: "#2563eb" },
             markerEnd: {
               type: MarkerType.ArrowClosed,
-              color: "#2563EB",
+              color: "#2563eb",
             },
           }}
         >
@@ -661,28 +692,15 @@ export const WorkflowCanvas = () => {
             <DialogTitle>Select task to add</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {taskTypes.map((task, index) => {
-              const sourceNode = selectedEdge ? nodes.find(n => n.id === selectedEdge.source) : null;
-              const isFirstTaskAfterStart = sourceNode?.id === "start";
-              
-              const isDisabled = (task.type === "create" && !isFirstTaskAfterStart) ||
-                               (!isFirstTaskAfterStart && task.type === "create");
-
-              return (
-                <TaskOption
-                  key={index}
-                  icon={task.icon}
-                  title={task.title}
-                  subtitle={task.subtitle}
-                  onClick={() => {
-                    if (task.type === "create" || task.type === "approval" || task.type === "integration") {
-                      handleTaskSelection(task.type);
-                    }
-                  }}
-                  disabled={isDisabled}
-                />
-              );
-            })}
+            {taskTypes.map((task, index) => (
+              <TaskOption
+                key={index}
+                icon={task.icon}
+                title={task.title}
+                subtitle={task.subtitle}
+                onClick={() => handleTaskSelection(task.type)}
+              />
+            ))}
           </div>
         </DialogContent>
       </Dialog>
