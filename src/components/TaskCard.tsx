@@ -1,7 +1,7 @@
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, Users, Filter } from "lucide-react";
-import { User, Bell, ArrowRight, Eye, Server, ShieldAlert, X, Trash2 } from "lucide-react";
+import { User, Bell, ArrowRight, Eye, Server, AlertCircle, X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -33,10 +33,59 @@ const TaskCard = memo(({
   });
   const [isHovered, setIsHovered] = useState(false);
   const [actions, setActions] = useState<TaskAction[]>(data.actions || DEFAULT_ACTIONS);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
     setTaskLabel(data.label);
   }, [data.label]);
+
+  useEffect(() => {
+    validateTask();
+  }, [data]);
+
+  const validateTask = () => {
+    const errors: string[] = [];
+
+    // Common validations
+    if (!data.label || data.label.trim() === '') {
+      errors.push('Task label is required');
+    }
+
+    // Create task validations
+    if (data.type === 'create') {
+      if (!data.assignment?.type) {
+        errors.push('Role/User/Supplier selection is required');
+      }
+    }
+
+    // Approval task validations
+    if (data.type === 'approval') {
+      if (!data.assignment?.type) {
+        errors.push('Role/User/Supplier/Manager selection is required');
+      }
+      const hasEmptyActionLabel = data.actions?.some(
+        action => !action.label || action.label.trim() === ''
+      );
+      if (hasEmptyActionLabel) {
+        errors.push('Accept/Reject labels cannot be empty');
+      }
+    }
+
+    // Integration task validations
+    if (data.type === 'integration') {
+      if (!data.apiConfig?.selectedApi) {
+        errors.push('API selection is required');
+      }
+    }
+
+    setValidationErrors(errors);
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        validationErrors: errors
+      });
+    }
+  };
 
   const getIcon = () => {
     switch (data.type) {
@@ -464,10 +513,29 @@ const TaskCard = memo(({
 
   return (
     <>
-      <div className={cn(
-        "bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] relative group",
-        getCardHeight()
-      )}>
+      <div 
+        className={cn(
+          "bg-white rounded-lg shadow-sm border border-gray-100 p-4 w-[400px] relative group",
+          getCardHeight(),
+          validationErrors.length > 0 && "border-red-200"
+        )}
+      >
+        {validationErrors.length > 0 && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <AlertCircle className="absolute top-2 right-2 h-4 w-4 text-red-500" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="space-y-1">
+                  {validationErrors.map((error, index) => (
+                    <p key={index} className="text-xs text-red-500">{error}</p>
+                  ))}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
         <Handle type="target" position={Position.Top} />
         {isHovered && <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleDeleteTask}>
             <X className="h-4 w-4" />
