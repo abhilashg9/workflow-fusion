@@ -65,21 +65,27 @@ const TaskCard = memo(({
   };
 
   const handleAssignmentTypeChange = (type: AssignmentConfig["type"]) => {
-    const newAssignment: AssignmentConfig = {
-      type
-    };
-    switch (type) {
-      case "roles":
-        newAssignment.roles = [];
-        break;
-      case "users":
-        newAssignment.users = [];
-        break;
-      case "supplier":
-        break;
+    if (data.type === "create") {
+      const newAssignment: AssignmentConfig = {
+        type
+      };
+      switch (type) {
+        case "roles":
+          newAssignment.roles = [];
+          break;
+        case "users":
+          newAssignment.users = [];
+          break;
+        case "supplier":
+          break;
+      }
+      setAssignment(newAssignment);
+      updateNodeData(newAssignment);
+    } else {
+      const newAssignment = { ...assignment, type };
+      setAssignment(newAssignment);
+      updateNodeData(newAssignment);
     }
-    setAssignment(newAssignment);
-    updateNodeData(newAssignment);
   };
 
   const updateNodeData = (newAssignment: AssignmentConfig) => {
@@ -261,16 +267,20 @@ const TaskCard = memo(({
       );
     }
 
-    switch (assignment.type) {
-      case "roles":
-        return renderAbbreviatedList(assignment.roles, 'roles');
-      case "users":
-        return renderAbbreviatedList(assignment.users, 'roles');
-      case "supplier":
-        return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
-      default:
-        return null;
+    if (data.type === "create") {
+      switch (assignment.type) {
+        case "roles":
+          return renderAbbreviatedList(assignment.roles, 'roles');
+        case "users":
+          return renderAbbreviatedList(assignment.users, 'roles');
+        case "supplier":
+          return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
+        default:
+          return null;
+      }
     }
+
+    return renderAbbreviatedList(assignment.roles, 'roles');
   };
 
   const handleApiSelect = (api: any) => {
