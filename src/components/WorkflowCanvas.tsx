@@ -201,19 +201,33 @@ export const WorkflowCanvas = () => {
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
     const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
 
-    // Check if this is the first task after Start
+    // Check if trying to add a task before an existing Create task
+    const hasExistingCreateTask = sortedNodes.some(node => 
+      node.type === "taskCard" && node.data.type === "create"
+    );
+
     const isFirstTaskAfterStart = sourceNode.id === "start";
     
-    // If trying to add a Create task after the first step
-    if (type === "create" && !isFirstTaskAfterStart) {
-      toast.error("Create tasks can only be added as the first step");
-      setIsModalOpen(false);
-      return;
+    // Rule 1 & 2: Handle Create task positioning
+    if (type === "create") {
+      // If there's already a create task, don't allow another one
+      if (hasExistingCreateTask) {
+        toast.error("Only one Create task is allowed in the workflow");
+        setIsModalOpen(false);
+        return;
+      }
+      
+      // If trying to add Create task not as the first task
+      if (!isFirstTaskAfterStart) {
+        toast.error("Create task can only be added as the first step");
+        setIsModalOpen(false);
+        return;
+      }
     }
 
-    // If adding the first task and it's not a Create task
-    if (isFirstTaskAfterStart && type !== "create") {
-      toast.error("The first task must be a Create task");
+    // Rule 3: Allow other tasks as first step if no Create task exists
+    if (isFirstTaskAfterStart && hasExistingCreateTask && type !== "create") {
+      toast.error("A Create task must be the first step");
       setIsModalOpen(false);
       return;
     }
