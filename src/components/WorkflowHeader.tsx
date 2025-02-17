@@ -153,7 +153,7 @@ export const WorkflowHeader = () => {
         <div className="flex items-center space-x-3">
           <div className="flex items-center gap-2">
             <h1 className="font-medium">
-              Invoice Workflow | <span className="text-[#7E69AB] capitalize">{selectedWorkflow.replace('-', ' ')}</span>
+              Invoice Workflow | <span className="text-[#0EA5E9] capitalize">{selectedWorkflow.replace('-', ' ')}</span>
             </h1>
           </div>
           <DropdownMenu>
@@ -161,38 +161,38 @@ export const WorkflowHeader = () => {
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="h-8 text-sm text-[#7E69AB] hover:bg-[#F1F0FB] px-2 transition-colors"
+                className="h-8 text-sm text-[#0EA5E9] hover:bg-[#D3E4FD] px-2 transition-colors"
               >
                 <ChevronDown className="h-3 w-3 opacity-70" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 bg-white shadow-lg border-[#E5DEFF]">
+            <DropdownMenuContent align="start" className="w-56 bg-white shadow-lg border-[#D3E4FD]">
               <DropdownMenuItem 
                 onClick={() => handleAuxiliaryWorkflow('create')} 
-                className="flex items-center gap-2 hover:bg-[#F1F0FB] text-gray-700 focus:bg-[#F1F0FB] focus:text-[#9b87f5]"
+                className="flex items-center gap-2 hover:bg-[#D3E4FD] text-gray-700 focus:bg-[#D3E4FD] focus:text-[#0EA5E9]"
               >
-                <Plus className="h-4 w-4 text-[#9b87f5]" />
+                <Plus className="h-4 w-4 text-[#0EA5E9]" />
                 Create
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => handleAuxiliaryWorkflow('amend')} 
-                className="flex items-center gap-2 hover:bg-[#F1F0FB] text-gray-700 focus:bg-[#F1F0FB] focus:text-[#9b87f5]"
+                className="flex items-center gap-2 hover:bg-[#D3E4FD] text-gray-700 focus:bg-[#D3E4FD] focus:text-[#0EA5E9]"
               >
-                <PenLine className="h-4 w-4 text-[#9b87f5]" />
+                <PenLine className="h-4 w-4 text-[#0EA5E9]" />
                 Amend
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => handleAuxiliaryWorkflow('short-close')} 
-                className="flex items-center gap-2 hover:bg-[#F1F0FB] text-gray-700 focus:bg-[#F1F0FB] focus:text-[#9b87f5]"
+                className="flex items-center gap-2 hover:bg-[#D3E4FD] text-gray-700 focus:bg-[#D3E4FD] focus:text-[#0EA5E9]"
               >
-                <CheckCircle className="h-4 w-4 text-[#9b87f5]" />
+                <CheckCircle className="h-4 w-4 text-[#0EA5E9]" />
                 Short Close
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => handleAuxiliaryWorkflow('cancel')} 
-                className="flex items-center gap-2 hover:bg-[#F1F0FB] text-gray-700 focus:bg-[#F1F0FB] focus:text-[#9b87f5]"
+                className="flex items-center gap-2 hover:bg-[#D3E4FD] text-gray-700 focus:bg-[#D3E4FD] focus:text-[#0EA5E9]"
               >
-                <X className="h-4 w-4 text-[#9b87f5]" />
+                <X className="h-4 w-4 text-[#0EA5E9]" />
                 Cancel
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -202,13 +202,13 @@ export const WorkflowHeader = () => {
           <DropdownMenuTrigger asChild>
             <Button 
               variant="ghost" 
-              className="text-sm text-[#9b87f5] hover:bg-[#F1F0FB] flex items-center gap-2 transition-colors"
+              className="text-sm text-[#0EA5E9] hover:bg-[#D3E4FD] flex items-center gap-2 transition-colors"
             >
               <History className="h-4 w-4" />
               <div className="flex items-center gap-2">
                 <span className="font-medium">{selectedVersion.version}</span>
                 {!selectedVersion.isPublished && (
-                  <Badge variant="secondary" className="bg-[#E5DEFF] text-[#7E69AB] hover:bg-[#E5DEFF]">
+                  <Badge variant="secondary" className="bg-[#D3E4FD] text-[#0EA5E9] hover:bg-[#D3E4FD]">
                     Draft
                   </Badge>
                 )}
@@ -216,30 +216,30 @@ export const WorkflowHeader = () => {
               <ChevronDown className="h-4 w-4 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-96 bg-white shadow-lg border-[#E5DEFF]" align="start">
-            <DropdownMenuLabel className="flex items-center gap-2 text-[#7E69AB]">
+          <DropdownMenuContent className="w-96 bg-white shadow-lg border-[#D3E4FD]" align="start">
+            <DropdownMenuLabel className="flex items-center gap-2 text-[#0EA5E9]">
               <History className="h-4 w-4" />
               Version History
             </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-[#E5DEFF]" />
+            <DropdownMenuSeparator className="bg-[#D3E4FD]" />
             <div className="max-h-[400px] overflow-y-auto">
               {workflowVersions.map((version, index) => (
                 <DropdownMenuItem
                   key={version.id}
                   onClick={() => handleVersionSelect(version)}
-                  className="flex flex-col items-start py-3 px-4 cursor-pointer hover:bg-[#F1F0FB] focus:bg-[#F1F0FB]"
+                  className="flex flex-col items-start py-3 px-4 cursor-pointer hover:bg-[#D3E4FD] focus:bg-[#D3E4FD]"
                 >
                   <div className="flex items-start justify-between w-full gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-semibold text-gray-900">{version.version}</span>
                         {version.isMajorChange && (
-                          <Badge variant="secondary" className="bg-[#E5DEFF] text-[#7E69AB]">
+                          <Badge variant="secondary" className="bg-[#D3E4FD] text-[#0EA5E9]">
                             Major Update
                           </Badge>
                         )}
                         {!version.isPublished && (
-                          <Badge variant="secondary" className="bg-[#E5DEFF] text-[#7E69AB]">
+                          <Badge variant="secondary" className="bg-[#D3E4FD] text-[#0EA5E9]">
                             Draft
                           </Badge>
                         )}
@@ -248,7 +248,7 @@ export const WorkflowHeader = () => {
                         <ul className="mt-1 space-y-1">
                           {version.changes.map((change, idx) => (
                             <li key={idx} className="text-xs text-gray-600 flex items-center gap-2">
-                              <div className="w-1 h-1 rounded-full bg-[#9b87f5]"></div>
+                              <div className="w-1 h-1 rounded-full bg-[#0EA5E9]"></div>
                               {change}
                             </li>
                           ))}
@@ -256,7 +256,7 @@ export const WorkflowHeader = () => {
                       )}
                     </div>
                     {version.isPublished && (
-                      <CheckCircle2 className="h-4 w-4 text-[#9b87f5] mt-1 flex-shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-[#0EA5E9] mt-1 flex-shrink-0" />
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
@@ -268,7 +268,7 @@ export const WorkflowHeader = () => {
                     <span className="text-gray-400">({formatDate(version.timestamp)})</span>
                   </div>
                   {index < workflowVersions.length - 1 && (
-                    <div className="absolute left-0 bottom-0 w-full border-b border-[#E5DEFF]"></div>
+                    <div className="absolute left-0 bottom-0 w-full border-b border-[#D3E4FD]"></div>
                   )}
                 </DropdownMenuItem>
               ))}
@@ -309,13 +309,13 @@ export const WorkflowHeader = () => {
         )}
         <Button 
           variant="outline" 
-          className="border-[#E5DEFF] hover:bg-[#F1F0FB] text-[#7E69AB]"
+          className="border-[#D3E4FD] hover:bg-[#D3E4FD] text-[#0EA5E9]"
         >
           Cancel
         </Button>
         <Button 
           disabled={hasErrors}
-          className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white transition-colors"
+          className="bg-[#0EA5E9] hover:bg-[#1EAEDB] text-white transition-colors"
         >
           Publish
         </Button>
