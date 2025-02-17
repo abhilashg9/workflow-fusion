@@ -1,7 +1,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { taskTypes } from "./constants";
 import { TaskType } from "./types";
-import { Code2, UploadCloud, UserCheck, Split } from "lucide-react";
 
 interface TaskOptionProps {
   icon: any;
@@ -31,33 +31,6 @@ interface TaskSelectionModalProps {
   onTaskSelect: (type: TaskType) => void;
 }
 
-const taskTypes = [
-  {
-    icon: UploadCloud,
-    title: "Create Record",
-    subtitle: "Start a new workflow with record creation",
-    type: "create" as TaskType,
-  },
-  {
-    icon: UserCheck,
-    title: "Approval",
-    subtitle: "Add an approval step to the workflow",
-    type: "approval" as TaskType,
-  },
-  {
-    icon: Code2,
-    title: "Integration",
-    subtitle: "Connect with external systems",
-    type: "integration" as TaskType,
-  },
-  {
-    icon: Split,
-    title: "Split Branch",
-    subtitle: "Split workflow into multiple paths",
-    type: "split" as TaskType,
-  },
-];
-
 export const TaskSelectionModal = ({ isOpen, onClose, onTaskSelect }: TaskSelectionModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -72,7 +45,11 @@ export const TaskSelectionModal = ({ isOpen, onClose, onTaskSelect }: TaskSelect
               icon={task.icon}
               title={task.title}
               subtitle={task.subtitle}
-              onClick={() => onTaskSelect(task.type)}
+              onClick={() => {
+                if (task.type === "create" || task.type === "approval" || task.type === "integration") {
+                  onTaskSelect(task.type);
+                }
+              }}
             />
           ))}
         </div>
