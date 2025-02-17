@@ -245,7 +245,11 @@ const TaskCard = memo(({
           ) : (
             <div className="flex flex-wrap gap-2">
               {items.slice(0, 2).map(item => (
-                <Badge key={item} variant="secondary" className="text-xs">
+                <Badge 
+                  key={item} 
+                  variant={type === 'filters' ? "outline" : "secondary"} 
+                  className="text-xs"
+                >
                   {item}
                 </Badge>
               ))}
@@ -253,7 +257,10 @@ const TaskCard = memo(({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Badge variant="secondary" className="text-xs cursor-help">
+                      <Badge 
+                        variant={type === 'filters' ? "outline" : "secondary"} 
+                        className="text-xs cursor-help"
+                      >
                         +{items.length - 2}
                       </Badge>
                     </TooltipTrigger>
@@ -311,7 +318,12 @@ const TaskCard = memo(({
         case "users":
           return renderAbbreviatedList(assignment.users, 'roles');
         case "supplier":
-          return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
+          return (
+            <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
+              <Users className="w-4 h-4" />
+              <Badge variant="secondary" className="text-xs">Supplier</Badge>
+            </div>
+          );
         default:
           return renderAbbreviatedList([], 'roles');
       }
@@ -322,7 +334,8 @@ const TaskCard = memo(({
         return (
           <div className="space-y-2">
             {renderAbbreviatedList(assignment.roles, 'roles')}
-            {assignment.filters && assignment.filters.length > 0 && renderAbbreviatedList(assignment.filters, 'filters')}
+            {assignment.filters && assignment.filters.length > 0 && 
+              renderAbbreviatedList(assignment.filters, 'filters')}
           </div>
         );
       case "users":
@@ -330,11 +343,26 @@ const TaskCard = memo(({
       case "dynamic_users":
         return renderAbbreviatedList(assignment.dynamicUsers, 'roles');
       case "supplier":
-        return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
+        return (
+          <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
+            <Users className="w-4 h-4" />
+            <Badge variant="secondary" className="text-xs">Supplier</Badge>
+          </div>
+        );
       case "manager":
-        return <Badge variant="secondary" className="text-xs">Manager</Badge>;
+        return (
+          <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
+            <Users className="w-4 h-4" />
+            <Badge variant="secondary" className="text-xs">Manager</Badge>
+          </div>
+        );
       case "manager_hierarchy":
-        return <Badge variant="secondary" className="text-xs">Manager Hierarchy</Badge>;
+        return (
+          <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
+            <Users className="w-4 h-4" />
+            <Badge variant="secondary" className="text-xs">Manager Hierarchy</Badge>
+          </div>
+        );
       default:
         return renderAbbreviatedList([], 'roles');
     }
