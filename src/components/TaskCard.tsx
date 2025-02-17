@@ -1,3 +1,4 @@
+
 import { memo, useState, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow } from "lucide-react";
@@ -202,18 +203,22 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
     switch (assignment.type) {
       case "roles":
         return (
-          <>
-            {assignment.roles?.map((role) => (
-              <Badge key={role} variant="secondary" className="text-xs">
-                {role}
-              </Badge>
-            ))}
-            {assignment.filters?.map((filter) => (
-              <Badge key={filter} variant="outline" className="text-xs">
-                {filter}
-              </Badge>
-            ))}
-          </>
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {assignment.roles?.map((role) => (
+                <Badge key={role} variant="secondary" className="text-xs">
+                  {role}
+                </Badge>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {assignment.filters?.map((filter) => (
+                <Badge key={filter} variant="outline" className="text-xs">
+                  {filter}
+                </Badge>
+              ))}
+            </div>
+          </div>
         );
       case "users":
         return assignment.users?.map((user) => (
@@ -301,7 +306,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="space-y-2">
             {renderAssignmentTags()}
           </div>
 
