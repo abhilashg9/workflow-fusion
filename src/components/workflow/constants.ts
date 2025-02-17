@@ -41,7 +41,7 @@ export const INITIAL_NODES: Node[] = [
     position: { x: CENTER_X - 50, y: START_Y },
     data: { 
       label: "Start",
-      type: undefined
+      type: "start" as TaskType
     },
     style: {
       background: "#3388eb",
@@ -59,7 +59,7 @@ export const INITIAL_NODES: Node[] = [
     position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
     data: { 
       label: "End",
-      type: undefined
+      type: "end" as TaskType
     },
     style: {
       background: "#0EA5E9",

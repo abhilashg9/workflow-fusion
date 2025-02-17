@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -22,7 +23,7 @@ const nodeTypes = {
 };
 
 export const WorkflowCanvas = () => {
-  const [nodes, setNodes] = useState<Node<TaskNodeData>[]>(INITIAL_NODES);
+  const [nodes, setNodes] = useState<Node<TaskNodeData>[]>(INITIAL_NODES as Node<TaskNodeData>[]);
   const [edges, setEdges] = useState<Edge[]>(INITIAL_EDGES);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
@@ -317,7 +318,6 @@ export const WorkflowCanvas = () => {
           edges={edges}
           onConnect={onConnect}
           onEdgeClick={onEdgeClick}
-          onNodeDragStop={onNodeDragStop}
           nodeTypes={nodeTypes}
           fitView
           className="bg-canvas"
