@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -168,42 +167,11 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   };
 
-  const handleTaskSelection = (type: TaskType) => {
-    if (!selectedEdge) return;
-
-    const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
-    const targetNode = nodes.find((n) => n.id === selectedEdge.target);
-    
-    if (!sourceNode || !targetNode) return;
-
+  const createSplitBranch = (sourceNode: Node, targetNode: Node, type: TaskType) => {
+    const newY = sourceNode.position.y + VERTICAL_SPACING;
     const sortedNodesList = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const isStartNode = sourceNode.id === "start";
-    const hasCreateTask = sortedNodesList.some(node => 
-      node.type === "taskCard" && node.data.type === "create"
-    );
-
-    if (type === "create") {
-      if (hasCreateTask) {
-        toast.error("Only one Create task is allowed in the workflow");
-        setIsModalOpen(false);
-        return;
-      }
-      
-      if (!isStartNode) {
-        toast.error("Create task can only be added as the first step");
-        setIsModalOpen(false);
-        return;
-      }
-    }
-
-    if (isStartNode && hasCreateTask && type !== "create") {
-      toast.error("A Create task must be the first step");
-      setIsModalOpen(false);
-      return;
-    }
-
     const sourceNodeIndex = sortedNodesList.findIndex(n => n.id === sourceNode.id);
-
+    
     const previousNodes: PreviousStep[] = sortedNodesList
       .slice(0, sourceNodeIndex + 1)
       .filter(node => node.type === "taskCard")
@@ -214,26 +182,124 @@ export const WorkflowCanvas = () => {
       }))
       .reverse();
 
-    const newY = sourceNode.position.y + VERTICAL_SPACING;
-    const newSequenceNumber = previousNodes.length + 1;
+    const splitId = `split-${Date.now()}`;
+    const defaultBranchId = `default-${Date.now()}`;
+    const conditionBranchId = `condition-${Date.now()}`;
+    const joinId = `join-${Date.now()}`;
 
-    const initialData: TaskNodeData = {
-      type,
-      label: `New ${type} task`,
-      tags: type === "integration" ? ["API Name"] : ["Role 1", "Role 2"],
-      previousSteps: previousNodes,
-      sequenceNumber: newSequenceNumber,
-      onDelete: handleDeleteNode,
-      validationErrors: [],
-    };
+    const newNodes: Node<TaskNodeData>[] = [
+      {
+        id: splitId,
+        type: "taskCard",
+        position: { x: CENTER_X - 125, y: newY },
+        data: {
+          type: "split",
+          label: "Split Branch",
+          previousSteps: previousNodes,
+          sequenceNumber: previousNodes.length + 1,
+          onDelete: handleDeleteNode,
+        },
+      },
+      {
+        id: defaultBranchId,
+        type: "taskCard",
+        position: { x: CENTER_X - 325, y: newY + VERTICAL_SPACING },
+        data: {
+          type: "default",
+          label: "Default Branch",
+          previousSteps: [...previousNodes, { id: splitId, label: "Split Branch", sequenceNumber: previousNodes.length + 1 }],
+          sequenceNumber: previousNodes.length + 2,
+          onDelete: handleDeleteNode,
+        },
+      },
+      {
+        id: conditionBranchId,
+        type: "taskCard",
+        position: { x: CENTER_X + 75, y: newY + VERTICAL_SPACING },
+        data: {
+          type: "condition",
+          label: "Conditions",
+          conditions: ["Condition 1"],
+          previousSteps: [...previousNodes, { id: splitId, label: "Split Branch", sequenceNumber: previousNodes.length + 1 }],
+          sequenceNumber: previousNodes.length + 2,
+          onDelete: handleDeleteNode,
+        },
+      },
+      {
+        id: joinId,
+        type: "taskCard",
+        position: { x: CENTER_X - 125, y: newY + VERTICAL_SPACING * 2 },
+        data: {
+          type: "join",
+          label: "Join Branch",
+          previousSteps: [
+            ...previousNodes,
+            { id: splitId, label: "Split Branch", sequenceNumber: previousNodes.length + 1 },
+            { id: defaultBranchId, label: "Default Branch", sequenceNumber: previousNodes.length + 2 },
+            { id: conditionBranchId, label: "Conditions", sequenceNumber: previousNodes.length + 2 },
+          ],
+          sequenceNumber: previousNodes.length + 3,
+          onDelete: handleDeleteNode,
+        },
+      },
+    ];
 
-    const newNode: Node<TaskNodeData> = {
-      id: `task-${Date.now()}`,
-      type: "taskCard",
-      position: { x: CENTER_X - 125, y: newY },
-      data: initialData,
-      draggable: true,
-    };
+    const newEdges: Edge[] = [
+      {
+        id: `e-${sourceNode.id}-${splitId}`,
+        source: sourceNode.id,
+        target: splitId,
+        type: "smoothstep",
+        animated: true,
+        style: { stroke: "#3388eb" },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
+      },
+      {
+        id: `e-${splitId}-${defaultBranchId}`,
+        source: splitId,
+        target: defaultBranchId,
+        type: "smoothstep",
+        animated: true,
+        style: { stroke: "#3388eb" },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
+      },
+      {
+        id: `e-${splitId}-${conditionBranchId}`,
+        source: splitId,
+        target: conditionBranchId,
+        type: "smoothstep",
+        animated: true,
+        style: { stroke: "#3388eb" },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
+      },
+      {
+        id: `e-${defaultBranchId}-${joinId}`,
+        source: defaultBranchId,
+        target: joinId,
+        type: "smoothstep",
+        animated: true,
+        style: { stroke: "#3388eb" },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
+      },
+      {
+        id: `e-${conditionBranchId}-${joinId}`,
+        source: conditionBranchId,
+        target: joinId,
+        type: "smoothstep",
+        animated: true,
+        style: { stroke: "#3388eb" },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
+      },
+      {
+        id: `e-${joinId}-${targetNode.id}`,
+        source: joinId,
+        target: targetNode.id,
+        type: "smoothstep",
+        animated: true,
+        style: { stroke: "#3388eb" },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#3388eb" },
+      },
+    ];
 
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
@@ -241,72 +307,140 @@ export const WorkflowCanvas = () => {
           ...node,
           position: {
             x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
-            y: node.position.y + VERTICAL_SPACING,
+            y: node.position.y + VERTICAL_SPACING * 3,
           },
         };
       }
       return node;
     });
 
-    const newEdges: Edge[] = [
-      {
-        id: `e-${selectedEdge.source}-${newNode.id}`,
-        source: selectedEdge.source,
-        target: newNode.id,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#3388eb" },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: "#3388eb",
-        },
-        label: "+",
-        labelStyle: { 
-          fill: "white",
-          fontWeight: "bold",
-          fontSize: "16px",
-          opacity: 0,
-        },
-        labelBgStyle: { 
-          fill: "#3388eb",
-          borderRadius: "12px",
-          width: 24,
-          height: 24,
-          opacity: 0,
-        },
-        className: "workflow-edge",
-      },
-      {
-        id: `e-${newNode.id}-${selectedEdge.target}`,
-        source: newNode.id,
-        target: selectedEdge.target,
-        type: "smoothstep",
-        animated: true,
-        style: { stroke: "#3388eb" },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: "#3388eb",
-        },
-        label: "+",
-        labelStyle: { 
-          fill: "white",
-          fontWeight: "bold",
-          fontSize: "16px",
-          opacity: 0,
-        },
-        labelBgStyle: { 
-          fill: "#3388eb",
-          borderRadius: "12px",
-          width: 24,
-          height: 24,
-          opacity: 0,
-        },
-        className: "workflow-edge",
-      },
-    ];
+    setNodes([...updatedNodes, ...newNodes]);
+    setEdges((eds) => 
+      eds
+        .filter((e) => e.id !== selectedEdge?.id)
+        .concat(newEdges)
+    );
+  };
 
-    setNodes([...updatedNodes, newNode]);
-    setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
+  const handleTaskSelection = (type: TaskType) => {
+    if (!selectedEdge) return;
+
+    const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
+    const targetNode = nodes.find((n) => n.id === selectedEdge.target);
+    
+    if (!sourceNode || !targetNode) return;
+
+    if (type === "split") {
+      createSplitBranch(sourceNode, targetNode, type);
+    } else {
+      const sourceNodeIndex = nodes.findIndex(n => n.id === sourceNode.id);
+      const targetNodeIndex = nodes.findIndex(n => n.id === targetNode.id);
+
+      const previousNodes: PreviousStep[] = nodes
+        .slice(0, Math.max(sourceNodeIndex, targetNodeIndex) + 1)
+        .filter(node => node.type === "taskCard")
+        .map((node, idx) => ({
+          id: node.id,
+          label: node.data.label,
+          sequenceNumber: idx + 1
+        }))
+        .reverse();
+
+      const newY = sourceNode.position.y + VERTICAL_SPACING;
+      const newSequenceNumber = previousNodes.length + 1;
+
+      const initialData: TaskNodeData = {
+        type,
+        label: `New ${type} task`,
+        tags: type === "integration" ? ["API Name"] : ["Role 1", "Role 2"],
+        previousSteps: previousNodes,
+        sequenceNumber: newSequenceNumber,
+        onDelete: handleDeleteNode,
+        validationErrors: [],
+      };
+
+      const newNode: Node<TaskNodeData> = {
+        id: `task-${Date.now()}`,
+        type: "taskCard",
+        position: { x: CENTER_X - 125, y: newY },
+        data: initialData,
+        draggable: true,
+      };
+
+      const updatedNodes = nodes.map((node) => {
+        if (node.position.y >= targetNode.position.y) {
+          return {
+            ...node,
+            position: {
+              x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
+              y: node.position.y + VERTICAL_SPACING,
+            },
+          };
+        }
+        return node;
+      });
+
+      const newEdges: Edge[] = [
+        {
+          id: `e-${selectedEdge.source}-${newNode.id}`,
+          source: selectedEdge.source,
+          target: newNode.id,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#3388eb" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#3388eb",
+          },
+          label: "+",
+          labelStyle: { 
+            fill: "white",
+            fontWeight: "bold",
+            fontSize: "16px",
+            opacity: 0,
+          },
+          labelBgStyle: { 
+            fill: "#3388eb",
+            borderRadius: "12px",
+            width: 24,
+            height: 24,
+            opacity: 0,
+          },
+          className: "workflow-edge",
+        },
+        {
+          id: `e-${newNode.id}-${selectedEdge.target}`,
+          source: newNode.id,
+          target: selectedEdge.target,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#3388eb" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#3388eb",
+          },
+          label: "+",
+          labelStyle: { 
+            fill: "white",
+            fontWeight: "bold",
+            fontSize: "16px",
+            opacity: 0,
+          },
+          labelBgStyle: { 
+            fill: "#3388eb",
+            borderRadius: "12px",
+            width: 24,
+            height: 24,
+            opacity: 0,
+          },
+          className: "workflow-edge",
+        },
+      ];
+
+      setNodes([...updatedNodes, newNode]);
+      setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
+    }
+
     setIsModalOpen(false);
   };
 
