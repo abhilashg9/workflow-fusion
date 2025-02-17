@@ -14,7 +14,7 @@ import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
-import TaskCard from "./TaskCard";
+import { TaskCard } from "./TaskCard";
 import { TaskNodeData, TaskType, PreviousStep } from "./workflow/types";
 
 const VERTICAL_SPACING = 250;
