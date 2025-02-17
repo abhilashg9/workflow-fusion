@@ -1,13 +1,11 @@
 
-import { FilePlus2, UserCheck, Workflow, GitBranch } from "lucide-react";
 import { TaskType } from "./types";
-import { MarkerType, Node, Edge } from "@xyflow/react";
+import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
 
 export const VERTICAL_SPACING = 250;
-export const START_Y = 150;
 export const CENTER_X = 250;
 
-export const TASK_TYPES = [
+export const taskTypes = [
   {
     icon: FilePlus2,
     title: "Create Task",
@@ -30,37 +28,37 @@ export const TASK_TYPES = [
     icon: GitBranch,
     title: "Split Branch",
     subtitle: "Split the workflow into branches with conditions",
-    type: "split" as TaskType,
+    type: "split" as const,
+  },
+  {
+    icon: ArrowRightLeft,
+    title: "Parallel Branch",
+    subtitle: "Add tasks in parallel that will occur simultaneously",
+    type: "parallel" as const,
   },
 ];
 
-export const INITIAL_NODES: Node[] = [
+export const initialNodes = [
   {
     id: "start",
     type: "input",
-    position: { x: CENTER_X - 50, y: START_Y },
-    data: { 
-      label: "Start",
-      type: "start" as TaskType
-    },
+    position: { x: CENTER_X, y: 150 },
+    data: { label: "Start" },
     style: {
-      background: "#3388eb",
+      background: "#8B5CF6",
       color: "white",
       border: "none",
       borderRadius: "4px",
       padding: "10px 20px",
       minWidth: "100px",
-      textAlign: "center" as const,
+      textAlign: "center",
     },
   },
   {
     id: "end",
     type: "output",
-    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
-    data: { 
-      label: "End",
-      type: "end" as TaskType
-    },
+    position: { x: CENTER_X, y: 400 },
+    data: { label: "End" },
     style: {
       background: "#0EA5E9",
       color: "white",
@@ -68,37 +66,16 @@ export const INITIAL_NODES: Node[] = [
       borderRadius: "4px",
       padding: "10px 20px",
       minWidth: "100px",
-      textAlign: "center" as const,
+      textAlign: "center",
     },
   },
 ];
 
-export const INITIAL_EDGES: Edge[] = [
-  {
-    id: "start-end",
-    source: "start",
-    target: "end",
-    type: "smoothstep",
-    animated: true,
-    style: { stroke: "#3388eb" },
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-      color: "#3388eb",
-    },
-    label: "+",
-    labelStyle: { 
-      fill: "#ffffff",
-      fontWeight: "bold",
-      fontSize: "16px",
-      opacity: 0,
-    },
-    labelBgStyle: { 
-      fill: "#3388eb",
-      opacity: 0,
-      borderRadius: "12px",
-      width: "24px",
-      height: "24px",
-    },
-    className: "workflow-edge",
+export const defaultEdgeOptions = {
+  type: "smoothstep",
+  style: { stroke: "#2563EB" },
+  markerEnd: {
+    type: "arrowclosed" as const,
+    color: "#2563EB",
   },
-];
+};
