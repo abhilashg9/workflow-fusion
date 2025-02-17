@@ -33,6 +33,7 @@ const TaskCard = memo(({
   });
   const [isHovered, setIsHovered] = useState(false);
   const [actions, setActions] = useState<TaskAction[]>(data.actions || DEFAULT_ACTIONS);
+  const [value, setValue] = useState<number>(data.value || 0);
 
   useEffect(() => {
     setTaskLabel(data.label);
@@ -450,6 +451,23 @@ const TaskCard = memo(({
     );
   };
 
+  const renderValueField = () => {
+    if (data.type !== "approval") return null;
+
+    return (
+      <div className="flex items-center gap-2 mt-1">
+        <div className="text-sm text-gray-600">Value:</div>
+        <input
+          type="number"
+          min="0"
+          value={value}
+          onChange={handleValueChange}
+          className="w-24 text-sm outline-none border border-gray-200 rounded px-2 py-1 focus:ring-1 focus:ring-primary/20"
+        />
+      </div>
+    );
+  };
+
   return (
     <>
       <div className={cn(
@@ -470,6 +488,7 @@ const TaskCard = memo(({
                     Step {data.sequenceNumber}
                   </span>}
               </div>
+              {renderValueField()}
             </div>
           </div>
 
