@@ -318,7 +318,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
             <X className="h-4 w-4" />
           </Button>
         )}
-        <div className="space-y-4">
+        <div className="space-y-4 h-full flex flex-col">
           <div className="flex items-start gap-3">
             <div className="p-2.5 rounded-xl bg-gray-50/80 ring-1 ring-gray-100">{getIcon()}</div>
             <div className="flex-1 space-y-1">
@@ -343,7 +343,7 @@ const TaskCard = memo(({ data, id, setNodeData, onDelete, previousSteps = [] }: 
             {renderAssignmentTags()}
           </div>
 
-          <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
+          <div className="flex items-center justify-between gap-2 pt-3 mt-auto border-t border-gray-100">
             <TooltipProvider>
               {!isIntegrationTask && (
                 <Tooltip>
