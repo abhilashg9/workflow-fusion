@@ -44,10 +44,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { TaskCardProps } from "./types";
-import { TaskCardAssignment } from "./TaskCardAssignment";
-import { TaskCardActions } from "./TaskCardActions";
-import { TaskCardApiConfig } from "./TaskCardApiConfig";
+import { TaskCardProps } from "./task-card/types";
+import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
+import { TaskCardActions } from "./task-card/TaskCardActions";
+import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
 
 export const TaskCard = ({ data, id, setNodeData, onDelete, previousSteps }: TaskCardProps) => {
   const [label, setLabel] = useState(data.label);
