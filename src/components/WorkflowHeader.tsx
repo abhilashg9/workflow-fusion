@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 interface NodeData extends Record<string, unknown> {
   type: 'create' | 'approval' | 'integration';
   label: string;
+  sequenceNumber?: number;
   assignment?: {
     type?: 'roles' | 'users' | 'supplier' | 'manager' | 'manager_hierarchy';
     roles?: string[];
@@ -33,18 +34,55 @@ export const WorkflowHeader = () => {
 
   const validateNodes = () => {
     const nodes = getNodes();
-    let allErrors: { nodeId: string; errors: string[] }[] = [];
+    let allErrors: { nodeId: string; sequenceNumber?: number; errors: string[] }[] = [];
 
     nodes.forEach((node) => {
-      if (node.data.validationErrors && node.data.validationErrors.length > 0) {
-        allErrors.push({
-          nodeId: node.id,
-          errors: node.data.validationErrors
+      const nodeData = node.data;
+      const errors: string[] = [];
+      
+      // Common validations
+      if (!nodeData.label || nodeData.label.trim() === '') {
+        errors.push('Task label is required');
+      }
+
+      // Create task validations
+      if (nodeData.type === 'create') {
+        if (!nodeData.assignment?.type) {
+          errors.push('Role/User/Supplier selection is required');
+        }
+      }
+
+      // Approval task validations
+      if (nodeData.type === 'approval') {
+        if (!nodeData.assignment?.type) {
+          errors.push('Role/User/Supplier/Manager selection is required');
+        }
+        const hasEmptyActionLabel = nodeData.actions?.some(
+          action => !action.label || action.label.trim() === ''
+        );
+        if (hasEmptyActionLabel) {
+          errors.push('Accept/Reject labels cannot be empty');
+        }
+      }
+
+      // Integration task validations
+      if (nodeData.type === 'integration') {
+        if (!nodeData.apiConfig?.selectedApi) {
+          errors.push('API selection is required');
+        }
+      }
+
+      if (errors.length > 0) {
+        allErrors.push({ 
+          nodeId: node.id, 
+          sequenceNumber: nodeData.sequenceNumber,
+          errors 
         });
       }
     });
 
-    return allErrors;
+    // Sort errors by sequence number
+    return allErrors.sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0));
   };
 
   const validationErrors = validateNodes();
@@ -73,9 +111,12 @@ export const WorkflowHeader = () => {
                 <div className="space-y-3 p-1">
                   {validationErrors.map((nodeError, index) => (
                     <div key={index} className="space-y-1">
+                      <div className="text-xs font-medium text-gray-700 mb-1">
+                        Step #{nodeError.sequenceNumber || '?'}
+                      </div>
                       <ul className="list-disc list-inside">
                         {nodeError.errors.map((error, errorIndex) => (
-                          <li key={errorIndex} className="text-xs text-gray-500">
+                          <li key={errorIndex} className="text-xs text-gray-500 ml-2">
                             {error}
                           </li>
                         ))}
