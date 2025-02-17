@@ -44,15 +44,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { NodeProps } from '@xyflow/react';
-import { TaskCardProps } from "./task-card/types";
+import { TaskCardProps, TaskData } from "./task-card/types";
 import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
 import { TaskCardActions } from "./task-card/TaskCardActions";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
 
-type TaskCardNodeProps = NodeProps & TaskCardProps;
-
-function TaskCard({ data, id, setNodeData, onDelete, previousSteps }: TaskCardProps) {
+function TaskCard({ data, id }: TaskCardProps) {
   const [label, setLabel] = useState(data.label);
   const [type, setType] = useState(data.type);
   const [tags, setTags] = useState(data.tags || []);
@@ -72,19 +69,19 @@ function TaskCard({ data, id, setNodeData, onDelete, previousSteps }: TaskCardPr
 
   const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLabel(e.target.value);
-    setNodeData({ ...data, label: e.target.value });
+    data.setNodeData?.({ ...data, label: e.target.value });
   };
 
   const handleTypeChange = (value: "create" | "approval" | "integration") => {
     setType(value);
-    setNodeData({ ...data, type: value });
+    data.setNodeData?.({ ...data, type: value });
   };
 
   const handleAddTag = () => {
     if (newTag && !tags.includes(newTag)) {
       const newTags = [...tags, newTag];
       setTags(newTags);
-      setNodeData({ ...data, tags: newTags });
+      data.setNodeData?.({ ...data, tags: newTags });
       setNewTag("");
     }
   };
@@ -92,46 +89,46 @@ function TaskCard({ data, id, setNodeData, onDelete, previousSteps }: TaskCardPr
   const handleRemoveTag = (tagToRemove: string) => {
     const newTags = tags.filter((tag) => tag !== tagToRemove);
     setTags(newTags);
-    setNodeData({ ...data, tags: newTags });
+    data.setNodeData?.({ ...data, tags: newTags });
   };
 
   const handleAssignmentChange = (newAssignment: any) => {
     setAssignment(newAssignment);
-    setNodeData({ ...data, assignment: newAssignment });
+    data.setNodeData?.({ ...data, assignment: newAssignment });
   };
 
   const handleAssignmentTypeChange = (type: any) => {
     const newAssignment = { ...assignment, type };
     setAssignment(newAssignment);
-    setNodeData({ ...data, assignment: newAssignment });
+    data.setNodeData?.({ ...data, assignment: newAssignment });
   };
 
   const handleRoleSelect = (role: string) => {
     const newRoles = assignment?.roles ? [...assignment.roles, role] : [role];
     const newAssignment = { ...assignment, roles: newRoles };
     setAssignment(newAssignment);
-    setNodeData({ ...data, assignment: newAssignment });
+    data.setNodeData?.({ ...data, assignment: newAssignment });
   };
 
   const handleFilterSelect = (filter: string) => {
     const newFilters = assignment?.filters ? [...assignment.filters, filter] : [filter];
     const newAssignment = { ...assignment, filters: newFilters };
     setAssignment(newAssignment);
-    setNodeData({ ...data, assignment: newAssignment });
+    data.setNodeData?.({ ...data, assignment: newAssignment });
   };
 
   const handleUserSelect = (user: string) => {
     const newUsers = assignment?.users ? [...assignment.users, user] : [user];
     const newAssignment = { ...assignment, users: newUsers };
     setAssignment(newAssignment);
-    setNodeData({ ...data, assignment: newAssignment });
+    data.setNodeData?.({ ...data, assignment: newAssignment });
   };
 
   const handleDynamicUserSelect = (user: string) => {
     const newDynamicUsers = assignment?.dynamicUsers ? [...assignment.dynamicUsers, user] : [user];
     const newAssignment = { ...assignment, dynamicUsers: newDynamicUsers };
     setAssignment(newAssignment);
-    setNodeData({ ...data, assignment: newAssignment });
+    data.setNodeData?.({ ...data, assignment: newAssignment });
   };
 
   const handleRemoveItem = (type: string, item: string) => {
@@ -140,22 +137,22 @@ function TaskCard({ data, id, setNodeData, onDelete, previousSteps }: TaskCardPr
       case "role":
         updatedItems = assignment?.roles?.filter((role) => role !== item);
         setAssignment({ ...assignment, roles: updatedItems });
-        setNodeData({ ...data, assignment: { ...assignment, roles: updatedItems } });
+        data.setNodeData?.({ ...data, assignment: { ...assignment, roles: updatedItems } });
         break;
       case "filter":
         updatedItems = assignment?.filters?.filter((filter) => filter !== item);
         setAssignment({ ...assignment, filters: updatedItems });
-        setNodeData({ ...data, assignment: { ...assignment, filters: updatedItems } });
+        data.setNodeData?.({ ...data, assignment: { ...assignment, filters: updatedItems } });
         break;
       case "user":
         updatedItems = assignment?.users?.filter((user) => user !== item);
         setAssignment({ ...assignment, users: updatedItems });
-        setNodeData({ ...data, assignment: { ...assignment, users: updatedItems } });
+        data.setNodeData?.({ ...data, assignment: { ...assignment, users: updatedItems } });
         break;
       case "dynamicUser":
         updatedItems = assignment?.dynamicUsers?.filter((user) => user !== item);
         setAssignment({ ...assignment, dynamicUsers: updatedItems });
-        setNodeData({ ...data, assignment: { ...assignment, dynamicUsers: updatedItems } });
+        data.setNodeData?.({ ...data, assignment: { ...assignment, dynamicUsers: updatedItems } });
         break;
     }
   };
@@ -163,21 +160,21 @@ function TaskCard({ data, id, setNodeData, onDelete, previousSteps }: TaskCardPr
   const handleValueChange = (value: number | undefined) => {
     const newAssignment = { ...assignment, value: value };
     setAssignment(newAssignment);
-    setNodeData({ ...data, assignment: newAssignment });
+    data.setNodeData?.({ ...data, assignment: newAssignment });
   };
 
   const handleActionToggle = (index: number, enabled: boolean) => {
     const newActions = [...actions];
     newActions[index].enabled = enabled;
     setActions(newActions);
-    setNodeData({ ...data, actions: newActions });
+    data.setNodeData?.({ ...data, actions: newActions });
   };
 
   const handleActionLabelChange = (index: number, label: string) => {
     const newActions = [...actions];
     newActions[index].label = label;
     setActions(newActions);
-    setNodeData({ ...data, actions: newActions });
+    data.setNodeData?.({ ...data, actions: newActions });
   };
 
   const handleSendBackStepChange = (stepId: string) => {
@@ -188,12 +185,12 @@ function TaskCard({ data, id, setNodeData, onDelete, previousSteps }: TaskCardPr
       return action;
     });
     setActions(newActions);
-    setNodeData({ ...data, actions: newActions });
+    data.setNodeData?.({ ...data, actions: newActions });
   };
 
   const handleApiConfigChange = (newApiConfig: any) => {
     setApiConfig(newApiConfig);
-    setNodeData({ ...data, apiConfig: newApiConfig });
+    data.setNodeData?.({ ...data, apiConfig: newApiConfig });
   };
 
   return (
@@ -226,7 +223,7 @@ function TaskCard({ data, id, setNodeData, onDelete, previousSteps }: TaskCardPr
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => onDelete(id)}>Delete</AlertDialogAction>
+              <AlertDialogAction onClick={() => data.onDelete?.(id)}>Delete</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -318,7 +315,7 @@ function TaskCard({ data, id, setNodeData, onDelete, previousSteps }: TaskCardPr
 
         <TaskCardActions
           actions={actions}
-          previousSteps={previousSteps}
+          previousSteps={data.previousSteps}
           onActionToggle={handleActionToggle}
           onActionLabelChange={handleActionLabelChange}
           onSendBackStepChange={handleSendBackStepChange}
@@ -345,7 +342,7 @@ function TaskCard({ data, id, setNodeData, onDelete, previousSteps }: TaskCardPr
           selectedApi={apiConfig?.selectedApi}
           failureRecourse={apiConfig?.failureRecourse}
           taskType={type}
-          previousSteps={previousSteps}
+          previousSteps={data.previousSteps}
           onChange={handleApiConfigChange}
         />
       </div>

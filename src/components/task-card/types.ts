@@ -1,4 +1,6 @@
 
+import { Node, NodeProps } from '@xyflow/react';
+
 export interface TaskAction {
   label: string;
   enabled: boolean;
@@ -21,17 +23,18 @@ export interface ApiConfig {
   failureRecourse?: string;
 }
 
-export interface TaskCardProps {
-  data: {
-    label: string;
-    type: "create" | "approval" | "integration";
-    tags?: string[];
-    assignment: AssignmentConfig;
-    actions?: TaskAction[];
-    apiConfig?: ApiConfig;
-  };
-  id: string;
-  setNodeData: (data: any) => void;
-  onDelete: (id: string) => void;
-  previousSteps: { id: string; label: string }[];
+export interface TaskData {
+  label: string;
+  type: "create" | "approval" | "integration";
+  tags?: string[];
+  assignment: AssignmentConfig;
+  actions?: TaskAction[];
+  apiConfig?: ApiConfig;
+  setNodeData?: (data: any) => void;
+  onDelete?: (id: string) => void;
+  previousSteps?: { id: string; label: string }[];
+}
+
+export interface TaskCardProps extends NodeProps {
+  data: TaskData;
 }
