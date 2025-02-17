@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -15,30 +14,6 @@ import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
 import TaskCard from "./TaskCard";
-
-// Add TaskOption interface
-interface TaskOptionProps {
-  icon: React.ElementType;
-  title: string;
-  subtitle: string;
-  onClick: () => void;
-}
-
-// Add TaskOption component
-const TaskOption = ({ icon: Icon, title, subtitle, onClick }: TaskOptionProps) => (
-  <div 
-    className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-    onClick={onClick}
-  >
-    <div className="p-2 rounded-lg bg-primary/10">
-      <Icon className="w-6 h-6 text-primary" />
-    </div>
-    <div>
-      <h3 className="font-medium">{title}</h3>
-      <p className="text-sm text-gray-500">{subtitle}</p>
-    </div>
-  </div>
-);
 
 interface PreviousStep {
   id: string;
@@ -59,9 +34,25 @@ type TaskType = "create" | "approval" | "integration";
 
 type CustomNode = Node<TaskNodeData> | Node<{ label: string }>;
 
-const VERTICAL_SPACING = 125;
-const START_Y = 75;
-const CENTER_X = 250;
+const TaskOption = ({ icon: Icon, title, subtitle, onClick }: { 
+  icon: any, 
+  title: string, 
+  subtitle: string,
+  onClick: () => void 
+}) => (
+  <div 
+    className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+    onClick={onClick}
+  >
+    <div className="p-2 rounded-lg bg-primary/10">
+      <Icon className="w-6 h-6 text-primary" />
+    </div>
+    <div>
+      <h3 className="font-medium">{title}</h3>
+      <p className="text-sm text-gray-500">{subtitle}</p>
+    </div>
+  </div>
+);
 
 const nodeTypes = {
   taskCard: TaskCard,
@@ -104,7 +95,7 @@ const initialNodes: CustomNode[] = [
   {
     id: "start",
     type: "input",
-    position: { x: CENTER_X - 50, y: START_Y },
+    position: { x: 250, y: 150 },
     data: { label: "Start" },
     style: {
       background: "#8B5CF6",
@@ -119,7 +110,7 @@ const initialNodes: CustomNode[] = [
   {
     id: "end",
     type: "output",
-    position: { x: CENTER_X - 50, y: START_Y + VERTICAL_SPACING },
+    position: { x: 250, y: 400 },
     data: { label: "End" },
     style: {
       background: "#0EA5E9",
@@ -207,6 +198,8 @@ export const WorkflowCanvas = () => {
       }))
       .reverse();
 
+    const VERTICAL_SPACING = 250;
+    const CENTER_X = 250;
     const newY = sourceNode.position.y + VERTICAL_SPACING;
     const newSequenceNumber = previousNodes.length + 1;
 
@@ -233,7 +226,7 @@ export const WorkflowCanvas = () => {
           .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
           .map((n, idx) => ({
             id: n.id,
-            label: (n as Node<TaskNodeData>).data.label || "",
+            label: `${idx + 1}. ${(n as Node<TaskNodeData>).data.label}`,
             sequenceNumber: idx + 1
           }))
           .reverse();
@@ -255,19 +248,12 @@ export const WorkflowCanvas = () => {
     });
 
     setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id));
-    const newEdges = createEdgesForNode(selectedEdge.source, newNode.id, selectedEdge.target);
-    
-    setNodes([...updatedNodes, newNode]);
-    setEdges((eds) => [...eds, ...newEdges]);
-    setIsModalOpen(false);
-  };
 
-  const createEdgesForNode = (sourceId: string, nodeId: string, targetId: string): Edge[] => {
-    return [
+    const newEdges: Edge[] = [
       {
-        id: `e-${sourceId}-${nodeId}`,
-        source: sourceId,
-        target: nodeId,
+        id: `e-${selectedEdge.source}-${newNode.id}`,
+        source: selectedEdge.source,
+        target: newNode.id,
         type: "smoothstep",
         animated: true,
         style: { stroke: "#2563EB" },
@@ -292,9 +278,9 @@ export const WorkflowCanvas = () => {
         className: "workflow-edge",
       },
       {
-        id: `e-${nodeId}-${targetId}`,
-        source: nodeId,
-        target: targetId,
+        id: `e-${newNode.id}-${selectedEdge.target}`,
+        source: newNode.id,
+        target: selectedEdge.target,
         type: "smoothstep",
         animated: true,
         style: { stroke: "#2563EB" },
@@ -319,6 +305,10 @@ export const WorkflowCanvas = () => {
         className: "workflow-edge",
       },
     ];
+
+    setNodes([...updatedNodes, newNode]);
+    setEdges((eds) => [...eds, ...newEdges]);
+    setIsModalOpen(false);
   };
 
   const onConnect = useCallback((params: Connection) => {
@@ -360,30 +350,34 @@ export const WorkflowCanvas = () => {
 
   const onNodeDragStop = (_: React.MouseEvent, node: Node) => {
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
+    const VERTICAL_SPACING = 250;
+    const START_Y = 150;
+    const CENTER_X = 250;
     
-    const updatedNodes = sortedNodes.map((node, index) => {
-      const currentSequence = node.type === "taskCard" ? index + 1 : 0;
+    const updatedNodes = sortedNodes.map((n, index) => {
+      const currentSequence = n.type === "taskCard" ? index + 1 : 0;
       const previousNodes: PreviousStep[] = sortedNodes
         .slice(0, index)
         .filter(prev => prev.type === "taskCard")
         .map((prev, idx) => ({
           id: prev.id,
-          label: (prev.data as TaskNodeData).label || "",
+          label: `${idx + 1}. ${prev.data.label}`,
           sequenceNumber: idx + 1
         }))
         .reverse();
 
       return {
-        ...node,
+        ...n,
         position: {
-          x: CENTER_X - (node.type === "taskCard" ? 125 : 50),
+          x: CENTER_X - (n.type === "taskCard" ? 125 : 50),
           y: START_Y + (index * VERTICAL_SPACING),
         },
-        data: node.type === "taskCard" ? {
-          ...node.data,
+        data: n.type === "taskCard" ? {
+          ...n.data,
           previousSteps: previousNodes,
           sequenceNumber: currentSequence
-        } : node.data,
+        } : n.data,
+        draggable: true,
       };
     });
 
@@ -391,7 +385,7 @@ export const WorkflowCanvas = () => {
     adjustViewport();
   };
 
-  const handleDeleteNode = useCallback((nodeId: string) => {
+  const handleDeleteNode = (nodeId: string) => {
     const connectedEdges = edges.filter(
       (edge) => edge.source === nodeId || edge.target === nodeId
     );
@@ -474,7 +468,7 @@ export const WorkflowCanvas = () => {
 
     setNodes(updatedNodes);
     adjustViewport();
-  }, [edges, nodes, adjustViewport]);
+  };
 
   return (
     <>
