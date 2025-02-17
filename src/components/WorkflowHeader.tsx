@@ -5,7 +5,7 @@ import { useReactFlow, Node } from "@xyflow/react";
 import { AlertCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-interface NodeData {
+interface NodeData extends Record<string, unknown> {
   type: 'create' | 'approval' | 'integration';
   label: string;
   assignment?: {
@@ -29,13 +29,13 @@ interface NodeData {
 type CustomNode = Node<NodeData>;
 
 export const WorkflowHeader = () => {
-  const { getNodes } = useReactFlow<NodeData>();
+  const { getNodes } = useReactFlow<CustomNode>();
 
   const validateNodes = () => {
     const nodes = getNodes();
     let allErrors: { nodeId: string; errors: string[] }[] = [];
 
-    nodes.forEach((node: CustomNode) => {
+    nodes.forEach((node) => {
       const nodeData = node.data;
       const errors: string[] = [];
       

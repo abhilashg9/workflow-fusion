@@ -14,6 +14,7 @@ import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
 import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
 import { DEFAULT_ACTIONS } from "./task-card/constants";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
+import { ApiConfig, FailureRecourse } from "../components/workflow/types";
 
 const TaskCard = memo(({
   data,
