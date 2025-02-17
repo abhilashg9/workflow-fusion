@@ -1,17 +1,16 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { TaskOption } from "./TaskOption";
 import { TASK_TYPES } from "./constants";
 import { TaskType } from "./types";
 
-interface TaskOptionProps {
+interface TaskOptionComponentProps {
   icon: any;
   title: string;
   subtitle: string;
   onClick: () => void;
 }
 
-const TaskOption = ({ icon: Icon, title, subtitle, onClick }: TaskOptionProps) => (
+const TaskOptionComponent = ({ icon: Icon, title, subtitle, onClick }: TaskOptionComponentProps) => (
   <div 
     className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
     onClick={onClick}
@@ -41,7 +40,7 @@ export const TaskSelectionModal = ({ isOpen, onClose, onTaskSelect }: TaskSelect
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {TASK_TYPES.map((task, index) => (
-            <TaskOption
+            <TaskOptionComponent
               key={index}
               icon={task.icon}
               title={task.title}
