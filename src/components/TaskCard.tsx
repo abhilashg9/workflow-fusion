@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from "react";
+import { memo, useState, useEffect, useMemo } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { FilePlus2, UserCheck, Workflow, Users, Filter } from "lucide-react";
 import { User, Bell, ArrowRight, Eye, Server, ShieldAlert, X, Trash2 } from "lucide-react";
@@ -34,6 +34,56 @@ const TaskCard = memo(({
   const [isHovered, setIsHovered] = useState(false);
   const [actions, setActions] = useState<TaskAction[]>(data.actions || DEFAULT_ACTIONS);
 
+  const validationErrors = useMemo(() => {
+    const errors: string[] = [];
+
+    if (!taskLabel.trim()) {
+      errors.push("Task label is required");
+    }
+
+    if (data.type === "create") {
+      if (!assignment.type || 
+          (assignment.type === "roles" && (!assignment.roles?.length)) ||
+          (assignment.type === "users" && (!assignment.users?.length)) ||
+          (assignment.type === "supplier" && !assignment.type)) {
+        errors.push("Assignment configuration is required");
+      }
+    }
+
+    if (data.type === "approval") {
+      if (!assignment.type || 
+          (assignment.type === "roles" && (!assignment.roles?.length)) ||
+          (assignment.type === "users" && (!assignment.users?.length)) ||
+          (assignment.type === "supplier" && !assignment.type) ||
+          (assignment.type === "manager" && !assignment.type) ||
+          (assignment.type === "manager_hierarchy" && !assignment.type)) {
+        errors.push("Assignment configuration is required");
+      }
+
+      const approveAction = actions.find(a => a.action === "approve");
+      const rejectAction = actions.find(a => a.action === "reject");
+
+      if (!approveAction?.label || (rejectAction?.enabled && !rejectAction?.label)) {
+        errors.push("Action labels cannot be empty");
+      }
+    }
+
+    if (data.type === "integration" && !data.apiConfig?.selectedApi) {
+      errors.push("API selection is required");
+    }
+
+    return errors;
+  }, [taskLabel, assignment, actions, data.apiConfig, data.type]);
+
+  useEffect(() => {
+    if (setNodeData) {
+      setNodeData({
+        ...data,
+        validationErrors
+      });
+    }
+  }, [validationErrors, setNodeData, data]);
+
   useEffect(() => {
     setTaskLabel(data.label);
   }, [data.label]);
@@ -51,6 +101,7 @@ const TaskCard = memo(({
 
   const isCreateTask = data.type === "create";
   const isIntegrationTask = data.type === "integration";
+  const isApprovalTask = data.type === "approval";
 
   const getCardHeight = () => {
     if (data.type === "create") return "h-[175px]";
@@ -468,12 +519,34 @@ const TaskCard = memo(({
         className={cn(
           "bg-white rounded-lg border transition-all duration-200",
           "hover:shadow-lg hover:border-primary/20",
+          validationErrors.length > 0 && "border-red-300",
           "group/card relative",
           getCardHeight()
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
+        {validationErrors.length > 0 && (
+          <div className="absolute -top-2 -left-2 z-10">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="h-4 w-4 rounded-full bg-red-500 shadow-md flex items-center justify-center">
+                    <AlertCircle className="h-3 w-3 text-white" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="space-y-1">
+                    {validationErrors.map((error, index) => (
+                      <p key={index} className="text-sm">{error}</p>
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
+        
         <Handle type="target" position={Position.Top} className="!bg-primary" />
         
         {isHovered && (
