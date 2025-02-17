@@ -1,3 +1,4 @@
+
 import React from "react";
 import { X } from "lucide-react";
 import { Handle, Position } from "@xyflow/react";
@@ -91,11 +92,24 @@ export const TaskCard = ({ data, id, setNodeData, onDelete, previousSteps }: Tas
           </div>
         </div>
 
-        <TaskCardAssignment data={data} setNodeData={setNodeData} />
+        <TaskCardAssignment
+          assignment={data.assignment}
+          type={data.type}
+          onChange={(assignment) => setNodeData?.({ ...data, assignment })}
+        />
 
-        <TaskCardActions data={data} setNodeData={setNodeData} />
+        <TaskCardActions
+          actions={data.actions}
+          type={data.type}
+          onChange={(actions) => setNodeData?.({ ...data, actions })}
+        />
 
-        <TaskCardApiConfig data={data} setNodeData={setNodeData} previousSteps={previousSteps} />
+        <TaskCardApiConfig
+          apiConfig={data.apiConfig}
+          type={data.type}
+          previousSteps={previousSteps}
+          onChange={(apiConfig) => setNodeData?.({ ...data, apiConfig })}
+        />
       </div>
       <Handle type="source" position={Position.Right} id="a" />
       <Handle type="target" position={Position.Left} id="b" />
