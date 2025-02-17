@@ -16,7 +16,6 @@ import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucid
 import { toast } from "sonner";
 import TaskCard from "./TaskCard";
 
-// Move constants outside the component to make them globally available
 const VERTICAL_SPACING = 250;
 const START_Y = 150;
 const CENTER_X = 250;
@@ -204,6 +203,14 @@ export const WorkflowCanvas = () => {
 
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
     const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
+
+    const isFirstTaskAfterStart = sourceNode.id === "start";
+    
+    if (isFirstTaskAfterStart && type !== "create") {
+      toast.error("The first task must be a Create task");
+      setIsModalOpen(false);
+      return;
+    }
     
     if (type === "create") {
       const isFirstStep = sourceNode.id === "start";
@@ -248,7 +255,7 @@ export const WorkflowCanvas = () => {
       draggable: true,
     };
 
-    const updatedNodes = nodes.map((node) => {
+    const updatedNodes: Node<TaskNodeData>[] = nodes.map((node): Node<TaskNodeData> => {
       if (node.position.y >= targetNode.position.y) {
         if (node.type === "taskCard") {
           const nodePreviousSteps: PreviousStep[] = sortedNodes
@@ -282,7 +289,7 @@ export const WorkflowCanvas = () => {
           data: {
             ...node.data
           },
-        };
+        } as Node<TaskNodeData>;
       }
       return node;
     });
