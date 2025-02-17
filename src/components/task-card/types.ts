@@ -30,9 +30,9 @@ export interface TaskNodeData {
   assignment: AssignmentConfig;
   actions?: TaskAction[];
   apiConfig?: ApiConfig;
-  setNodeData?: (data: any) => void;
+  setNodeData?: (data: TaskNodeData) => void;
   onDelete?: (id: string) => void;
   previousSteps?: { id: string; label: string }[];
 }
 
-export type TaskCardProps = NodeProps<TaskNodeData>;
+export type TaskCardProps = NodeProps;

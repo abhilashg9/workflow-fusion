@@ -44,45 +44,47 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { TaskCardProps, TaskNodeData } from "./task-card/types";
+import { TaskCardProps, TaskNodeData, AssignmentConfig } from "./task-card/types";
 import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
 import { TaskCardActions } from "./task-card/TaskCardActions";
 import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
 
-function TaskCard({ data: nodeData, id }: TaskCardProps) {
-  const data = nodeData as TaskNodeData;
-  const [label, setLabel] = useState(data.label);
-  const [type, setType] = useState(data.type);
-  const [tags, setTags] = useState(data.tags || []);
+function TaskCard({ data, id }: TaskCardProps) {
+  const nodeData = data as TaskNodeData;
+  const [label, setLabel] = useState(nodeData.label);
+  const [type, setType] = useState(nodeData.type);
+  const [tags, setTags] = useState(nodeData.tags || []);
   const [newTag, setNewTag] = useState("");
-  const [assignment, setAssignment] = useState(data.assignment);
-  const [actions, setActions] = useState(data.actions || []);
-  const [apiConfig, setApiConfig] = useState(data.apiConfig);
+  const [assignment, setAssignment] = useState(nodeData.assignment);
+  const [actions, setActions] = useState(nodeData.actions || []);
+  const [apiConfig, setApiConfig] = useState(nodeData.apiConfig);
 
   useEffect(() => {
-    setLabel(data.label);
-    setType(data.type);
-    setTags(data.tags || []);
-    setAssignment(data.assignment);
-    setActions(data.actions || []);
-    setApiConfig(data.apiConfig);
-  }, [data]);
+    if (nodeData) {
+      setLabel(nodeData.label);
+      setType(nodeData.type);
+      setTags(nodeData.tags || []);
+      setAssignment(nodeData.assignment);
+      setActions(nodeData.actions || []);
+      setApiConfig(nodeData.apiConfig);
+    }
+  }, [nodeData]);
 
   const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLabel(e.target.value);
-    data.setNodeData?.({ ...data, label: e.target.value });
+    nodeData.setNodeData?.({ ...nodeData, label: e.target.value });
   };
 
   const handleTypeChange = (value: "create" | "approval" | "integration") => {
     setType(value);
-    data.setNodeData?.({ ...data, type: value });
+    nodeData.setNodeData?.({ ...nodeData, type: value });
   };
 
   const handleAddTag = () => {
     if (newTag && !tags.includes(newTag)) {
       const newTags = [...tags, newTag];
       setTags(newTags);
-      data.setNodeData?.({ ...data, tags: newTags });
+      nodeData.setNodeData?.({ ...nodeData, tags: newTags });
       setNewTag("");
     }
   };
@@ -90,46 +92,46 @@ function TaskCard({ data: nodeData, id }: TaskCardProps) {
   const handleRemoveTag = (tagToRemove: string) => {
     const newTags = tags.filter((tag) => tag !== tagToRemove);
     setTags(newTags);
-    data.setNodeData?.({ ...data, tags: newTags });
+    nodeData.setNodeData?.({ ...nodeData, tags: newTags });
   };
 
   const handleAssignmentChange = (newAssignment: AssignmentConfig) => {
     setAssignment(newAssignment);
-    data.setNodeData?.({ ...data, assignment: newAssignment });
+    nodeData.setNodeData?.({ ...nodeData, assignment: newAssignment });
   };
 
   const handleAssignmentTypeChange = (type: any) => {
     const newAssignment = { ...assignment, type };
     setAssignment(newAssignment);
-    data.setNodeData?.({ ...data, assignment: newAssignment });
+    nodeData.setNodeData?.({ ...nodeData, assignment: newAssignment });
   };
 
   const handleRoleSelect = (role: string) => {
     const newRoles = assignment?.roles ? [...assignment.roles, role] : [role];
     const newAssignment = { ...assignment, roles: newRoles };
     setAssignment(newAssignment);
-    data.setNodeData?.({ ...data, assignment: newAssignment });
+    nodeData.setNodeData?.({ ...nodeData, assignment: newAssignment });
   };
 
   const handleFilterSelect = (filter: string) => {
     const newFilters = assignment?.filters ? [...assignment.filters, filter] : [filter];
     const newAssignment = { ...assignment, filters: newFilters };
     setAssignment(newAssignment);
-    data.setNodeData?.({ ...data, assignment: newAssignment });
+    nodeData.setNodeData?.({ ...nodeData, assignment: newAssignment });
   };
 
   const handleUserSelect = (user: string) => {
     const newUsers = assignment?.users ? [...assignment.users, user] : [user];
     const newAssignment = { ...assignment, users: newUsers };
     setAssignment(newAssignment);
-    data.setNodeData?.({ ...data, assignment: newAssignment });
+    nodeData.setNodeData?.({ ...nodeData, assignment: newAssignment });
   };
 
   const handleDynamicUserSelect = (user: string) => {
     const newDynamicUsers = assignment?.dynamicUsers ? [...assignment.dynamicUsers, user] : [user];
     const newAssignment = { ...assignment, dynamicUsers: newDynamicUsers };
     setAssignment(newAssignment);
-    data.setNodeData?.({ ...data, assignment: newAssignment });
+    nodeData.setNodeData?.({ ...nodeData, assignment: newAssignment });
   };
 
   const handleRemoveItem = (type: string, item: string) => {
@@ -138,22 +140,22 @@ function TaskCard({ data: nodeData, id }: TaskCardProps) {
       case "role":
         updatedItems = assignment?.roles?.filter((role) => role !== item);
         setAssignment({ ...assignment, roles: updatedItems });
-        data.setNodeData?.({ ...data, assignment: { ...assignment, roles: updatedItems } });
+        nodeData.setNodeData?.({ ...nodeData, assignment: { ...assignment, roles: updatedItems } });
         break;
       case "filter":
         updatedItems = assignment?.filters?.filter((filter) => filter !== item);
         setAssignment({ ...assignment, filters: updatedItems });
-        data.setNodeData?.({ ...data, assignment: { ...assignment, filters: updatedItems } });
+        nodeData.setNodeData?.({ ...nodeData, assignment: { ...assignment, filters: updatedItems } });
         break;
       case "user":
         updatedItems = assignment?.users?.filter((user) => user !== item);
         setAssignment({ ...assignment, users: updatedItems });
-        data.setNodeData?.({ ...data, assignment: { ...assignment, users: updatedItems } });
+        nodeData.setNodeData?.({ ...nodeData, assignment: { ...assignment, users: updatedItems } });
         break;
       case "dynamicUser":
         updatedItems = assignment?.dynamicUsers?.filter((user) => user !== item);
         setAssignment({ ...assignment, dynamicUsers: updatedItems });
-        data.setNodeData?.({ ...data, assignment: { ...assignment, dynamicUsers: updatedItems } });
+        nodeData.setNodeData?.({ ...nodeData, assignment: { ...assignment, dynamicUsers: updatedItems } });
         break;
     }
   };
@@ -161,21 +163,21 @@ function TaskCard({ data: nodeData, id }: TaskCardProps) {
   const handleValueChange = (value: number | undefined) => {
     const newAssignment = { ...assignment, value: value };
     setAssignment(newAssignment);
-    data.setNodeData?.({ ...data, assignment: newAssignment });
+    nodeData.setNodeData?.({ ...nodeData, assignment: newAssignment });
   };
 
   const handleActionToggle = (index: number, enabled: boolean) => {
     const newActions = [...actions];
     newActions[index].enabled = enabled;
     setActions(newActions);
-    data.setNodeData?.({ ...data, actions: newActions });
+    nodeData.setNodeData?.({ ...nodeData, actions: newActions });
   };
 
   const handleActionLabelChange = (index: number, label: string) => {
     const newActions = [...actions];
     newActions[index].label = label;
     setActions(newActions);
-    data.setNodeData?.({ ...data, actions: newActions });
+    nodeData.setNodeData?.({ ...nodeData, actions: newActions });
   };
 
   const handleSendBackStepChange = (stepId: string) => {
@@ -186,12 +188,12 @@ function TaskCard({ data: nodeData, id }: TaskCardProps) {
       return action;
     });
     setActions(newActions);
-    data.setNodeData?.({ ...data, actions: newActions });
+    nodeData.setNodeData?.({ ...nodeData, actions: newActions });
   };
 
   const handleApiConfigChange = (newApiConfig: any) => {
     setApiConfig(newApiConfig);
-    data.setNodeData?.({ ...data, apiConfig: newApiConfig });
+    nodeData.setNodeData?.({ ...nodeData, apiConfig: newApiConfig });
   };
 
   return (
@@ -224,7 +226,7 @@ function TaskCard({ data: nodeData, id }: TaskCardProps) {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => data.onDelete?.(id)}>Delete</AlertDialogAction>
+              <AlertDialogAction onClick={() => nodeData.onDelete?.(id)}>Delete</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -316,7 +318,7 @@ function TaskCard({ data: nodeData, id }: TaskCardProps) {
 
         <TaskCardActions
           actions={actions}
-          previousSteps={data.previousSteps}
+          previousSteps={nodeData.previousSteps}
           onActionToggle={handleActionToggle}
           onActionLabelChange={handleActionLabelChange}
           onSendBackStepChange={handleSendBackStepChange}
@@ -343,7 +345,7 @@ function TaskCard({ data: nodeData, id }: TaskCardProps) {
           selectedApi={apiConfig?.selectedApi}
           failureRecourse={apiConfig?.failureRecourse}
           taskType={type}
-          previousSteps={data.previousSteps}
+          previousSteps={nodeData.previousSteps}
           onChange={handleApiConfigChange}
         />
       </div>
