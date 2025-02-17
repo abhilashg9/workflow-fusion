@@ -61,6 +61,8 @@ export const WorkflowHeader = () => {
     changes: ["Added approval step", "Updated integration configuration"]
   });
 
+  const [selectedWorkflow, setSelectedWorkflow] = useState<'create' | 'amend' | 'short-close' | 'cancel' | null>(null);
+
   const workflowVersions: WorkflowVersion[] = [
     {
       id: "current",
@@ -117,6 +119,7 @@ export const WorkflowHeader = () => {
   };
 
   const handleAuxiliaryWorkflow = (type: 'create' | 'amend' | 'short-close' | 'cancel') => {
+    setSelectedWorkflow(type);
     toast.info(`Selected ${type} workflow`);
     // TODO: Implement auxiliary workflow handling
   };
@@ -147,7 +150,17 @@ export const WorkflowHeader = () => {
     <div className="h-14 border-b bg-white flex items-center justify-between px-6">
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-3">
-          <h1 className="font-medium">Invoice Workflow</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="font-medium">
+              Invoice Workflow
+              {selectedWorkflow && (
+                <>
+                  <span className="text-gray-400 mx-2">|</span>
+                  <span className="text-gray-600 capitalize">{selectedWorkflow.replace('-', ' ')}</span>
+                </>
+              )}
+            </h1>
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
