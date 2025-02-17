@@ -47,7 +47,7 @@ export interface TaskAction {
   };
 }
 
-export interface TaskNodeData {
+export interface TaskNodeData extends Record<string, unknown> {
   type: TaskType;
   label: string;
   tags?: string[];
