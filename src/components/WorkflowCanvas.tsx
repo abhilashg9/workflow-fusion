@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -34,6 +33,7 @@ interface TaskNodeData extends Record<string, unknown> {
   previousSteps?: PreviousStep[];
   sequenceNumber?: number;
   onDelete?: (id: string) => void;
+  validationErrors?: string[];
 }
 
 type TaskType = "create" | "approval" | "integration";
@@ -245,6 +245,15 @@ export const WorkflowCanvas = () => {
     const newY = sourceNode.position.y + VERTICAL_SPACING;
     const newSequenceNumber = previousNodes.length + 1;
 
+    const validationErrors = [];
+    if (type === "create") {
+      validationErrors.push("Role/User/Supplier selection is required");
+    } else if (type === "approval") {
+      validationErrors.push("Role/User/Supplier/Manager selection is required");
+    } else if (type === "integration") {
+      validationErrors.push("API selection is required");
+    }
+
     const newNode: Node<TaskNodeData> = {
       id: `task-${Date.now()}`,
       type: "taskCard",
@@ -258,6 +267,7 @@ export const WorkflowCanvas = () => {
         previousSteps: previousNodes,
         sequenceNumber: newSequenceNumber,
         onDelete: handleDeleteNode,
+        validationErrors: validationErrors,
       },
       draggable: true,
     };
