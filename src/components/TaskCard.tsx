@@ -1,648 +1,351 @@
-import { memo, useState, useEffect } from "react";
-import { Handle, Position } from "@xyflow/react";
-import { 
-  FilePlus2, 
-  UserCheck, 
-  Workflow, 
-  Users, 
-  Filter, 
-  ShieldAlert, 
-  Plug, 
-  AlertCircle, 
-  UserRound, 
-  UsersRound,
-  User, 
-  Bell, 
-  ArrowRight, 
-  Eye, 
-  Server, 
-  X,
-  GitBranch,
-  Trash,
-  CheckSquare
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Drawer, DrawerContent, DrawerHeader, DrawerFooter } from "@/components/ui/drawer";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { TaskCardActions } from "./task-card/TaskCardActions";
-import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
-import { TaskCardProps, AssignmentConfig, TaskAction, ApiConfig, FailureRecourse } from "./task-card/types";
-import { DEFAULT_ACTIONS } from "./task-card/constants";
-import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
+import React, { useState, useEffect } from "react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Plus,
+  X,
+  GripVertical,
+  HelpCircle,
+  Settings,
+  Settings2,
+  GitBranch,
+} from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { TaskCardProps } from "./types";
+import { TaskCardAssignment } from "./TaskCardAssignment";
+import { TaskCardActions } from "./TaskCardActions";
+import { TaskCardApiConfig } from "./TaskCardApiConfig";
 
-const TaskCard = memo(({
-  data,
-  id,
-  setNodeData,
-  onDelete,
-  previousSteps = []
-}: TaskCardProps) => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("assignment");
-  const [taskLabel, setTaskLabel] = useState(data.label);
-  const [assignment, setAssignment] = useState<AssignmentConfig>(data.assignment || {
-    type: "roles",
-    roles: [],
-    filters: []
-  });
-  const [isHovered, setIsHovered] = useState(false);
-  const [actions, setActions] = useState<TaskAction[]>(data.actions || DEFAULT_ACTIONS);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [selectedWorkflowActions, setSelectedWorkflowActions] = useState<string[]>([]);
+export const TaskCard = ({ data, id, setNodeData, onDelete, previousSteps }: TaskCardProps) => {
+  const [label, setLabel] = useState(data.label);
+  const [type, setType] = useState(data.type);
+  const [tags, setTags] = useState(data.tags || []);
+  const [newTag, setNewTag] = useState("");
+  const [assignment, setAssignment] = useState(data.assignment);
+  const [actions, setActions] = useState(data.actions || []);
+  const [apiConfig, setApiConfig] = useState(data.apiConfig);
 
   useEffect(() => {
-    validateTask();
+    setLabel(data.label);
+    setType(data.type);
+    setTags(data.tags || []);
+    setAssignment(data.assignment);
+    setActions(data.actions || []);
+    setApiConfig(data.apiConfig);
   }, [data]);
 
-  const handleWorkflowActionToggle = (action: string) => {
-    setSelectedWorkflowActions(prev => {
-      if (prev.includes(action)) {
-        return prev.filter(a => a !== action);
-      }
-      return [...prev, action];
-    });
+  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLabel(e.target.value);
+    setNodeData({ ...data, label: e.target.value });
   };
 
-  const validateTask = () => {
-    const errors: string[] = [];
+  const handleTypeChange = (value: "create" | "approval" | "integration") => {
+    setType(value);
+    setNodeData({ ...data, type: value });
+  };
 
-    // Common validations
-    if (!data.label || data.label.trim() === '') {
-      errors.push('Task label is required');
-    }
-
-    // Create task validations
-    if (data.type === 'create') {
-      if (!data.assignment?.type) {
-        errors.push('Role/User/Supplier selection is required');
-      }
-    }
-
-    // Approval task validations
-    if (data.type === 'approval') {
-      if (!data.assignment?.type) {
-        errors.push('Role/User/Supplier/Manager selection is required');
-      }
-      const hasEmptyActionLabel = data.actions?.some(action => !action.label || action.label.trim() === '');
-      if (hasEmptyActionLabel) {
-        errors.push('Accept/Reject labels cannot be empty');
-      }
-    }
-
-    // Integration task validations
-    if (data.type === 'integration') {
-      if (!data.apiConfig?.selectedApi) {
-        errors.push('API selection is required');
-      }
-    }
-    setValidationErrors(errors);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        validationErrors: errors
-      });
+  const handleAddTag = () => {
+    if (newTag && !tags.includes(newTag)) {
+      const newTags = [...tags, newTag];
+      setTags(newTags);
+      setNodeData({ ...data, tags: newTags });
+      setNewTag("");
     }
   };
 
-  const getIcon = () => {
-    switch (data.type) {
-      case "create":
-        return <FilePlus2 className="w-5 h-5 text-[#0FA0CE]" />;
-      case "approval":
-        return <UserCheck className="w-5 h-5 text-[#0EA5E9]" />;
-      case "integration":
-        return <Workflow className="w-5 h-5 text-[#F97316]" />;
-    }
+  const handleRemoveTag = (tagToRemove: string) => {
+    const newTags = tags.filter((tag) => tag !== tagToRemove);
+    setTags(newTags);
+    setNodeData({ ...data, tags: newTags });
   };
 
-  const isCreateTask = data.type === "create";
-  const isIntegrationTask = data.type === "integration";
-
-  const getCardHeight = () => {
-    if (data.type === "create") return "h-[190px]";
-    if (data.type === "integration") return "h-[225px]";
-    if (data.type === "approval") {
-      if (assignment.type === "roles") return "h-[225px]";
-      return "h-[175px]";
-    }
-    return "h-[225px]";
-  };
-
-  const handleActionClick = (tab: string) => {
-    setActiveTab(tab);
-    setIsDrawerOpen(true);
-  };
-
-  const handleLabelChange = (newLabel: string) => {
-    setTaskLabel(newLabel);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        label: newLabel
-      });
-    }
-  };
-
-  const handleAssignmentTypeChange = (type: AssignmentConfig["type"]) => {
-    const newAssignment: AssignmentConfig = {
-      type
-    };
-    switch (type) {
-      case "roles":
-        newAssignment.roles = [];
-        newAssignment.filters = [];
-        break;
-      case "users":
-        newAssignment.users = [];
-        break;
-      case "dynamic_users":
-        newAssignment.dynamicUsers = [];
-        break;
-    }
+  const handleAssignmentChange = (newAssignment: any) => {
     setAssignment(newAssignment);
-    updateNodeData(newAssignment);
+    setNodeData({ ...data, assignment: newAssignment });
   };
 
-  const updateNodeData = (newAssignment: AssignmentConfig) => {
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        assignment: newAssignment
-      });
-    }
+  const handleAssignmentTypeChange = (type: any) => {
+    const newAssignment = { ...assignment, type };
+    setAssignment(newAssignment);
+    setNodeData({ ...data, assignment: newAssignment });
   };
 
   const handleRoleSelect = (role: string) => {
-    if (assignment.type === "roles" && !assignment.roles?.includes(role)) {
-      const newRoles = [...(assignment.roles || []), role];
-      setAssignment({
-        ...assignment,
-        roles: newRoles
-      });
-      updateNodeData({
-        ...assignment,
-        roles: newRoles
-      });
-    }
+    const newRoles = assignment?.roles ? [...assignment.roles, role] : [role];
+    const newAssignment = { ...assignment, roles: newRoles };
+    setAssignment(newAssignment);
+    setNodeData({ ...data, assignment: newAssignment });
   };
 
   const handleFilterSelect = (filter: string) => {
-    if (assignment.type === "roles" && !assignment.filters?.includes(filter)) {
-      const newFilters = [...(assignment.filters || []), filter];
-      setAssignment({
-        ...assignment,
-        filters: newFilters
-      });
-      updateNodeData({
-        ...assignment,
-        filters: newFilters
-      });
-    }
+    const newFilters = assignment?.filters ? [...assignment.filters, filter] : [filter];
+    const newAssignment = { ...assignment, filters: newFilters };
+    setAssignment(newAssignment);
+    setNodeData({ ...data, assignment: newAssignment });
   };
 
   const handleUserSelect = (user: string) => {
-    if (assignment.type === "users" && !assignment.users?.includes(user)) {
-      const newUsers = [...(assignment.users || []), user];
-      setAssignment({
-        ...assignment,
-        users: newUsers
-      });
-      updateNodeData({
-        ...assignment,
-        users: newUsers
-      });
-    }
+    const newUsers = assignment?.users ? [...assignment.users, user] : [user];
+    const newAssignment = { ...assignment, users: newUsers };
+    setAssignment(newAssignment);
+    setNodeData({ ...data, assignment: newAssignment });
   };
 
   const handleDynamicUserSelect = (user: string) => {
-    if (assignment.type === "dynamic_users" && !assignment.dynamicUsers?.includes(user)) {
-      const newUsers = [...(assignment.dynamicUsers || []), user];
-      setAssignment({
-        ...assignment,
-        dynamicUsers: newUsers
-      });
-      updateNodeData({
-        ...assignment,
-        dynamicUsers: newUsers
-      });
-    }
+    const newDynamicUsers = assignment?.dynamicUsers ? [...assignment.dynamicUsers, user] : [user];
+    const newAssignment = { ...assignment, dynamicUsers: newDynamicUsers };
+    setAssignment(newAssignment);
+    setNodeData({ ...data, assignment: newAssignment });
   };
 
-  const removeItem = (type: string, item: string) => {
-    let newAssignment = {
-      ...assignment
-    };
+  const handleRemoveItem = (type: string, item: string) => {
+    let updatedItems;
     switch (type) {
       case "role":
-        newAssignment.roles = assignment.roles?.filter(r => r !== item);
+        updatedItems = assignment?.roles?.filter((role) => role !== item);
+        setAssignment({ ...assignment, roles: updatedItems });
+        setNodeData({ ...data, assignment: { ...assignment, roles: updatedItems } });
         break;
       case "filter":
-        newAssignment.filters = assignment.filters?.filter(f => f !== item);
+        updatedItems = assignment?.filters?.filter((filter) => filter !== item);
+        setAssignment({ ...assignment, filters: updatedItems });
+        setNodeData({ ...data, assignment: { ...assignment, filters: updatedItems } });
         break;
       case "user":
-        newAssignment.users = assignment.users?.filter(u => u !== item);
+        updatedItems = assignment?.users?.filter((user) => user !== item);
+        setAssignment({ ...assignment, users: updatedItems });
+        setNodeData({ ...data, assignment: { ...assignment, users: updatedItems } });
         break;
       case "dynamicUser":
-        newAssignment.dynamicUsers = assignment.dynamicUsers?.filter(u => u !== item);
+        updatedItems = assignment?.dynamicUsers?.filter((user) => user !== item);
+        setAssignment({ ...assignment, dynamicUsers: updatedItems });
+        setNodeData({ ...data, assignment: { ...assignment, dynamicUsers: updatedItems } });
         break;
     }
+  };
+
+  const handleValueChange = (value: number | undefined) => {
+    const newAssignment = { ...assignment, value: value };
     setAssignment(newAssignment);
-    updateNodeData(newAssignment);
+    setNodeData({ ...data, assignment: newAssignment });
   };
 
-  const handleActionToggle = (actionIndex: number, enabled: boolean) => {
+  const handleActionToggle = (index: number, enabled: boolean) => {
     const newActions = [...actions];
-    newActions[actionIndex] = {
-      ...newActions[actionIndex],
-      enabled
-    };
+    newActions[index].enabled = enabled;
     setActions(newActions);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        actions: newActions
-      });
-    }
+    setNodeData({ ...data, actions: newActions });
   };
 
-  const handleActionLabelChange = (actionIndex: number, newLabel: string) => {
+  const handleActionLabelChange = (index: number, label: string) => {
     const newActions = [...actions];
-    newActions[actionIndex] = {
-      ...newActions[actionIndex],
-      label: newLabel
-    };
+    newActions[index].label = label;
     setActions(newActions);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        actions: newActions
-      });
-    }
+    setNodeData({ ...data, actions: newActions });
   };
 
   const handleSendBackStepChange = (stepId: string) => {
-    const newActions = [...actions];
-    const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
-    if (sendBackIndex >= 0) {
-      newActions[sendBackIndex] = {
-        ...newActions[sendBackIndex],
-        sendBack: {
-          step: stepId
-        }
-      };
-      setActions(newActions);
-      if (setNodeData) {
-        setNodeData({
-          ...data,
-          actions: newActions
-        });
+    const newActions = actions.map(action => {
+      if (action.sendBack) {
+        return { ...action, sendBack: { step: stepId } };
       }
-    }
+      return action;
+    });
+    setActions(newActions);
+    setNodeData({ ...data, actions: newActions });
   };
 
-  const handleDeleteTask = () => {
-    if (onDelete) {
-      onDelete(id);
-    }
-    setIsDrawerOpen(false);
+  const handleApiConfigChange = (newApiConfig: any) => {
+    setApiConfig(newApiConfig);
+    setNodeData({ ...data, apiConfig: newApiConfig });
   };
 
-  const renderAssignmentTags = () => {
-    const renderAbbreviatedList = (items: string[] | undefined, type: 'roles' | 'filters') => {
-      const Icon = type === 'roles' ? Users : Filter;
-      const placeholderText = data.type === "create" ? "Selected users & roles will appear here" : type === 'roles' ? "Selected users, roles & filters will appear here" : "Selected dimensions will appear here";
-      return <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
-          <Icon className="w-4 h-4" />
-          {!items?.length ? <span className="italic">{placeholderText}</span> : <div className="flex flex-wrap gap-2">
-              {items.slice(0, 2).map(item => <Badge key={item} variant={type === 'roles' ? "secondary" : "outline"} className="text-xs">
-                  {item}
-                </Badge>)}
-              {items.length > 2 && <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge variant={type === 'roles' ? "secondary" : "outline"} className="text-xs cursor-help">
-                        +{items.length - 2}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent className="p-2">
-                      <div className="space-y-1">
-                        {items.slice(2).map(item => <div key={item} className="text-xs">{item}</div>)}
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>}
-            </div>}
-        </div>;
-    };
-
-    if (data.type === "integration") {
-      return <div className="space-y-2">
-          <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
-            <Plug className="w-4 h-4" />
-            {!data.apiConfig?.selectedApi ? <span className="italic">Selected API will appear here</span> : <Badge variant="secondary" className="text-xs">
-                <div className="flex items-center gap-1.5">
-                  {data.apiConfig.selectedApi.name}
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${data.apiConfig.selectedApi.type === 'inbound' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                    {data.apiConfig.selectedApi.type === 'inbound' ? '← Inbound' : '→ Outbound'}
-                  </span>
-                </div>
-              </Badge>}
-          </div>
-          <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
-            <AlertCircle className="w-4 h-4" />
-            {!data.apiConfig?.failureRecourse ? <span className="italic">Selected fallback option will appear here</span> : <Badge variant="outline" className="text-xs">
-                {data.apiConfig.failureRecourse.type === "sendBack" ? <div className="flex items-center gap-1.5">
-                    Send back to Step {previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.sequenceNumber}
-                  </div> : <div className="flex items-center gap-1.5">
-                    {data.apiConfig.failureRecourse.assignee?.type === 'user' ? <>
-                        <UserRound className="w-3 h-3" />
-                        {data.apiConfig.failureRecourse.assignee.value}
-                      </> : <>
-                        <UsersRound className="w-3 h-3" />
-                        {data.apiConfig.failureRecourse.assignee?.value}
-                      </>}
-                  </div>}
-              </Badge>}
-          </div>
-        </div>;
-    }
-
-    switch (assignment.type) {
-      case "roles":
-        return <div className="space-y-2">
-            {renderAbbreviatedList(assignment.roles, 'roles')}
-            {!data.type || data.type !== "create" && renderAbbreviatedList(assignment.filters, 'filters')}
-          </div>;
-      case "users":
-        return renderAbbreviatedList(assignment.users, 'roles');
-      case "dynamic_users":
-        return renderAbbreviatedList(assignment.dynamicUsers, 'roles');
-      case "supplier":
-        return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
-      case "manager":
-        return <Badge variant="secondary" className="text-xs">Manager</Badge>;
-      case "manager_hierarchy":
-        return <Badge variant="secondary" className="text-xs">Manager Hierarchy</Badge>;
-      default:
-        return renderAbbreviatedList([], 'roles');
-    }
-  };
-
-  const handleApiSelect = (selectedApi: ApiConfig) => {
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        apiConfig: {
-          ...data.apiConfig,
-          selectedApi
-        }
-      });
-    }
-  };
-
-  const handleFailureRecourseChange = (failureRecourse: FailureRecourse) => {
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        apiConfig: {
-          ...data.apiConfig,
-          failureRecourse
-        }
-      });
-    }
-  };
-
-  const handleValueChange = (newValue: number | undefined) => {
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        assignment: {
-          ...data.assignment,
-          value: newValue
-        }
-      });
-    }
-  };
-
-  const renderActionButtons = () => {
-    return <TooltipProvider>
-        {!isIntegrationTask && <Tooltip>
-          <TooltipTrigger asChild>
-            <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("assignment")}>
-              <User className="w-4 h-4 text-gray-600 mb-1" />
-              <span className="text-xs text-gray-600">Assignment</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Assignment</p>
-          </TooltipContent>
-        </Tooltip>}
-
-        {isIntegrationTask && <Tooltip>
-          <TooltipTrigger asChild>
-            <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("api-config")}>
-              <Server className="w-4 h-4 text-gray-600 mb-1" />
-              <span className="text-xs text-gray-600">API Config</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>API Config</p>
-          </TooltipContent>
-        </Tooltip>}
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button className={cn("flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors", isCreateTask && "opacity-50 cursor-not-allowed")} onClick={() => !isCreateTask && handleActionClick("notifications")} disabled={isCreateTask}>
-              <Bell className="w-4 h-4 text-gray-600 mb-1" />
-              <span className="text-xs text-gray-600">Notifications</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Notifications</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button className={cn("flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors", (isIntegrationTask || isCreateTask) && "opacity-50 cursor-not-allowed")} onClick={() => !isIntegrationTask && !isCreateTask && handleActionClick("actions")} disabled={isIntegrationTask || isCreateTask}>
-              <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
-              <span className="text-xs text-gray-600">Actions</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Actions</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("visibility")}>
-              <Eye className="w-4 h-4 text-gray-600 mb-1" />
-              <span className="text-xs text-gray-600">Visibility</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Visibility</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>;
-  };
-
-  return <div className={cn("bg-white rounded-lg shadow-sm border p-4 w-[400px] relative group", getCardHeight(), validationErrors.length > 0 && "border-red-400")} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-      {validationErrors.length > 0 && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger className="absolute top-2 right-2">
-              <ShieldAlert className="w-4 h-4 text-red-500" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <div className="space-y-1">
-                {validationErrors.map((error, index) => (
-                  <p key={index} className="text-xs text-red-500">{error}</p>
-                ))}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
-      {isHovered && <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleDeleteTask}>
-          <X className="h-4 w-4" />
-        </Button>}
-      <Handle type="target" position={Position.Top} />
-      <div className="space-y-4">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
-          <div className="flex-1 space-y-1">
-            <div className="flex items-center gap-2">
-              <input type="text" value={taskLabel} onChange={e => handleLabelChange(e.target.value)} className="flex-1 text-base font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1" maxLength={50} />
-              <div className="flex items-center gap-1 shrink-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="p-0">
-                      <GitBranch className="w-4 h-4 text-gray-400 py-0 px-0 mx-[12px] my-[12px] bg-slate-50 rounded hover:bg-slate-100 transition-colors" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-48">
-                    <DropdownMenuLabel>Workflow Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem
-                      checked={selectedWorkflowActions.includes('amend')}
-                      onCheckedChange={() => handleWorkflowActionToggle('amend')}
-                    >
-                      <span className="flex items-center gap-2">
-                        <CheckSquare className="w-4 h-4" />
-                        Amend
-                      </span>
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={selectedWorkflowActions.includes('short_close')}
-                      onCheckedChange={() => handleWorkflowActionToggle('short_close')}
-                    >
-                      <span className="flex items-center gap-2">
-                        <CheckSquare className="w-4 h-4" />
-                        Short Close
-                      </span>
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={selectedWorkflowActions.includes('cancel')}
-                      onCheckedChange={() => handleWorkflowActionToggle('cancel')}
-                    >
-                      <span className="flex items-center gap-2">
-                        <CheckSquare className="w-4 h-4" />
-                        Cancel
-                      </span>
-                    </DropdownMenuCheckboxItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                {data.sequenceNumber > 0 && (
-                  <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
-                    Step {data.sequenceNumber}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
+  return (
+    <div className="w-[400px] bg-white rounded-lg border shadow-sm">
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-2">
+          <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+          <Input
+            type="text"
+            placeholder="Task Label"
+            value={label}
+            onChange={handleLabelChange}
+            className="text-sm font-semibold"
+          />
         </div>
-
-        <div className="space-y-3 bg-gray-50/50 p-3 rounded-lg py-0 px-0">
-          {renderAssignmentTags()}
-        </div>
-
-        <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
-          {renderActionButtons()}
-        </div>
-      </div>
-      <Handle type="source" position={Position.Bottom} />
-
-      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200 flex flex-col">
-          <DrawerHeader className="border-b border-gray-100 shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
-                <Input value={taskLabel} onChange={e => handleLabelChange(e.target.value)} className="flex-1 text-lg font-medium h-auto py-1" maxLength={50} />
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsDrawerOpen(false)} className="h-8 w-8">
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </DrawerHeader>
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-4">
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="w-full justify-start sticky top-0 z-50 bg-white">
-                  {!isIntegrationTask && <TabsTrigger value="assignment">Assignment</TabsTrigger>}
-                  {isIntegrationTask && <TabsTrigger value="api-config">API Config</TabsTrigger>}
-                  <TabsTrigger value="notifications" disabled={isCreateTask}>Notifications</TabsTrigger>
-                  {!isIntegrationTask && <TabsTrigger value="actions" disabled={isCreateTask}>Actions</TabsTrigger>}
-                  {!isIntegrationTask && <TabsTrigger value="visibility">Visibility</TabsTrigger>}
-                </TabsList>
-
-                {!isIntegrationTask && <TabsContent value="assignment">
-                    <TaskCardAssignment assignment={assignment} onAssignmentTypeChange={handleAssignmentTypeChange} onRoleSelect={handleRoleSelect} onFilterSelect={handleFilterSelect} onUserSelect={handleUserSelect} onDynamicUserSelect={handleDynamicUserSelect} onRemoveItem={removeItem} onValueChange={handleValueChange} taskType={data.type} />
-                  </TabsContent>}
-
-                {isIntegrationTask && <TabsContent value="api-config">
-                  <TaskCardApiConfig selectedApi={data.apiConfig?.selectedApi} failureRecourse={data.apiConfig?.failureRecourse} previousSteps={previousSteps} onApiSelect={handleApiSelect} onFailureRecourseChange={handleFailureRecourseChange} />
-                </TabsContent>}
-
-                <TabsContent value="notifications">
-                  Notifications content
-                </TabsContent>
-
-                {!isIntegrationTask && <>
-                  <TabsContent value="actions">
-                    <TaskCardActions actions={actions} previousSteps={previousSteps} onActionToggle={handleActionToggle} onActionLabelChange={handleActionLabelChange} onSendBackStepChange={handleSendBackStepChange} />
-                  </TabsContent>
-                  <TabsContent value="visibility">
-                    Visibility content
-                  </TabsContent>
-                </>}
-              </Tabs>
-            </div>
-          </div>
-          <DrawerFooter className="border-t border-gray-100 mt-auto shrink-0">
-            <Button variant="destructive" onClick={handleDeleteTask} className="w-full">
-              <Trash className="w-4 h-4 mr-2" />
-              Delete Task
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <X className="w-4 h-4 mr-2" />
+              Delete
             </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    </div>;
-});
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete this task and remove it
+                from the workflow.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => onDelete(id)}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
 
-TaskCard.displayName = "TaskCard";
-export default TaskCard;
+      <div className="p-6 space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b">
+            <Settings className="w-4 h-4 text-blue-500" />
+            <label className="text-sm font-semibold text-gray-900">Task Configuration</label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="w-[200px] text-xs">Configure the basic settings for this task</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <Select value={type} onValueChange={handleTypeChange}>
+            <SelectTrigger className="w-full bg-white border shadow-sm">
+              <SelectValue placeholder="Select task type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="create">Create Task</SelectItem>
+              <SelectItem value="approval">Approval Task</SelectItem>
+              <SelectItem value="integration">Integration Task</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b">
+            <Settings2 className="w-4 h-4 text-blue-500" />
+            <label className="text-sm font-semibold text-gray-900">Tags</label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="w-[200px] text-xs">Add tags to categorize and filter tasks</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Add a tag"
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              className="flex-1 bg-white border shadow-sm"
+            />
+            <Button type="button" size="sm" onClick={handleAddTag}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Tag
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2 min-h-[48px] p-3 rounded-lg bg-gray-50 border border-gray-100">
+            {!tags.length && <span className="text-sm text-gray-400 italic">No tags added</span>}
+            {tags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="group py-1.5 px-3">
+                {tag}
+                <button
+                  onClick={() => handleRemoveTag(tag)}
+                  className="ml-1.5 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <TaskCardAssignment
+          assignment={assignment}
+          onAssignmentTypeChange={handleAssignmentTypeChange}
+          onRoleSelect={handleRoleSelect}
+          onFilterSelect={handleFilterSelect}
+          onUserSelect={handleUserSelect}
+          onDynamicUserSelect={handleDynamicUserSelect}
+          onRemoveItem={handleRemoveItem}
+          onValueChange={handleValueChange}
+          taskType={type}
+        />
+
+        <TaskCardActions
+          actions={actions}
+          previousSteps={previousSteps}
+          onActionToggle={handleActionToggle}
+          onActionLabelChange={handleActionLabelChange}
+          onSendBackStepChange={handleSendBackStepChange}
+        />
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b">
+            <GitBranch className="w-4 h-4 text-blue-500" />
+            <label className="text-sm font-semibold text-gray-900">Applies in</label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="w-[200px] text-xs">Select which workflow actions this task applies to</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
+
+        <TaskCardApiConfig
+          selectedApi={apiConfig?.selectedApi}
+          failureRecourse={apiConfig?.failureRecourse}
+          taskType={type}
+          previousSteps={previousSteps}
+          onChange={handleApiConfigChange}
+        />
+      </div>
+    </div>
+  );
+};
