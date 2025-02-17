@@ -279,7 +279,7 @@ const TaskCard = memo(({
           <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
             <Server className="w-4 h-4" />
             {!data.apiConfig?.selectedApi ? (
-              <span className="italic">Selected API will show here</span>
+              <span className="italic">Selected API will appear here</span>
             ) : (
               <Badge variant="secondary" className="text-xs">
                 {data.apiConfig.selectedApi.name}
@@ -289,7 +289,7 @@ const TaskCard = memo(({
           <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
             <ShieldAlert className="w-4 h-4" />
             {!data.apiConfig?.failureRecourse ? (
-              <span className="italic">Selected fallback option will be shown</span>
+              <span className="italic">Selected fallback option will appear here</span>
             ) : (
               <Badge variant="outline" className="text-xs">
                 {data.apiConfig.failureRecourse.type === "sendBack" ? (
