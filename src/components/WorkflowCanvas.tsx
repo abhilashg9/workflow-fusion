@@ -404,7 +404,7 @@ export const WorkflowCanvas = () => {
       const newY = sourceNode.position.y + VERTICAL_SPACING;
       const HORIZONTAL_OFFSET = 200;
 
-      const mergeNode: Node = {
+      const mergeNode: Node<TaskNodeData> = {
         id: `merge-${Date.now()}`,
         type: "default",
         position: { 
@@ -412,6 +412,7 @@ export const WorkflowCanvas = () => {
           y: newY + VERTICAL_SPACING 
         },
         data: { 
+          type: "integration",
           label: "Merge",
         },
         style: {
@@ -425,7 +426,7 @@ export const WorkflowCanvas = () => {
         },
       };
 
-      const leftBranch: Node = {
+      const leftBranch: Node<TaskNodeData> = {
         id: `branch-left-${Date.now()}`,
         type: "default",
         position: { 
@@ -433,6 +434,7 @@ export const WorkflowCanvas = () => {
           y: newY 
         },
         data: { 
+          type: "integration",
           label: "Branch A",
         },
         style: {
@@ -446,7 +448,7 @@ export const WorkflowCanvas = () => {
         },
       };
 
-      const rightBranch: Node = {
+      const rightBranch: Node<TaskNodeData> = {
         id: `branch-right-${Date.now()}`,
         type: "default",
         position: { 
@@ -454,6 +456,7 @@ export const WorkflowCanvas = () => {
           y: newY 
         },
         data: { 
+          type: "integration",
           label: "Branch B",
         },
         style: {
@@ -625,44 +628,35 @@ export const WorkflowCanvas = () => {
       return;
     }
 
+    const sortedNodesList = [...nodes].sort((a, b) => a.position.y - b.position.y);
+    const isStartNode = sourceNode.id === "start";
+    const hasCreateTask = sortedNodesList.some(node => 
+      node.type === "taskCard" && node.data.type === "create"
+    );
+
     if (type === "create") {
-      if (!selectedEdge) return;
-
-      const sourceNode = nodes.find((n) => n.id === selectedEdge.source);
-      const targetNode = nodes.find((n) => n.id === selectedEdge.target);
-      
-      if (!sourceNode || !targetNode) return;
-
-      const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
-      const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
-
-      const hasExistingCreateTask = sortedNodes.some(node => 
-        node.type === "taskCard" && node.data.type === "create"
-      );
-
-      const isFirstTaskAfterStart = sourceNode.id === "start";
-      
-      if (hasExistingCreateTask) {
-        toast.error("Only one Create task is allowed in the workflow");
+      if (!isStartNode) {
+        toast.error("Create task can only be added as the first step");
         setIsModalOpen(false);
         return;
       }
       
-      if (!isFirstTaskAfterStart) {
-        toast.error("Create task can only be added as the first step");
+      if (hasCreateTask) {
+        toast.error("Only one Create task is allowed in the workflow");
         setIsModalOpen(false);
         return;
       }
     }
 
-    if (isFirstTaskAfterStart && hasExistingCreateTask && type !== "create") {
+    if (!isStartNode && hasCreateTask && type !== "create") {
       toast.error("A Create task must be the first step");
       setIsModalOpen(false);
       return;
     }
 
-    const previousNodes: PreviousStep[] = sortedNodes
-      .slice(0, sourceNodeIndex + 1)
+    const sourceIndex = sortedNodesList.findIndex(n => n.id === sourceNode.id);
+    const previousNodes: PreviousStep[] = sortedNodesList
+      .slice(0, sourceIndex + 1)
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
         id: node.id,
@@ -701,7 +695,7 @@ export const WorkflowCanvas = () => {
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
         if (node.type === "taskCard") {
-          const nodePreviousSteps: PreviousStep[] = sortedNodes
+          const nodePreviousSteps: PreviousStep[] = sortedNodesList
             .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
             .map((n, idx) => ({
               id: n.id,
