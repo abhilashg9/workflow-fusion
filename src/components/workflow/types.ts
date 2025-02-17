@@ -63,6 +63,13 @@ export interface TaskNodeData extends Record<string, unknown> {
 
 export type CustomNode = Node<TaskNodeData>;
 
+// This interface is used by TaskCardApiConfig
+export interface StepOption {
+  id: string;
+  label: string;
+  sequenceNumber: number;
+}
+
 export const mockApiConfigs: ApiConfig[] = [
   {
     id: "po-create",
