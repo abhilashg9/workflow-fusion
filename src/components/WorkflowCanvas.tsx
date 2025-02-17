@@ -73,6 +73,12 @@ const taskTypes = [
     subtitle: "Split the workflow into branches with conditions",
     type: "split" as const,
   },
+  {
+    icon: ArrowRightLeft,
+    title: "Parallel Branch",
+    subtitle: "Add tasks in parallel that will occur simultaneously",
+    type: "parallel" as const,
+  },
 ];
 
 const initialNodes: Node<TaskNodeData>[] = [
@@ -394,263 +400,37 @@ export const WorkflowCanvas = () => {
     
     if (!sourceNode || !targetNode) return;
 
-    const sortedNodesList = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const isStartNode = sourceNode.id === "start";
-    const hasCreateTask = sortedNodesList.some(node => 
+    const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
+    const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
+
+    const hasExistingCreateTask = sortedNodes.some(node => 
       node.type === "taskCard" && node.data.type === "create"
     );
 
+    const isFirstTaskAfterStart = sourceNode.id === "start";
+    
     if (type === "create") {
-      if (!isStartNode) {
-        toast.error("Create task can only be added as the first step");
+      if (hasExistingCreateTask) {
+        toast.error("Only one Create task is allowed in the workflow");
         setIsModalOpen(false);
         return;
       }
       
-      if (hasCreateTask) {
-        toast.error("Only one Create task is allowed in the workflow");
+      if (!isFirstTaskAfterStart) {
+        toast.error("Create task can only be added as the first step");
         setIsModalOpen(false);
         return;
       }
     }
 
-    if (!isStartNode && hasCreateTask && type !== "create") {
+    if (isFirstTaskAfterStart && hasExistingCreateTask && type !== "create") {
       toast.error("A Create task must be the first step");
       setIsModalOpen(false);
       return;
     }
 
-    if (type === "split") {
-      const newY = sourceNode.position.y + VERTICAL_SPACING;
-      const HORIZONTAL_OFFSET = 200;
-
-      const mergeNode: Node<TaskNodeData> = {
-        id: `merge-${Date.now()}`,
-        type: "default",
-        position: { 
-          x: CENTER_X - 50, 
-          y: newY + VERTICAL_SPACING 
-        },
-        data: { 
-          type: "integration",
-          label: "Merge",
-        },
-        style: {
-          background: "#E5E7EB",
-          color: "#374151",
-          border: "none",
-          borderRadius: "4px",
-          padding: "10px 20px",
-          minWidth: "100px",
-          textAlign: "center",
-        },
-      };
-
-      const leftBranch: Node<TaskNodeData> = {
-        id: `branch-left-${Date.now()}`,
-        type: "default",
-        position: { 
-          x: CENTER_X - HORIZONTAL_OFFSET - 50, 
-          y: newY 
-        },
-        data: { 
-          type: "integration",
-          label: "Branch A",
-        },
-        style: {
-          background: "#E5E7EB",
-          color: "#374151",
-          border: "none",
-          borderRadius: "4px",
-          padding: "10px 20px",
-          minWidth: "100px",
-          textAlign: "center",
-        },
-      };
-
-      const rightBranch: Node<TaskNodeData> = {
-        id: `branch-right-${Date.now()}`,
-        type: "default",
-        position: { 
-          x: CENTER_X + HORIZONTAL_OFFSET - 50, 
-          y: newY 
-        },
-        data: { 
-          type: "integration",
-          label: "Branch B",
-        },
-        style: {
-          background: "#E5E7EB",
-          color: "#374151",
-          border: "none",
-          borderRadius: "4px",
-          padding: "10px 20px",
-          minWidth: "100px",
-          textAlign: "center",
-        },
-      };
-
-      const newEdges: Edge[] = [
-        {
-          id: `e-${selectedEdge.source}-${leftBranch.id}`,
-          source: selectedEdge.source,
-          target: leftBranch.id,
-          type: "smoothstep",
-          animated: true,
-          style: { stroke: "#2563EB" },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: "#2563EB",
-          },
-          label: "+",
-          labelStyle: { 
-            fill: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "16px",
-            opacity: 0,
-          },
-          labelBgStyle: { 
-            fill: "#2563EB",
-            opacity: 0,
-            borderRadius: "12px",
-            width: "24px",
-            height: "24px",
-          },
-          className: "workflow-edge",
-        },
-        {
-          id: `e-${selectedEdge.source}-${rightBranch.id}`,
-          source: selectedEdge.source,
-          target: rightBranch.id,
-          type: "smoothstep",
-          animated: true,
-          style: { stroke: "#2563EB" },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: "#2563EB",
-          },
-          label: "+",
-          labelStyle: { 
-            fill: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "16px",
-            opacity: 0,
-          },
-          labelBgStyle: { 
-            fill: "#2563EB",
-            opacity: 0,
-            borderRadius: "12px",
-            width: "24px",
-            height: "24px",
-          },
-          className: "workflow-edge",
-        },
-        {
-          id: `e-${leftBranch.id}-${mergeNode.id}`,
-          source: leftBranch.id,
-          target: mergeNode.id,
-          type: "smoothstep",
-          animated: true,
-          style: { stroke: "#2563EB" },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: "#2563EB",
-          },
-          label: "+",
-          labelStyle: { 
-            fill: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "16px",
-            opacity: 0,
-          },
-          labelBgStyle: { 
-            fill: "#2563EB",
-            opacity: 0,
-            borderRadius: "12px",
-            width: "24px",
-            height: "24px",
-          },
-          className: "workflow-edge",
-        },
-        {
-          id: `e-${rightBranch.id}-${mergeNode.id}`,
-          source: rightBranch.id,
-          target: mergeNode.id,
-          type: "smoothstep",
-          animated: true,
-          style: { stroke: "#2563EB" },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: "#2563EB",
-          },
-          label: "+",
-          labelStyle: { 
-            fill: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "16px",
-            opacity: 0,
-          },
-          labelBgStyle: { 
-            fill: "#2563EB",
-            opacity: 0,
-            borderRadius: "12px",
-            width: "24px",
-            height: "24px",
-          },
-          className: "workflow-edge",
-        },
-        {
-          id: `e-${mergeNode.id}-${selectedEdge.target}`,
-          source: mergeNode.id,
-          target: selectedEdge.target,
-          type: "smoothstep",
-          animated: true,
-          style: { stroke: "#2563EB" },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: "#2563EB",
-          },
-          label: "+",
-          labelStyle: { 
-            fill: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "16px",
-            opacity: 0,
-          },
-          labelBgStyle: { 
-            fill: "#2563EB",
-            opacity: 0,
-            borderRadius: "12px",
-            width: "24px",
-            height: "24px",
-          },
-          className: "workflow-edge",
-        },
-      ];
-
-      const updatedNodes = nodes.map((node) => {
-        if (node.position.y >= targetNode.position.y) {
-          return {
-            ...node,
-            position: {
-              ...node.position,
-              y: node.position.y + VERTICAL_SPACING * 2,
-            },
-          };
-        }
-        return node;
-      });
-
-      setEdges((eds) => eds.filter((e) => e.id !== selectedEdge.id).concat(newEdges));
-      setNodes([...updatedNodes, leftBranch, rightBranch, mergeNode]);
-      
-      setIsModalOpen(false);
-      return;
-    }
-
-    const sourceIndex = sortedNodesList.findIndex(n => n.id === sourceNode.id);
-    const previousNodes: PreviousStep[] = sortedNodesList
-      .slice(0, sourceIndex + 1)
+    const previousNodes: PreviousStep[] = sortedNodes
+      .slice(0, sourceNodeIndex + 1)
       .filter(node => node.type === "taskCard")
       .map((node, idx) => ({
         id: node.id,
@@ -689,7 +469,7 @@ export const WorkflowCanvas = () => {
     const updatedNodes = nodes.map((node) => {
       if (node.position.y >= targetNode.position.y) {
         if (node.type === "taskCard") {
-          const nodePreviousSteps: PreviousStep[] = sortedNodesList
+          const nodePreviousSteps: PreviousStep[] = sortedNodes
             .filter(n => n.type === "taskCard" && n.position.y < node.position.y)
             .map((n, idx) => ({
               id: n.id,
@@ -860,13 +640,10 @@ export const WorkflowCanvas = () => {
           <div className="grid gap-4 py-4">
             {taskTypes.map((task, index) => {
               const sourceNode = selectedEdge ? nodes.find(n => n.id === selectedEdge.source) : null;
-              const isSelectedNodeStart = sourceNode?.id === "start";
-              const hasExistingCreateTask = nodes.some(
-                node => node.type === "taskCard" && node.data.type === "create"
-              );
-
-              const isDisabled = (task.type === "create" && !isSelectedNodeStart) ||
-                               (!isSelectedNodeStart && task.type !== "create" && !hasExistingCreateTask);
+              const isFirstTaskAfterStart = sourceNode?.id === "start";
+              
+              const isDisabled = (task.type === "create" && !isFirstTaskAfterStart) ||
+                               (!isFirstTaskAfterStart && task.type === "create");
 
               return (
                 <TaskOption
@@ -874,7 +651,11 @@ export const WorkflowCanvas = () => {
                   icon={task.icon}
                   title={task.title}
                   subtitle={task.subtitle}
-                  onClick={() => handleTaskSelection(task.type)}
+                  onClick={() => {
+                    if (task.type === "create" || task.type === "approval" || task.type === "integration") {
+                      handleTaskSelection(task.type);
+                    }
+                  }}
                   disabled={isDisabled}
                 />
               );

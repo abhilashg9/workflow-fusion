@@ -1,6 +1,7 @@
+
 import { Node, Edge, MarkerType } from "@xyflow/react";
 
-export type TaskType = "create" | "approval" | "integration" | "split";
+export type TaskType = "create" | "approval" | "integration";
 
 export interface PreviousStep {
   id: string;
