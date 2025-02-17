@@ -1,7 +1,8 @@
+
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReactFlow, Node } from "@xyflow/react";
-import { AlertCircle, Clock, CheckCircle, History, User } from "lucide-react";
+import { AlertCircle, Clock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
@@ -12,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 
 interface NodeData extends Record<string, unknown> {
   type: 'create' | 'approval' | 'integration';
@@ -58,6 +58,7 @@ export const WorkflowHeader = () => {
     isMajorChange: false
   });
 
+  // Mock versions data - in real app this would come from backend
   const workflowVersions: WorkflowVersion[] = [
     {
       id: "current",
@@ -120,71 +121,41 @@ export const WorkflowHeader = () => {
     });
   };
 
-  const getRelativeTime = (timestamp: string) => {
-    const diff = Date.now() - new Date(timestamp).getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
-  };
-
   return (
     <div className="h-14 border-b bg-white flex items-center justify-between px-6">
       <div className="flex items-center space-x-4">
         <h1 className="font-medium">Invoice Workflow</h1>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="text-sm text-blue-600 flex items-center gap-2">
-              <History className="h-4 w-4" />
+            <Button variant="ghost" className="text-sm text-blue-600">
               {selectedVersion.version}
-              {!selectedVersion.isPublished && (
-                <Badge variant="secondary" className="ml-1 bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
-                  Unpublished
-                </Badge>
-              )}
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-4 w-4 ml-1" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-80" align="start">
-            <DropdownMenuLabel className="flex items-center gap-2">
-              <History className="h-4 w-4" />
-              Version History
-            </DropdownMenuLabel>
+          <DropdownMenuContent className="w-72">
+            <DropdownMenuLabel>Workflow Versions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {workflowVersions.map((version) => (
               <DropdownMenuItem
                 key={version.id}
                 onClick={() => handleVersionSelect(version)}
-                className="flex flex-col items-start py-3 cursor-pointer hover:bg-gray-50"
+                className="flex flex-col items-start py-2 cursor-pointer"
               >
                 <div className="flex items-center justify-between w-full">
+                  <span className="font-medium">{version.version}</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{version.version}</span>
-                    {version.isMajorChange && (
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                        Major Change
-                      </Badge>
-                    )}
                     {!version.isPublished && (
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
                         Unpublished
-                      </Badge>
+                      </span>
                     )}
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-400">
-                    {version.isPublished && <CheckCircle className="h-4 w-4 text-green-500" />}
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-4 w-4 text-gray-400" />
                   </div>
                 </div>
-                <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                  <User className="h-3 w-3" />
-                  <span>{version.user}</span>
-                  <span>•</span>
-                  <span>{getRelativeTime(version.timestamp)}</span>
-                  <span className="text-gray-400">({formatDate(version.timestamp)})</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-gray-500">
+                    {formatDate(version.timestamp)} by {version.user}
+                  </span>
                 </div>
               </DropdownMenuItem>
             ))}
