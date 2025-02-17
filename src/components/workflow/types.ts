@@ -1,12 +1,18 @@
 
 import { Node, Edge, MarkerType } from "@xyflow/react";
 
-export type TaskType = "create" | "approval" | "integration";
+export type TaskType = "create" | "approval" | "integration" | "split" | "default" | "condition" | "join";
 
 export interface PreviousStep {
   id: string;
   label: string;
   sequenceNumber: number;
+}
+
+export interface Condition {
+  id: string;
+  name: string;
+  description?: string;
 }
 
 export interface ApiConfig {
@@ -35,7 +41,7 @@ export interface TaskAction {
   };
 }
 
-export interface TaskNodeData extends Record<string, unknown> {
+export interface TaskNodeData {
   type: TaskType;
   label: string;
   tags?: string[];
@@ -53,6 +59,8 @@ export interface TaskNodeData extends Record<string, unknown> {
     selectedApi?: ApiConfig;
     failureRecourse?: FailureRecourse;
   };
+  conditions?: Condition[];
+  description?: string;
 }
 
 export type CustomNode = Node<TaskNodeData>;
