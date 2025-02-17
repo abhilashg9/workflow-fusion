@@ -18,7 +18,8 @@ import {
   CheckCircle2, 
   User, 
   Users,
-  Plug 
+  Plug,
+  AlertCircle
 } from "lucide-react";
 import { ApiConfig, FailureRecourse, mockApiConfigs, StepOption } from "../workflow/types";
 import {
@@ -99,12 +100,14 @@ export const TaskCardApiConfig = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* API Selection Section */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="api-select" className="text-sm font-medium">
-            Select Integration API(s)
-          </Label>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Plug className="w-5 h-5 text-blue-500" />
+            <Label className="text-base font-medium">Integration API</Label>
+          </div>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
@@ -116,6 +119,7 @@ export const TaskCardApiConfig = ({
             </Tooltip>
           </TooltipProvider>
         </div>
+        
         <Select
           value={selectedApi?.id}
           onValueChange={(value) => {
@@ -123,7 +127,7 @@ export const TaskCardApiConfig = ({
             if (api) onApiSelect(api);
           }}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Select an API" />
           </SelectTrigger>
           <SelectContent>
@@ -140,11 +144,20 @@ export const TaskCardApiConfig = ({
       </div>
 
       {selectedApi && (
-        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+        <div className="space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-100">
           <div className="space-y-2">
             <Label className="text-sm text-gray-500">API Type</Label>
-            <p className="text-sm font-medium capitalize">{selectedApi.type}</p>
+            <p className="text-sm font-medium">
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                selectedApi.type === 'inbound' 
+                  ? 'bg-green-100 text-green-700' 
+                  : 'bg-blue-100 text-blue-700'
+              }`}>
+                {selectedApi.type === 'inbound' ? '← Inbound' : '→ Outbound'}
+              </span>
+            </p>
           </div>
+          
           <div className="space-y-2">
             <Label className="text-sm text-gray-500">Endpoint</Label>
             <div className="flex items-center gap-2">
@@ -167,19 +180,20 @@ export const TaskCardApiConfig = ({
               </Button>
             </div>
           </div>
+          
           {selectedApi.viewUrl && (
             <Button
               variant="link"
-              className="h-auto p-0 text-primary"
+              className="h-auto p-0 text-blue-600"
               asChild
             >
               <a
                 href={selectedApi.viewUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 hover:text-blue-700"
               >
-                View Integration
+                View Integration Details
                 <ArrowUpRightFromSquare className="w-4 h-4 ml-1" />
               </a>
             </Button>
@@ -187,11 +201,13 @@ export const TaskCardApiConfig = ({
         </div>
       )}
 
+      {/* Fallback Options Section */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Label className="text-sm font-medium">
-            Fallback Options
-          </Label>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-amber-500" />
+            <Label className="text-base font-medium">Fallback Options</Label>
+          </div>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
@@ -209,12 +225,13 @@ export const TaskCardApiConfig = ({
           onValueChange={(value: "sendBack" | "assign") =>
             handleRecourseTypeChange(value)
           }
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-6 bg-gray-50 p-6 rounded-lg border border-gray-100"
         >
-          <div className="flex items-start space-x-2">
-            <RadioGroupItem value="sendBack" id="sendBack" />
-            <div className="grid gap-1.5 leading-none">
-              <Label htmlFor="sendBack">Send back to previous step</Label>
+          <div className="flex items-start space-x-3">
+            <RadioGroupItem value="sendBack" id="sendBack" className="mt-1" />
+            <div className="grid gap-2 leading-none">
+              <Label htmlFor="sendBack" className="font-medium">Send back to previous step</Label>
+              <p className="text-sm text-gray-500">Return the task to a previous step in the workflow</p>
               {recourseType === "sendBack" && previousSteps.length > 0 && (
                 <Select
                   value={failureRecourse?.stepId}
@@ -225,8 +242,8 @@ export const TaskCardApiConfig = ({
                     })
                   }
                 >
-                  <SelectTrigger className="w-[200px] mt-2">
-                    <SelectValue placeholder="Select step" />
+                  <SelectTrigger className="w-[280px] mt-2">
+                    <SelectValue placeholder="Select step to return to" />
                   </SelectTrigger>
                   <SelectContent>
                     {previousSteps.map((step) => (
@@ -240,12 +257,13 @@ export const TaskCardApiConfig = ({
             </div>
           </div>
 
-          <div className="flex items-start space-x-2">
-            <RadioGroupItem value="assign" id="assign" />
-            <div className="grid gap-1.5 leading-none">
-              <Label htmlFor="assign">Assign to</Label>
+          <div className="flex items-start space-x-3">
+            <RadioGroupItem value="assign" id="assign" className="mt-1" />
+            <div className="grid gap-2 leading-none">
+              <Label htmlFor="assign" className="font-medium">Assign to another person</Label>
+              <p className="text-sm text-gray-500">Delegate the task to a specific user or role</p>
               {recourseType === "assign" && (
-                <div className="space-y-3 mt-2">
+                <div className="space-y-4 mt-2">
                   <div className="flex gap-2">
                     <Button
                       variant={assigneeType === "user" ? "default" : "outline"}
@@ -254,7 +272,7 @@ export const TaskCardApiConfig = ({
                       className="flex items-center gap-2"
                     >
                       <User className="w-4 h-4" />
-                      User
+                      Specific User
                     </Button>
                     <Button
                       variant={assigneeType === "role" ? "default" : "outline"}
@@ -280,7 +298,7 @@ export const TaskCardApiConfig = ({
                         })
                       }
                     >
-                      <SelectTrigger className="w-[200px]">
+                      <SelectTrigger className="w-[280px]">
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                       <SelectContent>
@@ -306,7 +324,7 @@ export const TaskCardApiConfig = ({
                         })
                       }
                     >
-                      <SelectTrigger className="w-[200px]">
+                      <SelectTrigger className="w-[280px]">
                         <SelectValue placeholder="Select user" />
                       </SelectTrigger>
                       <SelectContent>
