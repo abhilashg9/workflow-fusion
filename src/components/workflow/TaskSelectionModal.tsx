@@ -1,6 +1,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { taskTypes } from "./constants";
+import { TaskOption } from "./TaskOption";
+import { TASK_TYPES } from "./constants";
 import { TaskType } from "./types";
 
 interface TaskOptionProps {
@@ -39,7 +40,7 @@ export const TaskSelectionModal = ({ isOpen, onClose, onTaskSelect }: TaskSelect
           <DialogTitle>Select task to add</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          {taskTypes.map((task, index) => (
+          {TASK_TYPES.map((task, index) => (
             <TaskOption
               key={index}
               icon={task.icon}
