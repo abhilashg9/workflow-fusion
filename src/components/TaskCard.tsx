@@ -1,20 +1,11 @@
 import { memo, useState, useEffect, useMemo } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { FilePlus2, UserCheck, Workflow, Users, Filter } from "lucide-react";
-import { User, Bell, ArrowRight, Eye, Server, ShieldAlert, X, Trash2 } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow, Users, Filter, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Drawer, DrawerContent, DrawerHeader, DrawerFooter } from "@/components/ui/drawer";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { TaskCardActions } from "./task-card/TaskCardActions";
-import { TaskCardAssignment } from "./task-card/TaskCardAssignment";
-import { TaskCardProps, AssignmentConfig, TaskAction } from "./task-card/types";
-import { DEFAULT_ACTIONS } from "./task-card/constants";
-import { TaskCardApiConfig } from "./task-card/TaskCardApiConfig";
-import { ApiConfig, FailureRecourse } from "./workflow/types";
+import { TaskCardProps } from "./task-card/types";
 
 const TaskCard = memo(({
   data,
@@ -23,785 +14,130 @@ const TaskCard = memo(({
   onDelete,
   previousSteps = []
 }: TaskCardProps) => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("assignment");
-  const [taskLabel, setTaskLabel] = useState(data.label);
-  const [assignment, setAssignment] = useState<AssignmentConfig>(data.assignment || {
-    type: "roles",
-    roles: [],
-    filters: []
-  });
-  const [isHovered, setIsHovered] = useState(false);
-  const [actions, setActions] = useState<TaskAction[]>(data.actions || DEFAULT_ACTIONS);
-
-  const validationErrors = useMemo(() => {
-    const errors: string[] = [];
-
-    if (!taskLabel.trim()) {
-      errors.push("Task label is required");
-    }
-
-    if (data.type === "create") {
-      if (!assignment.type || 
-          (assignment.type === "roles" && (!assignment.roles?.length)) ||
-          (assignment.type === "users" && (!assignment.users?.length)) ||
-          (assignment.type === "supplier" && !assignment.type)) {
-        errors.push("Assignment configuration is required");
-      }
-    }
-
-    if (data.type === "approval") {
-      if (!assignment.type || 
-          (assignment.type === "roles" && (!assignment.roles?.length)) ||
-          (assignment.type === "users" && (!assignment.users?.length)) ||
-          (assignment.type === "supplier" && !assignment.type) ||
-          (assignment.type === "manager" && !assignment.type) ||
-          (assignment.type === "manager_hierarchy" && !assignment.type)) {
-        errors.push("Assignment configuration is required");
-      }
-
-      const approveAction = actions.find(a => a.action === "approve");
-      const rejectAction = actions.find(a => a.action === "reject");
-
-      if (!approveAction?.label || (rejectAction?.enabled && !rejectAction?.label)) {
-        errors.push("Action labels cannot be empty");
-      }
-    }
-
-    if (data.type === "integration" && !data.apiConfig?.selectedApi) {
-      errors.push("API selection is required");
-    }
-
-    return errors;
-  }, [taskLabel, assignment, actions, data.apiConfig, data.type]);
+  const [label, setLabel] = useState(data.label || "Task");
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        validationErrors
-      });
-    }
-  }, [validationErrors, setNodeData, data]);
-
-  useEffect(() => {
-    setTaskLabel(data.label);
+    setLabel(data.label || "Task");
   }, [data.label]);
 
-  const getIcon = () => {
+  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newLabel = e.target.value;
+    setLabel(newLabel);
+    setNodeData({ ...data, label: newLabel });
+  };
+
+  useEffect(() => {
+    if (setNodeData) {
+      setNodeData({ ...data, validationErrors });
+    }
+  }, [validationErrors, data, setNodeData]);
+
+  const taskIcon = useMemo(() => {
     switch (data.type) {
       case "create":
-        return <FilePlus2 className="w-5 h-5 text-[#0FA0CE]" />;
+        return FilePlus2;
       case "approval":
-        return <UserCheck className="w-5 h-5 text-[#0EA5E9]" />;
+        return UserCheck;
       case "integration":
-        return <Workflow className="w-5 h-5 text-[#F97316]" />;
+        return Workflow;
+      default:
+        return FilePlus2;
+    }
+  }, [data.type]);
+
+  const validateLabel = () => {
+    if (!label || label.trim() === "") {
+      setValidationErrors(["Task label is required"]);
+      return false;
+    } else {
+      setValidationErrors([]);
+      return true;
     }
   };
 
-  const isCreateTask = data.type === "create";
-  const isIntegrationTask = data.type === "integration";
-  const isApprovalTask = data.type === "approval";
-
-  const getCardHeight = () => {
-    if (data.type === "create") return "h-[175px]";
-    if (data.type === "integration") return "h-[225px]";
-    if (data.type === "approval") {
-      if (assignment.type === "roles") return "h-[225px]";
-      return "h-[175px]";
-    }
-    return "h-[225px]";
-  };
-
-  const handleActionClick = (tab: string) => {
-    setActiveTab(tab);
-    setIsDrawerOpen(true);
-  };
-
-  const handleLabelChange = (newLabel: string) => {
-    setTaskLabel(newLabel);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        label: newLabel
-      });
-    }
-  };
-
-  const handleAssignmentTypeChange = (type: AssignmentConfig["type"]) => {
-    const newAssignment: AssignmentConfig = {
-      type
-    };
-    switch (type) {
-      case "roles":
-        newAssignment.roles = [];
-        newAssignment.filters = [];
-        break;
-      case "users":
-        newAssignment.users = [];
-        break;
-      case "dynamic_users":
-        newAssignment.dynamicUsers = [];
-        break;
-    }
-    setAssignment(newAssignment);
-    updateNodeData(newAssignment);
-  };
-
-  const updateNodeData = (newAssignment: AssignmentConfig) => {
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        assignment: newAssignment
-      });
-    }
-  };
-
-  const handleRoleSelect = (role: string) => {
-    if (assignment.type === "roles" && !assignment.roles?.includes(role)) {
-      const newRoles = [...(assignment.roles || []), role];
-      setAssignment({
-        ...assignment,
-        roles: newRoles
-      });
-      updateNodeData({
-        ...assignment,
-        roles: newRoles
-      });
-    }
-  };
-
-  const handleFilterSelect = (filter: string) => {
-    if (assignment.type === "roles" && !assignment.filters?.includes(filter)) {
-      const newFilters = [...(assignment.filters || []), filter];
-      setAssignment({
-        ...assignment,
-        filters: newFilters
-      });
-      updateNodeData({
-        ...assignment,
-        filters: newFilters
-      });
-    }
-  };
-
-  const handleUserSelect = (user: string) => {
-    if (assignment.type === "users" && !assignment.users?.includes(user)) {
-      const newUsers = [...(assignment.users || []), user];
-      setAssignment({
-        ...assignment,
-        users: newUsers
-      });
-      updateNodeData({
-        ...assignment,
-        users: newUsers
-      });
-    }
-  };
-
-  const handleDynamicUserSelect = (user: string) => {
-    if (assignment.type === "dynamic_users" && !assignment.dynamicUsers?.includes(user)) {
-      const newUsers = [...(assignment.dynamicUsers || []), user];
-      setAssignment({
-        ...assignment,
-        dynamicUsers: newUsers
-      });
-      updateNodeData({
-        ...assignment,
-        dynamicUsers: newUsers
-      });
-    }
-  };
-
-  const removeItem = (type: string, item: string) => {
-    let newAssignment = {
-      ...assignment
-    };
-    switch (type) {
-      case "role":
-        newAssignment.roles = assignment.roles?.filter(r => r !== item);
-        break;
-      case "filter":
-        newAssignment.filters = assignment.filters?.filter(f => f !== item);
-        break;
-      case "user":
-        newAssignment.users = assignment.users?.filter(u => u !== item);
-        break;
-      case "dynamicUser":
-        newAssignment.dynamicUsers = assignment.dynamicUsers?.filter(u => u !== item);
-        break;
-    }
-    setAssignment(newAssignment);
-    updateNodeData(newAssignment);
-  };
-
-  const handleActionToggle = (actionIndex: number, enabled: boolean) => {
-    const newActions = [...actions];
-    newActions[actionIndex] = {
-      ...newActions[actionIndex],
-      enabled
-    };
-    setActions(newActions);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        actions: newActions
-      });
-    }
-  };
-
-  const handleActionLabelChange = (actionIndex: number, newLabel: string) => {
-    const newActions = [...actions];
-    newActions[actionIndex] = {
-      ...newActions[actionIndex],
-      label: newLabel
-    };
-    setActions(newActions);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        actions: newActions
-      });
-    }
-  };
-
-  const handleSendBackStepChange = (stepId: string) => {
-    const newActions = [...actions];
-    const sendBackIndex = newActions.findIndex(a => a.action === "sendBack");
-    if (sendBackIndex >= 0) {
-      newActions[sendBackIndex] = {
-        ...newActions[sendBackIndex],
-        sendBack: {
-          step: stepId
-        }
-      };
-      setActions(newActions);
-      if (setNodeData) {
-        setNodeData({
-          ...data,
-          actions: newActions
-        });
-      }
-    }
-  };
-
-  const handleDeleteTask = () => {
-    if (onDelete) {
+  const handleOnDelete = () => {
+    if (onDelete && id) {
       onDelete(id);
     }
-    setIsDrawerOpen(false);
   };
 
-  const renderAssignmentTags = () => {
-    const renderAbbreviatedList = (items: string[] | undefined, type: 'roles' | 'filters') => {
-      const Icon = type === 'roles' ? Users : Filter;
-      const placeholderText = data.type === "create" ? 
-        "Selected users & roles will appear here" : 
-        type === 'roles' ? "Selected users, roles & filters will appear here" : "Selected dimensions will appear here";
-      
-      return (
-        <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
-          <Icon className="w-4 h-4" />
-          {!items?.length ? (
-            <span className="italic">{placeholderText}</span>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {items.slice(0, 2).map(item => (
-                <Badge key={item} variant={type === 'roles' ? "secondary" : "outline"} className="text-xs">
-                  {item}
-                </Badge>
-              ))}
-              {items.length > 2 && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge variant={type === 'roles' ? "secondary" : "outline"} className="text-xs cursor-help">
-                        +{items.length - 2}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent className="p-2">
-                      <div className="space-y-1">
-                        {items.slice(2).map(item => (
-                          <div key={item} className="text-xs">{item}</div>
-                        ))}
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
-          )}
-        </div>
-      );
-    };
-
-    if (data.type === "integration") {
-      return (
-        <div className="space-y-2">
-          <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
-            <Server className="w-4 h-4" />
-            {!data.apiConfig?.selectedApi ? (
-              <span className="italic">Selected API will appear here</span>
-            ) : (
-              <Badge variant="secondary" className="text-xs">
-                {data.apiConfig.selectedApi.name}
-              </Badge>
-            )}
-          </div>
-          <div className="text-sm text-gray-400 flex items-center gap-2 py-1">
-            <ShieldAlert className="w-4 h-4" />
-            {!data.apiConfig?.failureRecourse ? (
-              <span className="italic">Selected fallback option will appear here</span>
-            ) : (
-              <Badge variant="outline" className="text-xs">
-                {data.apiConfig.failureRecourse.type === "sendBack" ? (
-                  `Step ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.sequenceNumber}: ${previousSteps.find(step => step.id === data.apiConfig?.failureRecourse?.stepId)?.label}`
-                ) : (
-                  `Assign to ${data.apiConfig.failureRecourse.assignee?.type === 'user' ? 'User' : 'Role'}`
-                )}
-              </Badge>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    switch (assignment.type) {
-      case "roles":
-        return (
-          <div className="space-y-2">
-            {renderAbbreviatedList(assignment.roles, 'roles')}
-            {!data.type || data.type !== "create" && (
-              renderAbbreviatedList(assignment.filters, 'filters')
-            )}
-          </div>
-        );
-      case "users":
-        return renderAbbreviatedList(assignment.users, 'roles');
-      case "dynamic_users":
-        return renderAbbreviatedList(assignment.dynamicUsers, 'roles');
-      case "supplier":
-        return <Badge variant="secondary" className="text-xs">Supplier</Badge>;
-      case "manager":
-        return <Badge variant="secondary" className="text-xs">Manager</Badge>;
-      case "manager_hierarchy":
-        return <Badge variant="secondary" className="text-xs">Manager Hierarchy</Badge>;
-      default:
-        return renderAbbreviatedList([], 'roles');
-    }
-  };
-
-  const handleApiSelect = (selectedApi: ApiConfig) => {
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        apiConfig: {
-          ...data.apiConfig,
-          selectedApi
-        }
-      });
-    }
-  };
-
-  const handleFailureRecourseChange = (failureRecourse: FailureRecourse) => {
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        apiConfig: {
-          ...data.apiConfig,
-          failureRecourse
-        }
-      });
-    }
-  };
-
-  const handleValueChange = (newValue: number | undefined) => {
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        assignment: {
-          ...data.assignment,
-          value: newValue
-        }
-      });
-    }
-  };
-
-  const renderActionButtons = () => {
-    return (
-      <TooltipProvider>
-        {!isIntegrationTask && <Tooltip>
-          <TooltipTrigger asChild>
-            <button 
-              className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors"
-              onClick={() => handleActionClick("assignment")}
-            >
-              <User className="w-4 h-4 text-gray-600 mb-1" />
-              <span className="text-xs text-gray-600">Assignment</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Assignment</p>
-          </TooltipContent>
-        </Tooltip>}
-
-        {isIntegrationTask && <Tooltip>
-          <TooltipTrigger asChild>
-            <button className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => handleActionClick("api-config")}>
-              <Server className="w-4 h-4 text-gray-600 mb-1" />
-              <span className="text-xs text-gray-600">API Config</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>API Config</p>
-          </TooltipContent>
-        </Tooltip>}
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button 
-              className={cn(
-                "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
-                isCreateTask && "opacity-50 cursor-not-allowed"
-              )} 
-              onClick={() => !isCreateTask && handleActionClick("notifications")}
-              disabled={isCreateTask}
-            >
-              <Bell className="w-4 h-4 text-gray-600 mb-1" />
-              <span className="text-xs text-gray-600">Notifications</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Notifications</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button 
-              className={cn(
-                "flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors",
-                (isIntegrationTask || isCreateTask) && "opacity-50 cursor-not-allowed"
-              )} 
-              onClick={() => !isIntegrationTask && !isCreateTask && handleActionClick("actions")}
-              disabled={isIntegrationTask || isCreateTask}
-            >
-              <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
-              <span className="text-xs text-gray-600">Actions</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Actions</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button 
-              className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors"
-              onClick={() => handleActionClick("visibility")}
-            >
-              <Eye className="w-4 h-4 text-gray-600 mb-1" />
-              <span className="text-xs text-gray-600">Visibility</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Visibility</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  };
+  useEffect(() => {
+    validateLabel();
+  }, [label]);
 
   return (
-    <>
-      <div 
-        className={cn(
-          "bg-white rounded-lg border transition-all duration-200",
-          "hover:shadow-lg hover:border-primary/20",
-          validationErrors.length > 0 && "border-red-300",
-          "group/card relative",
-          getCardHeight()
-        )}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {validationErrors.length > 0 && (
-          <div className="absolute -top-2 -left-2 z-10">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="h-4 w-4 rounded-full bg-red-500 shadow-md flex items-center justify-center">
-                    <AlertCircle className="h-3 w-3 text-white" />
+    <div className="w-64 rounded-md shadow-md bg-white p-4 relative">
+      <Handle type="target" position={Position.Top} className="!bg-zinc-500" />
+      <Handle type="source" position={Position.Bottom} className="!bg-zinc-500" />
+      {validationErrors.length > 0 && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <AlertCircle className="w-4 h-4 text-red-500 absolute top-2 right-2 cursor-pointer" />
+            </TooltipTrigger>
+            <TooltipContent className="w-80">
+              <div className="space-y-3 p-1">
+                {validationErrors.map((error, index) => (
+                  <div key={index} className="space-y-1">
+                    <ul className="list-disc list-inside">
+                      <li className="text-xs text-red-500">
+                        {error}
+                      </li>
+                    </ul>
                   </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="space-y-1">
-                    {validationErrors.map((error, index) => (
-                      <p key={index} className="text-sm">{error}</p>
-                    ))}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        )}
-        
-        <Handle type="target" position={Position.Top} className="!bg-primary" />
-        
-        {isHovered && (
-          <Button 
-            variant="destructive" 
-            size="icon" 
-            className="absolute -top-2 -right-2 h-8 w-8 rounded-full opacity-0 group-hover/card:opacity-100 transition-opacity z-10 shadow-md" 
-            onClick={handleDeleteTask}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
-
-        <div className="space-y-4 p-4">
-          <div className="flex items-start gap-3">
-            <div className={cn(
-              "p-2 rounded-lg transition-colors",
-              data.type === "create" && "bg-blue-50",
-              data.type === "approval" && "bg-sky-50",
-              data.type === "integration" && "bg-orange-50"
-            )}>
-              {getIcon()}
-            </div>
-            <div className="flex-1 space-y-1">
-              <div className="flex items-center justify-between gap-2">
-                <input 
-                  type="text" 
-                  value={taskLabel} 
-                  onChange={e => handleLabelChange(e.target.value)} 
-                  className={cn(
-                    "flex-1 text-lg font-medium bg-transparent",
-                    "outline-none border-none focus:ring-2 focus:ring-primary/20 rounded px-1",
-                    "transition-all duration-200"
-                  )} 
-                  maxLength={50} 
-                />
-                {data.sequenceNumber > 0 && (
-                  <Badge variant="default" className="bg-primary/90 hover:bg-primary/90">
-                    Step {data.sequenceNumber}
-                  </Badge>
-                )}
+                ))}
               </div>
-            </div>
-          </div>
-
-          <div className={cn(
-            "space-y-3 bg-gray-50/50 p-3 rounded-lg transition-colors",
-            "group-hover/card:bg-gray-50/80"
-          )}>
-            {renderAssignmentTags()}
-          </div>
-
-          <div className={cn(
-            "flex items-center justify-between gap-2 pt-2 border-t border-gray-100",
-            "group-hover/card:border-gray-200 transition-colors"
-          )}>
-            <TooltipProvider>
-              {!isIntegrationTask && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex flex-col items-center h-auto py-2 px-3"
-                      onClick={() => handleActionClick("assignment")}
-                    >
-                      <User className="w-4 h-4 text-gray-600 mb-1" />
-                      <span className="text-xs text-gray-600">Assignment</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Configure task assignment</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-
-              {isIntegrationTask && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex flex-col items-center h-auto py-2 px-3"
-                      onClick={() => handleActionClick("api-config")}
-                    >
-                      <Server className="w-4 h-4 text-gray-600 mb-1" />
-                      <span className="text-xs text-gray-600">API Config</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Configure API integration</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      "flex flex-col items-center h-auto py-2 px-3",
-                      isCreateTask && "opacity-50 cursor-not-allowed"
-                    )}
-                    onClick={() => !isCreateTask && handleActionClick("notifications")}
-                    disabled={isCreateTask}
-                  >
-                    <Bell className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">Notifications</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Configure notifications</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      "flex flex-col items-center h-auto py-2 px-3",
-                      (isIntegrationTask || isCreateTask) && "opacity-50 cursor-not-allowed"
-                    )}
-                    onClick={() => !isIntegrationTask && !isCreateTask && handleActionClick("actions")}
-                    disabled={isIntegrationTask || isCreateTask}
-                  >
-                    <ArrowRight className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">Actions</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Configure task actions</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex flex-col items-center h-auto py-2 px-3"
-                    onClick={() => handleActionClick("visibility")}
-                  >
-                    <Eye className="w-4 h-4 text-gray-600 mb-1" />
-                    <span className="text-xs text-gray-600">Visibility</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Configure visibility rules</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
-        <Handle type="source" position={Position.Bottom} className="!bg-primary" />
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      <div className="flex items-center space-x-2 mb-4">
+        <taskIcon className="w-5 h-5 text-gray-700" />
+        <Input
+          type="text"
+          placeholder="Task Label"
+          value={label}
+          onChange={handleLabelChange}
+          onBlur={validateLabel}
+          className={cn(
+            "text-sm font-medium h-8",
+            validationErrors.length > 0 ? "border-red-500" : "border-gray-200"
+          )}
+        />
       </div>
-
-      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent className="fixed right-0 top-0 h-screen w-[40vw] rounded-none border-l border-gray-200 flex flex-col">
-          <DrawerHeader className="border-b border-gray-100 shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={cn(
-                  "p-2 rounded-lg",
-                  data.type === "create" && "bg-blue-50",
-                  data.type === "approval" && "bg-sky-50",
-                  data.type === "integration" && "bg-orange-50"
-                )}>
-                  {getIcon()}
-                </div>
-                <Input 
-                  value={taskLabel} 
-                  onChange={e => handleLabelChange(e.target.value)} 
-                  className="flex-1 text-lg font-medium h-auto py-1 border-none focus-visible:ring-2 focus-visible:ring-primary/20" 
-                  maxLength={50} 
-                />
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsDrawerOpen(false)} className="h-8 w-8">
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </DrawerHeader>
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-4">
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="w-full justify-start sticky top-0 z-50 bg-white">
-                  {!isIntegrationTask && <TabsTrigger value="assignment">Assignment</TabsTrigger>}
-                  {isIntegrationTask && <TabsTrigger value="api-config">API Config</TabsTrigger>}
-                  <TabsTrigger value="notifications" disabled={isCreateTask}>Notifications</TabsTrigger>
-                  {!isIntegrationTask && <TabsTrigger value="actions" disabled={isCreateTask}>Actions</TabsTrigger>}
-                  {!isIntegrationTask && <TabsTrigger value="visibility">Visibility</TabsTrigger>}
-                </TabsList>
-
-                {!isIntegrationTask && (
-                  <TabsContent value="assignment" className="pt-4">
-                    <TaskCardAssignment
-                      assignment={assignment}
-                      onAssignmentTypeChange={handleAssignmentTypeChange}
-                      onRoleSelect={handleRoleSelect}
-                      onFilterSelect={handleFilterSelect}
-                      onUserSelect={handleUserSelect}
-                      onDynamicUserSelect={handleDynamicUserSelect}
-                      onRemoveItem={removeItem}
-                      onValueChange={handleValueChange}
-                      taskType={data.type}
-                    />
-                  </TabsContent>
-                )}
-
-                {isIntegrationTask && (
-                  <TabsContent value="api-config" className="pt-4">
-                    <TaskCardApiConfig 
-                      selectedApi={data.apiConfig?.selectedApi} 
-                      failureRecourse={data.apiConfig?.failureRecourse} 
-                      previousSteps={previousSteps} 
-                      onApiSelect={handleApiSelect} 
-                      onFailureRecourseChange={handleFailureRecourseChange} 
-                    />
-                  </TabsContent>
-                )}
-
-                <TabsContent value="notifications">
-                  Notifications content
-                </TabsContent>
-
-                {!isIntegrationTask && (
-                  <>
-                    <TabsContent value="actions" className="pt-4">
-                      <TaskCardActions 
-                        actions={actions} 
-                        previousSteps={previousSteps} 
-                        onActionToggle={handleActionToggle} 
-                        onActionLabelChange={handleActionLabelChange} 
-                        onSendBackStepChange={handleSendBackStepChange} 
-                      />
-                    </TabsContent>
-                    <TabsContent value="visibility">
-                      Visibility content
-                    </TabsContent>
-                  </>
-                )}
-              </Tabs>
-            </div>
-          </div>
-          <DrawerFooter className="border-t border-gray-100 mt-auto shrink-0">
-            <Button variant="destructive" onClick={handleDeleteTask} className="w-full">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Task
-            </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    </>
+      <div className="flex items-center space-x-1 text-xs text-gray-500">
+        <Users className="w-3 h-3" />
+        <span>{data.assignment?.roles?.join(", ") || "No roles"}</span>
+        {data.tags && data.tags.length > 0 && (
+          <>
+            <Filter className="w-3 h-3" />
+            <span>{data.tags.join(", ")}</span>
+          </>
+        )}
+      </div>
+      <div className="absolute bottom-2 right-2">
+        <Button variant="ghost" size="icon" onClick={handleOnDelete}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            className="w-4 h-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+            />
+          </svg>
+        </Button>
+      </div>
+      <div className="text-xs text-gray-400 absolute bottom-2 left-2">
+        Step {data.sequenceNumber}
+      </div>
+    </div>
   );
 });
 

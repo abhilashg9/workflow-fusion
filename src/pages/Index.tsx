@@ -9,9 +9,9 @@ const Index = () => {
   const [title, setTitle] = useState("Untitled Workflow");
 
   return (
-    <div className="flex flex-col h-screen animate-fade-in">
-      <GlobalHeader />
-      <ReactFlowProvider>
+    <ReactFlowProvider>
+      <div className="flex flex-col h-screen animate-fade-in">
+        <GlobalHeader />
         <WorkflowHeader 
           title={title}
           onTitleChange={setTitle}
@@ -19,8 +19,8 @@ const Index = () => {
           onPublish={() => console.log("publish")}
         />
         <WorkflowCanvas />
-      </ReactFlowProvider>
-    </div>
+      </div>
+    </ReactFlowProvider>
   );
 };
 

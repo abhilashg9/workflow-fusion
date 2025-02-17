@@ -12,7 +12,7 @@ interface WorkflowHeaderProps {
   onPublish: () => void;
 }
 
-interface NodeData {
+interface NodeData extends Record<string, unknown> {
   validationErrors?: string[];
   sequenceNumber?: number;
   label?: string;
