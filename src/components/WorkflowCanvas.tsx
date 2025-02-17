@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
@@ -12,17 +13,12 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft, MoreVertical } from "lucide-react";
+import { FilePlus2, UserCheck, Workflow, GitBranch, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import TaskCard from "./TaskCard";
 import { TaskNodeData, TaskType, PreviousStep } from "./workflow/types";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { AuxiliaryWorkflowsDialog } from "./workflow/AuxiliaryWorkflowsDialog";
 
 const VERTICAL_SPACING = 250;
 const START_Y = 150;
@@ -162,6 +158,7 @@ export const WorkflowCanvas = () => {
   const [edges, setEdges] = useState(initialEdges);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
+  const [isAuxiliaryWorkflowsOpen, setIsAuxiliaryWorkflowsOpen] = useState(false);
   const { fitView } = useReactFlow();
 
   const adjustViewport = useCallback(() => {
@@ -581,10 +578,10 @@ export const WorkflowCanvas = () => {
     setIsModalOpen(false);
   };
 
-  const handleAuxiliaryWorkflow = (type: 'create' | 'amend') => {
-    toast.info(`Selected ${type} workflow`);
-    // TODO: Implement auxiliary workflow handling
-  };
+  const handleAuxiliaryWorkflowSelect = useCallback((workflowId: string) => {
+    console.log("Selected auxiliary workflow:", workflowId);
+    // TODO: Implement the logic to load the selected auxiliary workflow
+  }, []);
 
   return (
     <>
@@ -617,21 +614,13 @@ export const WorkflowCanvas = () => {
           `}
         </style>
         <div className="absolute top-4 right-4 z-10">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="bg-white hover:bg-gray-50">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('create')}>
-                Create
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAuxiliaryWorkflow('amend')}>
-                Amend
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="outline"
+            className="bg-white hover:bg-gray-50"
+            onClick={() => setIsAuxiliaryWorkflowsOpen(true)}
+          >
+            <span className="text-sm font-medium">Auxiliary Workflows</span>
+          </Button>
         </div>
         <ReactFlow
           nodes={nodes}
@@ -692,6 +681,12 @@ export const WorkflowCanvas = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AuxiliaryWorkflowsDialog
+        open={isAuxiliaryWorkflowsOpen}
+        onOpenChange={setIsAuxiliaryWorkflowsOpen}
+        onSelect={handleAuxiliaryWorkflowSelect}
+      />
     </>
   );
 };
