@@ -43,6 +43,8 @@ export const TaskCardActions = ({
     }
   };
 
+  const isRejectEnabled = actions[getActionIndex("reject")]?.enabled || false;
+
   return (
     <div className="space-y-6">
       {/* Enable Actions Section */}
@@ -59,7 +61,7 @@ export const TaskCardActions = ({
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <span className="text-sm text-gray-700">Reject</span>
             <Switch
-              checked={actions[getActionIndex("reject")]?.enabled || false}
+              checked={isRejectEnabled}
               onCheckedChange={(checked) => handleToggle("reject", checked)}
             />
           </div>
@@ -95,7 +97,13 @@ export const TaskCardActions = ({
               placeholder="Enter label"
               maxLength={15}
               className="h-9"
+              disabled={!isRejectEnabled}
             />
+            {!isRejectEnabled && (
+              <p className="text-sm text-gray-500 italic">
+                Enable Reject action to modify its label
+              </p>
+            )}
           </div>
         </div>
       </div>
