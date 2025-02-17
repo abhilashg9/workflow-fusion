@@ -55,12 +55,14 @@ const TaskCard = memo(({
   };
 
   const handleLabelChange = (newLabel: string) => {
-    setTaskLabel(newLabel);
-    if (setNodeData) {
-      setNodeData({
-        ...data,
-        label: newLabel
-      });
+    if (data.type === "create") {
+      setTaskLabel(newLabel);
+      if (setNodeData) {
+        setNodeData({
+          ...data,
+          label: newLabel
+        });
+      }
     }
   };
 
@@ -79,10 +81,6 @@ const TaskCard = memo(({
         case "supplier":
           break;
       }
-      setAssignment(newAssignment);
-      updateNodeData(newAssignment);
-    } else {
-      const newAssignment = { ...assignment, type };
       setAssignment(newAssignment);
       updateNodeData(newAssignment);
     }
@@ -315,7 +313,7 @@ const TaskCard = memo(({
         onMouseLeave={() => setIsHovered(false)}
       >
         <Handle type="target" position={Position.Top} />
-        {isHovered && (
+        {isHovered && data.type === "create" && (
           <Button
             variant="ghost"
             size="icon"
@@ -330,13 +328,17 @@ const TaskCard = memo(({
             <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <input
-                  type="text"
-                  value={taskLabel}
-                  onChange={e => handleLabelChange(e.target.value)}
-                  className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
-                  maxLength={50}
-                />
+                {data.type === "create" ? (
+                  <input
+                    type="text"
+                    value={taskLabel}
+                    onChange={e => handleLabelChange(e.target.value)}
+                    className="flex-1 text-lg font-medium outline-none border-none focus:ring-1 focus:ring-primary/20 rounded px-1"
+                    maxLength={50}
+                  />
+                ) : (
+                  <div className="flex-1 text-lg font-medium px-1">{taskLabel}</div>
+                )}
                 {data.sequenceNumber > 0 && (
                   <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full shrink-0">
                     Step {data.sequenceNumber}
@@ -358,6 +360,7 @@ const TaskCard = memo(({
                     <button
                       className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-colors"
                       onClick={() => handleActionClick("assignment")}
+                      disabled={data.type !== "create"}
                     >
                       <User className="w-4 h-4 text-gray-600 mb-1" />
                       <span className="text-xs text-gray-600">Assignment</span>
@@ -450,12 +453,16 @@ const TaskCard = memo(({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-gray-50">{getIcon()}</div>
-                <Input
-                  value={taskLabel}
-                  onChange={e => handleLabelChange(e.target.value)}
-                  className="flex-1 text-lg font-medium h-auto py-1"
-                  maxLength={50}
-                />
+                {data.type === "create" ? (
+                  <Input
+                    value={taskLabel}
+                    onChange={e => handleLabelChange(e.target.value)}
+                    className="flex-1 text-lg font-medium h-auto py-1"
+                    maxLength={50}
+                  />
+                ) : (
+                  <div className="flex-1 text-lg font-medium">{taskLabel}</div>
+                )}
               </div>
               <Button
                 variant="ghost"
