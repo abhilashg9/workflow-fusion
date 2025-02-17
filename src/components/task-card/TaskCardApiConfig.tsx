@@ -18,6 +18,8 @@ import {
   CheckCircle2, 
   User, 
   Users,
+  UserRound,
+  UsersRound,
   Plug,
   AlertCircle
 } from "lucide-react";
@@ -271,7 +273,7 @@ export const TaskCardApiConfig = ({
                       onClick={() => handleAssigneeTypeChange("user")}
                       className="flex items-center gap-2"
                     >
-                      <User className="w-4 h-4" />
+                      <UserRound className="w-4 h-4" />
                       Specific User
                     </Button>
                     <Button
@@ -280,7 +282,7 @@ export const TaskCardApiConfig = ({
                       onClick={() => handleAssigneeTypeChange("role")}
                       className="flex items-center gap-2"
                     >
-                      <Users className="w-4 h-4" />
+                      <UsersRound className="w-4 h-4" />
                       Role
                     </Button>
                   </div>
@@ -304,7 +306,10 @@ export const TaskCardApiConfig = ({
                       <SelectContent>
                         {MOCK_ROLES.map((role) => (
                           <SelectItem key={role} value={role}>
-                            {role}
+                            <div className="flex items-center gap-2">
+                              <UsersRound className="w-4 h-4" />
+                              {role}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -330,7 +335,10 @@ export const TaskCardApiConfig = ({
                       <SelectContent>
                         {MOCK_USERS.map((user) => (
                           <SelectItem key={user} value={user}>
-                            {user}
+                            <div className="flex items-center gap-2">
+                              <UserRound className="w-4 h-4" />
+                              {user}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
