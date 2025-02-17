@@ -12,7 +12,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-import TaskCard from "@/components/TaskCard";
+import TaskCard from "@/components/task-card/TaskCard";
 import { TaskSelectionModal } from "@/components/workflow/TaskSelectionModal";
 import { WorkflowEdge } from "@/components/workflow/WorkflowEdge";
 import { CustomNode, TaskNodeData, TaskType, PreviousStep } from "@/components/workflow/types";
@@ -131,6 +131,138 @@ export const WorkflowCanvas = () => {
     const targetNode = nodes.find((n) => n.id === selectedEdge.target);
     
     if (!sourceNode || !targetNode) return;
+
+    if (type === "split") {
+      const junctionNode: CustomNode = {
+        id: `junction-${Date.now()}`,
+        type: "junctionNode",
+        position: { 
+          x: CENTER_X - 24, 
+          y: sourceNode.position.y + VERTICAL_SPACING 
+        },
+        data: {
+          type: "condition",
+          label: "Junction",
+        },
+      };
+
+      const leftConditionNode: CustomNode = {
+        id: `condition-left-${Date.now()}`,
+        type: "conditionCard",
+        position: { 
+          x: CENTER_X - 325, 
+          y: junctionNode.position.y + VERTICAL_SPACING 
+        },
+        data: {
+          type: "condition",
+          label: "Condition 1",
+          isDefault: true,
+        },
+      };
+
+      const rightConditionNode: CustomNode = {
+        id: `condition-right-${Date.now()}`,
+        type: "conditionCard",
+        position: { 
+          x: CENTER_X + 75, 
+          y: junctionNode.position.y + VERTICAL_SPACING 
+        },
+        data: {
+          type: "condition",
+          label: "Condition 2",
+        },
+      };
+
+      const newEdges = [
+        {
+          id: `e-${selectedEdge.source}-${junctionNode.id}`,
+          source: selectedEdge.source,
+          target: junctionNode.id,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+        },
+        {
+          id: `e-${junctionNode.id}-${leftConditionNode.id}`,
+          source: junctionNode.id,
+          target: leftConditionNode.id,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+        },
+        {
+          id: `e-${junctionNode.id}-${rightConditionNode.id}`,
+          source: junctionNode.id,
+          target: rightConditionNode.id,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+        },
+        {
+          id: `e-${leftConditionNode.id}-${selectedEdge.target}`,
+          source: leftConditionNode.id,
+          target: selectedEdge.target,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+        },
+        {
+          id: `e-${rightConditionNode.id}-${selectedEdge.target}`,
+          source: rightConditionNode.id,
+          target: selectedEdge.target,
+          type: "smoothstep",
+          animated: true,
+          style: { stroke: "#2563EB" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#2563EB",
+          },
+        },
+      ];
+
+      setNodes((nds) => [
+        ...nds.map(node => {
+          if (node.position.y > sourceNode.position.y) {
+            return {
+              ...node,
+              position: {
+                ...node.position,
+                y: node.position.y + (VERTICAL_SPACING * 2),
+              },
+            };
+          }
+          return node;
+        }),
+        junctionNode,
+        leftConditionNode,
+        rightConditionNode,
+      ]);
+
+      setEdges((eds) => 
+        eds
+          .filter((e) => e.id !== selectedEdge.id)
+          .concat(newEdges)
+      );
+      
+      setIsModalOpen(false);
+      return;
+    }
 
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
     const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode.id);
